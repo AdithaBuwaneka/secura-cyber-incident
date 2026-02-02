@@ -88,6 +88,61 @@ async def create_incident(
             detail=f"Failed to create incident: {str(e)}"
         )
 
+
+@router.get("/dashboard/queue")
+async def get_dashboard_queue(
+    limit: int = 10,
+    current_user: User = Depends(get_current_user),
+    incident_service: IncidentService = Depends()
+):
+    """
+    FAST endpoint for dashboard incident queue
+    Returns only last N incidents WITHOUT attachments for speed
+    """
+    if current_user.role.value not in ["security_team", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only security team can access dashboard queue"
+        )
+
+    try:
+        incidents = await incident_service.get_dashboard_incidents(limit=limit)
+        return {
+            "incidents": incidents,
+            "total": len(incidents)
+        }
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get dashboard queue: {str(e)}"
+        )
+
+
+@router.get("/dashboard/stats")
+async def get_dashboard_stats(
+    current_user: User = Depends(get_current_user),
+    incident_service: IncidentService = Depends()
+):
+    """
+    FAST endpoint for dashboard statistics
+    Returns counts only, no full incident data
+    """
+    if current_user.role.value not in ["security_team", "admin"]:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only security team can access dashboard stats"
+        )
+
+    try:
+        stats = await incident_service.get_incident_stats()
+        return stats
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to get dashboard stats: {str(e)}"
+        )
+
+
 @router.get("/")
 async def get_incidents(
     status_filter: Optional[IncidentStatus] = None,
@@ -213,16 +268,10 @@ async def get_assigned_incidents(
         )
     
     try:
-        # Get all incidents and filter by currently assigned user (excluding resolved/closed)
-        all_incidents = await incident_service.get_all_incidents()
-        assigned_incidents = [
-            incident for incident in all_incidents 
-            if incident.get('assigned_to') == user_id and 
-            incident.get('status') not in ['resolved', 'closed']
-        ]
-        
+        # PERFORMANCE FIX: Use fast query instead of loading all incidents
+        assigned_incidents = await incident_service.get_assigned_incidents_fast(user_id)
         return assigned_incidents
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -255,16 +304,10 @@ async def get_resolved_incidents(
         )
     
     try:
-        # Get all incidents and filter by those resolved by this user
-        all_incidents = await incident_service.get_all_incidents()
-        resolved_incidents = [
-            incident for incident in all_incidents 
-            if (incident.get('assigned_to') == user_id or incident.get('resolved_by') == user_id) and 
-            incident.get('status') in ['resolved', 'closed']
-        ]
-        
+        # PERFORMANCE FIX: Use direct query instead of loading all incidents
+        resolved_incidents = await incident_service.get_resolved_incidents_fast(user_id)
         return resolved_incidents
-        
+
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

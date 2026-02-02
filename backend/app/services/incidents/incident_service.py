@@ -704,9 +704,9 @@ class IncidentService:
         return await self.get_incident(incident_id)
 
     async def update_ai_analysis(
-        self, 
-        incident_id: str, 
-        ai_category: str, 
+        self,
+        incident_id: str,
+        ai_category: str,
         ai_confidence: float,
         suggested_severity: IncidentSeverity = None
     ) -> IncidentResponse:
@@ -716,10 +716,193 @@ class IncidentService:
             'ai_confidence': ai_confidence,
             'updated_at': datetime.utcnow()
         }
-        
+
         if suggested_severity:
             update_data['severity'] = suggested_severity.value
-        
+
         self.incidents_collection.document(incident_id).update(update_data)
-        
+
         return await self.get_incident(incident_id)
+
+    async def get_dashboard_incidents(self, limit: int = 10) -> List[Dict]:
+        """
+        FAST: Get recent incidents for dashboard WITHOUT attachments
+        Optimized for speed - no N+1 queries
+        """
+        # Check cache first
+        cache_key = f"dashboard_incidents_{limit}"
+        cached = self.cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            # Get only limited recent incidents
+            query = self.incidents_collection.order_by(
+                'created_at', direction='DESCENDING'
+            ).limit(limit)
+
+            docs = list(query.stream())
+            incidents = []
+
+            for doc in docs:
+                data = doc.to_dict()
+
+                # Fast enum conversion
+                try:
+                    if data.get('status') and isinstance(data['status'], str):
+                        data['status'] = data['status'].lower()
+                    if data.get('severity') and isinstance(data['severity'], str):
+                        data['severity'] = data['severity'].lower()
+                    if data.get('incident_type') and isinstance(data['incident_type'], str):
+                        data['incident_type'] = data['incident_type'].lower()
+                except:
+                    pass
+
+                # Return minimal data for dashboard (no attachments)
+                incidents.append({
+                    'id': data.get('id'),
+                    'title': data.get('title'),
+                    'status': data.get('status'),
+                    'severity': data.get('severity'),
+                    'incident_type': data.get('incident_type'),
+                    'reporter_name': data.get('reporter_name'),
+                    'assigned_to_name': data.get('assigned_to_name'),
+                    'created_at': data.get('created_at'),
+                    'updated_at': data.get('updated_at')
+                })
+
+            # Cache for 30 seconds
+            self.cache.set(cache_key, incidents)
+            return incidents
+
+        except Exception as e:
+            print(f"Error getting dashboard incidents: {e}")
+            return []
+
+    async def get_incident_stats(self) -> Dict[str, Any]:
+        """
+        FAST: Get incident statistics without loading full documents
+        Uses aggregation for counts only
+        """
+        cache_key = "incident_stats"
+        cached = self.cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            # Get all incidents (but only count them, don't process)
+            all_docs = list(self.incidents_collection.stream())
+
+            stats = {
+                'total': len(all_docs),
+                'pending': 0,
+                'investigating': 0,
+                'resolved': 0,
+                'closed': 0,
+                'critical': 0,
+                'high': 0,
+                'medium': 0,
+                'low': 0
+            }
+
+            for doc in all_docs:
+                data = doc.to_dict()
+                status = str(data.get('status', '')).lower()
+                severity = str(data.get('severity', '')).lower()
+
+                # Count by status
+                if status in stats:
+                    stats[status] += 1
+
+                # Count by severity
+                if severity in stats:
+                    stats[severity] += 1
+
+            # Calculate derived stats
+            stats['open'] = stats['pending'] + stats['investigating']
+            stats['closed_total'] = stats['resolved'] + stats['closed']
+
+            self.cache.set(cache_key, stats)
+            return stats
+
+        except Exception as e:
+            print(f"Error getting incident stats: {e}")
+            return {'total': 0, 'open': 0, 'closed_total': 0}
+
+    async def get_assigned_incidents_fast(self, user_id: str, limit: int = 20) -> List[Dict]:
+        """
+        FAST: Get assigned incidents for a user without N+1 queries
+        """
+        try:
+            # Direct query with filter
+            query = self.incidents_collection.where(
+                'assigned_to', '==', user_id
+            ).order_by('created_at', direction='DESCENDING').limit(limit)
+
+            docs = list(query.stream())
+            incidents = []
+
+            for doc in docs:
+                data = doc.to_dict()
+                status = str(data.get('status', '')).lower()
+
+                # Skip resolved/closed
+                if status in ['resolved', 'closed']:
+                    continue
+
+                incidents.append({
+                    'id': data.get('id'),
+                    'title': data.get('title'),
+                    'status': status,
+                    'severity': str(data.get('severity', '')).lower(),
+                    'incident_type': str(data.get('incident_type', '')).lower(),
+                    'reporter_name': data.get('reporter_name'),
+                    'created_at': data.get('created_at'),
+                    'assigned_at': data.get('assigned_at')
+                })
+
+            return incidents
+
+        except Exception as e:
+            print(f"Error getting assigned incidents: {e}")
+            return []
+
+    async def get_resolved_incidents_fast(self, user_id: str, limit: int = 20) -> List[Dict]:
+        """
+        FAST: Get resolved incidents for a user without N+1 queries
+        """
+        try:
+            # Query resolved incidents assigned to or resolved by user
+            query = self.incidents_collection.where(
+                'status', 'in', ['resolved', 'closed']
+            ).order_by('resolved_at', direction='DESCENDING').limit(limit * 2)
+
+            docs = list(query.stream())
+            incidents = []
+
+            for doc in docs:
+                data = doc.to_dict()
+
+                # Filter by user (assigned_to or resolved_by)
+                if data.get('assigned_to') != user_id and data.get('resolved_by') != user_id:
+                    continue
+
+                if len(incidents) >= limit:
+                    break
+
+                incidents.append({
+                    'id': data.get('id'),
+                    'title': data.get('title'),
+                    'status': str(data.get('status', '')).lower(),
+                    'severity': str(data.get('severity', '')).lower(),
+                    'incident_type': str(data.get('incident_type', '')).lower(),
+                    'reporter_name': data.get('reporter_name'),
+                    'resolved_at': data.get('resolved_at'),
+                    'resolved_by': data.get('resolved_by')
+                })
+
+            return incidents
+
+        except Exception as e:
+            print(f"Error getting resolved incidents: {e}")
+            return []
