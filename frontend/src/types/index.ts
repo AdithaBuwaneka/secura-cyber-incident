@@ -16,6 +16,7 @@ export interface User {
   country?: string;
   city?: string;
   home_number?: string;
+  profile_picture_url?: string;
   created_at: Date;
   last_login?: Date;
   is_active: boolean;

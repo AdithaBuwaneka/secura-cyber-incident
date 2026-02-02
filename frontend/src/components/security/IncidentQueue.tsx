@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
 import { 
   Search, 
@@ -10,12 +10,24 @@ import {
   ExternalLink
 } from 'lucide-react';
 
+interface Incident {
+  id: string;
+  title?: string;
+  description?: string;
+  severity: string;
+  status: string;
+  incident_type?: string;
+  reporter_name?: string;
+  created_at: string;
+  updated_at: string;
+}
+
 interface IncidentQueueProps {
-  incidents: any[];
+  incidents: Incident[];
   loading: boolean;
   searchTerm: string;
   onSearchChange: (term: string) => void;
-  onIncidentClick: (incident: any) => void;
+  onIncidentClick: (incident: Incident) => void;
   getSeverityColor: (severity: string) => string;
   getStatusColor: (status: string) => string;
   getTimeAgo: (date: Date) => string;

@@ -251,7 +251,7 @@ export const updateUserProfile = createAsyncThunk(
       
       const updatedProfile = await response.json();
       return updatedProfile;
-    } catch (error) {
+    } catch {
       return rejectWithValue('Failed to update profile');
     }
   }

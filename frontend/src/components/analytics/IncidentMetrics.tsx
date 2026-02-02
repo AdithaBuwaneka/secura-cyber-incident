@@ -86,47 +86,14 @@ export default function IncidentMetrics({ timeRange = '30d' }: IncidentMetricsPr
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-  const loadMetrics = useCallback(async () => {
-    if (!idToken) {
-      setMetrics(mockMetrics);
-      setIsLoading(false);
-      return;
-    }
-
-    try {
-      const response = await fetch(`${API_URL}/api/analytics/metrics?timeRange=${timeRange}`, {
-        headers: {
-          'Authorization': `Bearer ${idToken}`
-        }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setMetrics(formatMetrics(data));
-      } else {
-        console.error('API request failed:', response.status, response.statusText);
-        setMetrics(formatMetrics({})); // Use empty data to show 0 values
-      }
-    } catch (error) {
-      console.error('Failed to load metrics:', error);
-      setMetrics(formatMetrics({})); // Use empty data to show 0 values
-    } finally {
-      setIsLoading(false);
-    }
-  }, [timeRange, idToken, API_URL]);
-
-  useEffect(() => {
-    loadMetrics();
-  }, [loadMetrics]);
-
-  const formatMetrics = (data: Record<string, unknown>): MetricCard[] => {
+  const formatMetrics = useCallback((data: Record<string, unknown>): MetricCard[] => {
     const totalIncidents = (data.total_incidents as number) || 0;
     const resolutionRate = (data.resolution_rate as number) || 0;
     const avgResponseTime = (data.avg_response_time as number) || 0;
     const criticalIncidents = (data.critical_incidents as number) || 0;
     const activeAnalysts = (data.active_analysts as number) || 0;
     const threatLevel = (data.threat_level as string) || 'Low';
-    
+
     return [
       {
         title: 'Total Incidents',
@@ -177,7 +144,40 @@ export default function IncidentMetrics({ timeRange = '30d' }: IncidentMetricsPr
         color: criticalIncidents === 0 ? 'green' : criticalIncidents <= 2 ? 'yellow' : 'red'
       }
     ];
-  };
+  }, [timeRange]);
+
+  const loadMetrics = useCallback(async () => {
+    if (!idToken) {
+      setMetrics(mockMetrics);
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/api/analytics/metrics?timeRange=${timeRange}`, {
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setMetrics(formatMetrics(data));
+      } else {
+        console.error('API request failed:', response.status, response.statusText);
+        setMetrics(formatMetrics({})); // Use empty data to show 0 values
+      }
+    } catch (error) {
+      console.error('Failed to load metrics:', error);
+      setMetrics(formatMetrics({})); // Use empty data to show 0 values
+    } finally {
+      setIsLoading(false);
+    }
+  }, [timeRange, idToken, API_URL, formatMetrics]);
+
+  useEffect(() => {
+    loadMetrics();
+  }, [loadMetrics]);
 
   const getColorClasses = (color: string) => {
     const colors = {

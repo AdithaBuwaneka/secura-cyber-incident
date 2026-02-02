@@ -60,8 +60,15 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
   const [isGeneratingPrediction, setIsGeneratingPrediction] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [dragActive, setDragActive] = useState(false);
-  const [imageAnalysisResults, setImageAnalysisResults] = useState<Record<string, any>>({});
-  const [isAnalyzingImages, setIsAnalyzingImages] = useState(false);
+  const [imageAnalysisResults, setImageAnalysisResults] = useState<Record<string, {
+    status: string;
+    ocr_text: string;
+    threat_indicators: string[];
+    summary?: string;
+    confidence?: number;
+    recommendations?: string[];
+    error?: string;
+  }>>({});
 
   // AI-powered suggestions based on description using our trained ML model
   const handleDescriptionChange = useCallback(async (description: string) => {
@@ -129,6 +136,7 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
     } else {
       setAISuggestions([]);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formData.title, idToken, API_URL]);
 
   // Generate AI predictions for severity and incident type
@@ -141,7 +149,7 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
     setIsGeneratingPrediction(true);
     
     // First, analyze any uploaded images to get OCR text
-    let ocrTexts: string[] = [];
+    const ocrTexts: string[] = [];
     if (formData.attachments.length > 0) {
       for (const file of formData.attachments) {
         if (file.type.startsWith('image/')) {
@@ -201,7 +209,7 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
         // Auto-apply predictions to form
         setFormData(prev => ({
           ...prev,
-          severity: prediction.severity as any,
+          severity: prediction.severity as 'low' | 'medium' | 'high' | 'critical',
           incident_type: prediction.incident_type
         }));
 
@@ -229,8 +237,6 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
 
   const analyzeImageWithGemini = async (file: File) => {
     if (!idToken) return;
-    
-    setIsAnalyzingImages(true);
     try {
       // First, upload the image to ImageKit to get a URL
       const uploadFormData = new FormData();
@@ -296,7 +302,7 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
       
     } catch (error) {
       console.error('Image analysis error:', error);
-      
+
       // Update status to failed
       setImageAnalysisResults(prev => ({
         ...prev,
@@ -307,8 +313,6 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
           error: error instanceof Error ? error.message : 'Unknown error'
         }
       }));
-    } finally {
-      setIsAnalyzingImages(false);
     }
   };
 
@@ -331,6 +335,7 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
         }
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idToken]);
 
   const getSeverityColor = (severity: string) => {

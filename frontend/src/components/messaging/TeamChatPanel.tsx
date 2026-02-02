@@ -2,11 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  Users, 
-  User, 
-  Plus, 
-  MessageCircle, 
+import {
+  Users,
+  Plus,
+  MessageCircle,
   Shield,
   Search,
   X,
@@ -72,6 +71,7 @@ export default function TeamChatPanel({ onClose }: TeamChatPanelProps) {
   useEffect(() => {
     loadTeamChatRooms();
     loadSecurityMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadTeamChatRooms = async () => {
@@ -336,7 +336,9 @@ export default function TeamChatPanel({ onClose }: TeamChatPanelProps) {
                             <Users className="h-4 w-4 text-[#00D4FF]" />
                             <h3 className="font-medium text-sm text-white truncate">{room.title}</h3>
                             {room.created_by === userProfile?.uid && (
-                              <Crown className="h-3 w-3 text-yellow-400" title="Created by you" />
+                              <span title="Created by you">
+                                <Crown className="h-3 w-3 text-yellow-400" />
+                              </span>
                             )}
                           </div>
                           
