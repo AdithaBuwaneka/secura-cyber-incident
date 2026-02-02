@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+venv/
+.venv/
+
+# Environment
+.env
+.env.local
+
+# Test files
+test_*.py
+
+# IDE
+.vscode/
+.idea/
+
+# Git
+.git/
+.gitignore
+
+# HF deploy temp folders
+hf-deploy/
+hf-temp/
+
+# Misc
+*.log
+*.pdf
