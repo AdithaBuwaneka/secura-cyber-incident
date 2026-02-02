@@ -6,21 +6,28 @@ on:
       - main
     paths:
       - 'backend/**'
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Install HuggingFace Hub
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install huggingface_hub
         run: pip install huggingface_hub
 
-      - name: Deploy to Hugging Face
+      - name: Upload to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           cd backend
-          rm -rf hf-deploy __pycache__ */__pycache__ */*/__pycache__ 2>/dev/null || true
-          huggingface-cli upload adithaf7/secura-backend . . --repo-type space --token $HF_TOKEN
+          rm -rf hf-deploy hf-temp __pycache__ 2>/dev/null || true
+          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
+          huggingface-cli upload adithaf7/secura-backend . . --repo-type space --token $HF_TOKEN --delete "*"
