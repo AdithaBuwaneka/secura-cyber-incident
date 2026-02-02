@@ -1,30 +1,66 @@
 from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
+import time
 
 from app.core.firebase_config import FirebaseConfig
 from app.models.common import IncidentType, IncidentSeverity, IncidentStatus
 
 
+# PERFORMANCE FIX: Cache analytics data to avoid repeated queries
+class AnalyticsCache:
+    def __init__(self, ttl_seconds: int = 60):
+        self._cache: Dict[str, Any] = {}
+        self._timestamps: Dict[str, float] = {}
+        self._ttl = ttl_seconds
+
+    def get(self, key: str) -> Optional[Any]:
+        if key in self._cache:
+            if time.time() - self._timestamps[key] < self._ttl:
+                return self._cache[key]
+            del self._cache[key]
+            del self._timestamps[key]
+        return None
+
+    def set(self, key: str, value: Any):
+        self._cache[key] = value
+        self._timestamps[key] = time.time()
+
+
+_analytics_cache = AnalyticsCache(ttl_seconds=60)
+
+
 class AnalyticsService:
     """Service for handling analytics operations - Pramudi's Module"""
-    
+
     def __init__(self):
         self.db = FirebaseConfig.get_firestore()
         self.incidents_collection = self.db.collection('incidents')
         self.users_collection = self.db.collection('users')
-    
-    async def get_basic_metrics(self, days: int = 30) -> Dict[str, Any]:
-        """Get basic dashboard metrics for the analytics dashboard"""
+        self.cache = _analytics_cache
+
+    async def _get_incidents_cached(self, days: int) -> List:
+        """Get incidents with caching to avoid repeated queries"""
+        cache_key = f"incidents_{days}"
+        cached = self.cache.get(cache_key)
+        if cached:
+            return cached
+
         end_date = datetime.now(timezone.utc)
         start_date = end_date - timedelta(days=days)
-        
-        # Query incidents in the period
+
         incidents_query = self.incidents_collection.where(
             'created_at', '>=', start_date
         ).where('created_at', '<=', end_date)
-        
+
         incidents = list(incidents_query.stream())
+        self.cache.set(cache_key, incidents)
+        return incidents
+    
+    async def get_basic_metrics(self, days: int = 30) -> Dict[str, Any]:
+        """Get basic dashboard metrics for the analytics dashboard"""
+        # PERFORMANCE FIX: Use cached incidents
+        incidents = await self._get_incidents_cached(days)
         total_incidents = len(incidents)
         
         # Status breakdown
@@ -100,15 +136,8 @@ class AnalyticsService:
 
     async def get_incident_statistics(self, period_days: int = 30) -> Dict[str, Any]:
         """Get comprehensive incident statistics"""
-        end_date = datetime.now(timezone.utc)
-        start_date = end_date - timedelta(days=period_days)
-        
-        # Query incidents in the period
-        incidents_query = self.incidents_collection.where(
-            'created_at', '>=', start_date
-        ).where('created_at', '<=', end_date)
-        
-        incidents = list(incidents_query.stream())
+        # PERFORMANCE FIX: Use cached incidents
+        incidents = await self._get_incidents_cached(period_days)
         
         # Calculate statistics
         total_incidents = len(incidents)

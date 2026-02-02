@@ -3,9 +3,12 @@ Incident Service - Jayasanka's Module
 Handles CRUD operations for security incidents
 """
 
-from typing import List, Optional
-from datetime import datetime
+from typing import List, Optional, Dict, Any
+from datetime import datetime, timedelta
 from uuid import uuid4
+import asyncio
+from functools import lru_cache
+import time
 
 from app.models.incident import IncidentCreate, IncidentUpdate, IncidentResponse
 from app.models.common import IncidentType, IncidentStatus, IncidentSeverity
@@ -13,11 +16,84 @@ from app.core.firebase_config import FirebaseConfig
 from app.services.incidents.file_service import FileService
 
 
+# Simple in-memory cache for incidents
+class IncidentCache:
+    def __init__(self, ttl_seconds: int = 30):
+        self._cache: Dict[str, Any] = {}
+        self._timestamps: Dict[str, float] = {}
+        self._ttl = ttl_seconds
+
+    def get(self, key: str) -> Optional[Any]:
+        if key in self._cache:
+            if time.time() - self._timestamps[key] < self._ttl:
+                return self._cache[key]
+            else:
+                del self._cache[key]
+                del self._timestamps[key]
+        return None
+
+    def set(self, key: str, value: Any):
+        self._cache[key] = value
+        self._timestamps[key] = time.time()
+
+    def invalidate(self, key: str = None):
+        if key:
+            self._cache.pop(key, None)
+            self._timestamps.pop(key, None)
+        else:
+            self._cache.clear()
+            self._timestamps.clear()
+
+
+# Global cache instance
+_incident_cache = IncidentCache(ttl_seconds=30)
+
+
 class IncidentService:
     def __init__(self):
         self.db = FirebaseConfig.get_firestore()
         self.incidents_collection = self.db.collection('incidents')
         self.file_service = FileService()
+        self.cache = _incident_cache
+
+    async def _batch_get_attachments(self, incident_ids: List[str]) -> Dict[str, List]:
+        """Batch fetch attachments for multiple incidents - fixes N+1 query problem"""
+        if not incident_ids:
+            return {}
+
+        attachments_map = {}
+        try:
+            # Fetch all attachments in one query
+            files_collection = self.db.collection('incident_files')
+            all_files = list(files_collection.where('incident_id', 'in', incident_ids[:10]).stream())
+
+            # If more than 10 incidents, batch the queries (Firestore 'in' limit is 10)
+            if len(incident_ids) > 10:
+                for i in range(10, len(incident_ids), 10):
+                    batch_ids = incident_ids[i:i+10]
+                    batch_files = list(files_collection.where('incident_id', 'in', batch_ids).stream())
+                    all_files.extend(batch_files)
+
+            # Group by incident_id
+            for doc in all_files:
+                data = doc.to_dict()
+                inc_id = data.get('incident_id')
+                if inc_id not in attachments_map:
+                    attachments_map[inc_id] = []
+                attachments_map[inc_id].append({
+                    'file_id': data.get('id', doc.id),
+                    'filename': data.get('filename', ''),
+                    'original_filename': data.get('filename', ''),
+                    'file_size': data.get('size', 0),
+                    'file_type': data.get('content_type', ''),
+                    'file_url': data.get('imagekit_url', ''),
+                    'thumbnail_url': data.get('imagekit_thumbnail_url', ''),
+                    'uploader_id': data.get('uploader_id', '')
+                })
+        except Exception as e:
+            print(f"Error batch fetching attachments: {e}")
+
+        return attachments_map
 
     async def create_incident(
         self, 
@@ -341,44 +417,23 @@ class IncidentService:
                 incident = IncidentResponse(**data)
                 incident_dict = incident.dict()
                 
-                # Try to fetch attachments but don't fail if it doesn't work
-                try:
-                    attachments = await self.file_service.get_incident_files(data['id'])
-                    if attachments:
-                        print(f"Found {len(attachments)} attachments for incident {data['id']}")
-                        # Debug: print first attachment details
-                        if len(attachments) > 0:
-                            print(f"First attachment: {attachments[0].__dict__}")
-                        
-                        incident_dict['attachments'] = [
-                            {
-                                'file_id': att.id,
-                                'filename': att.filename,
-                                'original_filename': att.filename,
-                                'file_size': att.size,
-                                'file_type': att.content_type,
-                                'file_url': att.imagekit_url,
-                                'thumbnail_url': att.imagekit_thumbnail_url,
-                                'uploader_id': att.uploader_id
-                            } for att in attachments
-                        ]
-                        print(f"Incident {data['id']} attachments: {incident_dict['attachments']}")
-                    else:
-                        print(f"No attachments found for incident {data['id']}")
-                        incident_dict['attachments'] = []
-                except Exception as e:
-                    print(f"Error fetching attachments for incident {data['id']}: {str(e)}")
-                    # Silently fail attachment fetching
-                    incident_dict['attachments'] = []
-                
+                # Don't fetch attachments individually here - we'll batch load them below
+                incident_dict['attachments'] = []
                 incidents.append(incident_dict)
-                
+
             except Exception as e:
                 print(f"Error creating IncidentResponse for incident {data.get('id', 'unknown')}: {e}")
-                print(f"Data fields: {list(data.keys())}")
                 # Skip this incident if we can't create a valid response
                 continue
-        
+
+        # PERFORMANCE FIX: Batch load all attachments in ONE query instead of N+1
+        incident_ids = [inc['id'] for inc in incidents]
+        attachments_map = await self._batch_get_attachments(incident_ids)
+
+        # Assign attachments to incidents
+        for incident in incidents:
+            incident['attachments'] = attachments_map.get(incident['id'], [])
+
         # Return response with pagination info
         return {
             "incidents": incidents,
@@ -550,45 +605,20 @@ class IncidentService:
             try:
                 incident = IncidentResponse(**data)
                 incident_dict = incident.dict()
-                
-                # Try to fetch attachments but don't fail if it doesn't work
-                try:
-                    attachments = await self.file_service.get_incident_files(data['id'])
-                    if attachments:
-                        print(f"Found {len(attachments)} attachments for incident {data['id']}")
-                        # Debug: print first attachment details
-                        if len(attachments) > 0:
-                            print(f"First attachment: {attachments[0].__dict__}")
-                        
-                        incident_dict['attachments'] = [
-                            {
-                                'file_id': att.id,
-                                'filename': att.filename,
-                                'original_filename': att.filename,
-                                'file_size': att.size,
-                                'file_type': att.content_type,
-                                'file_url': att.imagekit_url,
-                                'thumbnail_url': att.imagekit_thumbnail_url,
-                                'uploader_id': att.uploader_id
-                            } for att in attachments
-                        ]
-                        print(f"Incident {data['id']} attachments: {incident_dict['attachments']}")
-                    else:
-                        print(f"No attachments found for incident {data['id']}")
-                        incident_dict['attachments'] = []
-                except Exception as e:
-                    print(f"Error fetching attachments for incident {data['id']}: {str(e)}")
-                    # Silently fail attachment fetching
-                    incident_dict['attachments'] = []
-                
+                incident_dict['attachments'] = []
                 incidents.append(incident_dict)
-                
+
             except Exception as e:
                 print(f"Error creating IncidentResponse for incident {data.get('id', 'unknown')}: {e}")
-                print(f"Data fields: {list(data.keys())}")
-                # Skip this incident if we can't create a valid response
                 continue
-        
+
+        # PERFORMANCE FIX: Batch load all attachments in ONE query
+        incident_ids = [inc['id'] for inc in incidents]
+        attachments_map = await self._batch_get_attachments(incident_ids)
+
+        for incident in incidents:
+            incident['attachments'] = attachments_map.get(incident['id'], [])
+
         return incidents
 
     async def update_incident(

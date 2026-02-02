@@ -5,71 +5,102 @@ from app.models.auth import TokenData
 from app.models.common import UserRole
 from app.models.user import User
 from app.services.auth.auth_service import AuthService
-from typing import List
+from typing import List, Dict, Any, Optional
+import time
 
 # Security scheme for Bearer token
 security = HTTPBearer()
 
+# PERFORMANCE FIX: Cache user profiles to avoid DB hit on every request
+class UserProfileCache:
+    def __init__(self, ttl_seconds: int = 60):
+        self._cache: Dict[str, User] = {}
+        self._timestamps: Dict[str, float] = {}
+        self._ttl = ttl_seconds
+
+    def get(self, uid: str) -> Optional[User]:
+        if uid in self._cache:
+            if time.time() - self._timestamps[uid] < self._ttl:
+                return self._cache[uid]
+            else:
+                del self._cache[uid]
+                del self._timestamps[uid]
+        return None
+
+    def set(self, uid: str, user: User):
+        self._cache[uid] = user
+        self._timestamps[uid] = time.time()
+
+    def invalidate(self, uid: str = None):
+        if uid:
+            self._cache.pop(uid, None)
+            self._timestamps.pop(uid, None)
+        else:
+            self._cache.clear()
+            self._timestamps.clear()
+
+# Global cache - 60 second TTL
+_user_cache = UserProfileCache(ttl_seconds=60)
+
 async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(security)) -> User:
     """Verify Firebase ID token and return user data"""
-    
+
     # Extract token from Authorization header
     id_token = credentials.credentials
-    
+
     # Verify token with Firebase
     decoded_token = FirebaseConfig.verify_id_token(id_token)
-    
+
     if not decoded_token:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid authentication token",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    
-    # Get user profile from Firestore using AuthService
+
     uid = decoded_token.get('uid')
     email = decoded_token.get('email')
     name = decoded_token.get('name', email.split('@')[0] if email else 'User')
-    
-    print(f"DEBUG: Looking for user profile with UID: {uid}")  # Debug log
-    
+
+    # PERFORMANCE FIX: Check cache first before hitting database
+    cached_user = _user_cache.get(uid)
+    if cached_user:
+        return cached_user
+
     auth_service = AuthService()
     user_profile = await auth_service.get_user_profile(uid)
-    
+
     if not user_profile:
-        print(f"DEBUG: User profile not found for UID: {uid}")  # Debug log
-        print(f"DEBUG: User email from token: {email}")  # Debug log
-        print(f"DEBUG: Attempting to create profile automatically...")  # Debug log
-        
         # Automatically create profile for existing Firebase users
         try:
             from models.user import User
             from models.common import UserRole
-            
+
             auto_profile = User(
                 uid=uid,
                 email=email,
                 full_name=name,
-                phone_number=None,  # Will be updated later by user
-                role=UserRole.EMPLOYEE,  # Default role
+                phone_number=None,
+                role=UserRole.EMPLOYEE,
                 is_active=True
             )
-            
+
             user_profile = await auth_service.create_user_profile(auto_profile)
-            print(f"DEBUG: Auto-created profile for user: {email}")
-            
+
         except Exception as create_error:
-            print(f"DEBUG: Failed to auto-create profile: {create_error}")
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"User profile not found for UID: {uid}. Please complete registration via /api/auth/create-profile endpoint."
+                detail=f"User profile not found for UID: {uid}. Please complete registration."
             )
-    
-    print(f"DEBUG: Found user profile for: {user_profile.email}")  # Debug log
-    
-    # Update last login timestamp
-    await auth_service.update_last_login(uid)
-    
+
+    # Cache the user profile
+    _user_cache.set(uid, user_profile)
+
+    # Update last login in background (don't block response)
+    # Only update occasionally, not every request
+    import asyncio
+    asyncio.create_task(auth_service.update_last_login(uid))
+
     return user_profile
 
 def require_role(required_role: UserRole):
