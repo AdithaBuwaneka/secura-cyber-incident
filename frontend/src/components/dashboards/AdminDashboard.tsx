@@ -25,8 +25,7 @@ import AdminApplicationReview from '@/components/applications/AdminApplicationRe
 import UserManagement from '@/components/users/UserManagement';
 import SystemConfig from '@/components/system/SystemConfig';
 import toast from 'react-hot-toast';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import Link from 'next/link';
 
 interface OverviewData {
   users: {
@@ -62,7 +61,14 @@ export default function AdminDashboard() {
     const [activeTab, setActiveTab] = useState('overview');
     const [overviewData, setOverviewData] = useState<OverviewData | null>(null);
     const [loading, setLoading] = useState(false);
-    const [recentIncidents, setRecentIncidents] = useState<any[]>([]);
+    const [recentIncidents, setRecentIncidents] = useState<Array<{
+      id: string;
+      title?: string;
+      severity: string;
+      status: string;
+      reporter_name: string;
+      created_at: string;
+    }>>([]);
     const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
     interface SystemLog {
@@ -211,7 +217,7 @@ export default function AdminDashboard() {
     } catch (error) {
       toast.dismiss();
       console.error('Error generating report:', error);
-      toast.error(`Failed to generate executive report: ${error.message}`);
+      toast.error(`Failed to generate executive report: ${(error as Error).message}`);
     }
   };
 
@@ -313,6 +319,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="relative group">
                   {userProfile?.profile_picture_url ? (
+                    // eslint-disable-next-line @next/next/no-img-element
                     <img
                       src={userProfile.profile_picture_url}
                       alt="Profile"
@@ -548,7 +555,7 @@ export default function AdminDashboard() {
                         toast.success(`Backend connected: ${data.status}`);
                         console.log('Backend health:', data);
                       } catch (error) {
-                        toast.error(`Backend connection failed: ${error.message}`);
+                        toast.error(`Backend connection failed: ${(error as Error).message}`);
                         console.error('Backend connection error:', error);
                       }
                     }}
@@ -596,12 +603,12 @@ export default function AdminDashboard() {
             <div className="mt-8 bg-[#2A2D35] p-6 rounded-lg border border-gray-700 mb-8">
               <div className="flex items-center justify-between mb-6">
                 <h3 className="text-lg font-semibold text-white">Recent Incidents</h3>
-                <a 
+                <Link
                   href="/incidents/all"
                   className="text-[#00D4FF] hover:underline text-sm"
                 >
                   View All Incidents
-                </a>
+                </Link>
               </div>
               <div className="space-y-4">
                 {recentIncidents.length > 0 ? (

@@ -2,9 +2,21 @@
 
 import React from 'react';
 
+interface TeamMember {
+  user_id: string;
+  full_name: string;
+  is_online: boolean;
+}
+
+interface Incident {
+  id: string;
+  assigned_to?: string;
+  status: string;
+}
+
 interface TeamStatusPanelProps {
-  teamMembers: any[];
-  incidents: any[];
+  teamMembers: TeamMember[];
+  incidents: Incident[];
 }
 
 export default function TeamStatusPanel({ teamMembers, incidents }: TeamStatusPanelProps) {
