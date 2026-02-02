@@ -5,24 +5,16 @@ import { useParams, useRouter } from 'next/navigation';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/store';
 import toast from 'react-hot-toast';
-import { 
-  ArrowLeft, 
-  Calendar, 
-  User, 
-  AlertTriangle, 
-  Shield, 
+import {
+  Calendar,
+  User,
   MessageSquare,
   Paperclip,
-  Clock,
   MapPin,
-  CheckCircle,
-  XCircle,
-  AlertCircle,
   FileText,
   Image as ImageIcon,
   Download,
-  X,
-  ScanLine
+  X
 } from 'lucide-react';
 
 interface IncidentAttachment {
@@ -60,7 +52,7 @@ interface IncidentDetail {
   updated_at: string;
   resolved_at?: string;
   closed_at?: string;
-  ai_analysis?: any;
+  ai_analysis?: Record<string, unknown>;
 }
 
 interface Message {
@@ -92,6 +84,7 @@ export default function IncidentDetailPage() {
       fetchIncidentDetails();
       fetchMessages();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params.id, idToken]);
 
   const fetchIncidentDetails = async () => {
@@ -190,11 +183,6 @@ export default function IncidentDetailPage() {
     }
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' B';
-    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
-    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
-  };
 
   if (isLoading) {
     return (
@@ -310,13 +298,10 @@ export default function IncidentDetailPage() {
                 Attachments ({incident.attachments.length})
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {incident.attachments.map((attachment: any, index) => {
-                  const isImage = attachment.file_type?.startsWith('image/') || 
+                {incident.attachments.map((attachment: IncidentAttachment & { file_url?: string; imagekit_url?: string }, index) => {
+                  const isImage = attachment.file_type?.startsWith('image/') ||
                                  attachment.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                  
-                  // Debug log
-                  console.log('Attachment data:', attachment);
-                  
+
                   // Check if attachment has file_url (from backend) or construct it
                   let fileUrl = '';
                   if (attachment.file_url) {
@@ -329,9 +314,7 @@ export default function IncidentDetailPage() {
                     // Construct ImageKit URL
                     fileUrl = `${IMAGEKIT_URL}/incidents/${incident.id}/${attachment.filename}`;
                   }
-                  
-                  console.log('Image URL:', fileUrl);
-                  
+
                   return (
                     <div key={index} className="bg-[#1A1D23] p-3 rounded-lg border border-gray-700">
                       <div className="flex items-start space-x-3">
@@ -349,13 +332,13 @@ export default function IncidentDetailPage() {
                           </p>
                           {isImage && fileUrl && (
                             <div className="mt-2">
-                              <img 
-                                src={fileUrl} 
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={fileUrl}
                                 alt={attachment.original_filename || 'Attachment'}
                                 className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(fileUrl, '_blank')}
                                 onError={(e) => {
-                                  console.error('Image failed to load:', fileUrl);
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />

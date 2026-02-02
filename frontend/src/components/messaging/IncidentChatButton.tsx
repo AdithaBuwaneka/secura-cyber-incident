@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { MessageCircle, X, Users, User, Shield } from 'lucide-react';
+import { MessageCircle, X, Users, Shield } from 'lucide-react';
 import { RootState } from '@/store';
 import MessageThread from './MessageThread';
 import toast from 'react-hot-toast';
@@ -25,22 +25,22 @@ interface IncidentChatButtonProps {
   showLabel?: boolean;
 }
 
-export default function IncidentChatButton({ 
-  incidentId, 
+export default function IncidentChatButton({
+  incidentId,
   incidentTitle,
   assignedToId,
   assignedToName,
-  incidentStatus,
-  unreadCount = 0, 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  incidentStatus: _incidentStatus,
+  unreadCount = 0,
   size = 'md',
-  showLabel = true 
+  showLabel = true
 }: IncidentChatButtonProps) {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
   const [showChat, setShowChat] = useState(false);
   const [showMemberSelection, setShowMemberSelection] = useState(false);
   const [securityTeamMembers, setSecurityTeamMembers] = useState<SecurityTeamMember[]>([]);
-  const [selectedMemberId, setSelectedMemberId] = useState<string | null>(null);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
@@ -67,7 +67,7 @@ export default function IncidentChatButton({
 
       if (response.ok) {
         const users = await response.json();
-        const securityTeam = users.filter((user: any) => user.role === 'security_team');
+        const securityTeam = users.filter((user: { role: string }) => user.role === 'security_team');
         setSecurityTeamMembers(securityTeam);
       }
     } catch (error) {
@@ -79,7 +79,6 @@ export default function IncidentChatButton({
   const handleChatClick = () => {
     if (assignedToId) {
       // If incident is assigned to someone, chat directly with them
-      setSelectedMemberId(assignedToId);
       setShowChat(true);
     } else if (userProfile?.role === 'employee') {
       // If employee and no one assigned, show member selection
@@ -211,8 +210,7 @@ export default function IncidentChatButton({
               <button
                 onClick={() => {
                   setShowChat(false);
-                  setSelectedMemberId(null);
-                  setConversationId(null);
+                  setConversationId(undefined);
                 }}
                 className="p-2 text-gray-400 hover:text-white hover:bg-gray-600 rounded-lg transition-colors"
               >
@@ -226,10 +224,8 @@ export default function IncidentChatButton({
                 conversationId={conversationId}
                 onClose={() => {
                   setShowChat(false);
-                  setSelectedMemberId(null);
-                  setConversationId(null);
+                  setConversationId(undefined);
                 }}
-                isModal={true}
               />
             </div>
           </div>

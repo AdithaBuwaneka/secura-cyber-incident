@@ -91,8 +91,8 @@ export default function SecurityReports(): React.JSX.Element {
         
         // Ensure all reports have required properties and filter out invalid ones
         const validReports = apiReports
-          .filter((report: any) => report && typeof report === 'object')
-          .map((report: any) => ({
+          .filter((report: Partial<Report> | null | undefined) => report && typeof report === 'object')
+          .map((report: Partial<Report>) => ({
             id: report.id || `unknown-${Date.now()}`,
             title: report.title || 'Untitled Report',
             type: report.type || 'custom',

@@ -16,7 +16,7 @@ import Link from 'next/link';
 import toast from 'react-hot-toast';
 
 export default function EditProfilePage() {
-  const { userProfile, idToken, loading } = useSelector((state: RootState) => state.auth);
+  const { userProfile, loading } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
   
   const [formData, setFormData] = useState({
@@ -144,7 +144,7 @@ export default function EditProfilePage() {
       }
 
       // Update profile
-      const updateData: any = {
+      const updateData = {
         full_name: formData.full_name.trim(),
         phone_number: formData.phone_number.trim(),
         country: formData.country.trim(),
@@ -154,18 +154,19 @@ export default function EditProfilePage() {
 
       await dispatch(updateUserProfile(updateData)).unwrap();
       toast.success('Profile updated successfully');
-      
+
       setErrors({});
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as { message?: string };
       console.error('DEBUG: Profile update error:', error);
-      if (error.message && error.message.includes('Current password is incorrect')) {
+      if (err.message && err.message.includes('Current password is incorrect')) {
         toast.error('Current password is incorrect');
         setErrors(prev => ({
           ...prev,
           current_password: 'Current password is incorrect'
         }));
       } else {
-        toast.error(error.message || 'Failed to update profile');
+        toast.error(err.message || 'Failed to update profile');
       }
     } finally {
       setIsSubmitting(false);

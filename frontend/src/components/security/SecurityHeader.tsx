@@ -14,8 +14,15 @@ import {
 } from 'lucide-react';
 import TeamChatPanel from '../messaging/TeamChatPanel';
 
+interface UserProfile {
+  uid?: string;
+  email?: string;
+  full_name?: string;
+  role?: string;
+}
+
 interface SecurityHeaderProps {
-  userProfile: any;
+  userProfile: UserProfile | null;
   unreadCount: number;
   isTeamLeader: () => boolean;
   onAnalyticsClick: () => void;

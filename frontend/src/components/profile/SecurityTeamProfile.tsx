@@ -2,18 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  User, 
-  Shield, 
-  Clock, 
-  CheckCircle2, 
-  AlertTriangle, 
+import {
+  User,
+  Shield,
+  Clock,
+  CheckCircle2,
+  AlertTriangle,
   X,
   Eye,
-  MessageSquare,
-  Calendar,
-  MapPin,
-  Paperclip,
   CheckCircle,
   AlertCircle,
   Trophy,
@@ -27,11 +23,24 @@ interface SecurityTeamProfileProps {
   onClose: () => void;
 }
 
+interface Incident {
+  id: string;
+  title?: string;
+  description?: string;
+  severity: string;
+  status: string;
+  incident_type?: string;
+  reporter_name?: string;
+  assigned_at?: string;
+  resolved_at?: string;
+  created_at: string;
+}
+
 export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProps) {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('profile');
-  const [assignedIncidents, setAssignedIncidents] = useState<any[]>([]);
-  const [resolvedIncidents, setResolvedIncidents] = useState<any[]>([]);
+  const [assignedIncidents, setAssignedIncidents] = useState<Incident[]>([]);
+  const [resolvedIncidents, setResolvedIncidents] = useState<Incident[]>([]);
   const [profileStats, setProfileStats] = useState({
     totalAssigned: 0,
     totalResolved: 0,
@@ -175,10 +184,12 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
     } else if (activeTab === 'resolved') {
       fetchResolvedIncidents();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab, idToken, userProfile?.uid]);
 
   useEffect(() => {
     calculateStats();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [assignedIncidents, resolvedIncidents]);
 
   const getSeverityColor = (severity: string) => {
@@ -437,7 +448,7 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
                 <div className="text-center py-12">
                   <AlertCircle className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-white mb-2">No Assigned Incidents</h3>
-                  <p className="text-gray-400">You don't have any incidents assigned to you currently.</p>
+                  <p className="text-gray-400">You don&apos;t have any incidents assigned to you currently.</p>
                 </div>
               )}
             </div>
@@ -476,7 +487,7 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
                           <div className="flex items-center space-x-4 text-xs text-gray-400">
                             <span>Type: {incident.incident_type?.replace('_', ' ') || 'Unknown'}</span>
                             <span>•</span>
-                            <span>Resolved: {getTimeAgo(incident.resolved_at)}</span>
+                            <span>Resolved: {incident.resolved_at ? getTimeAgo(incident.resolved_at) : 'N/A'}</span>
                             <span>•</span>
                             <span>Reporter: {incident.reporter_name}</span>
                           </div>
@@ -494,7 +505,7 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
                 <div className="text-center py-12">
                   <CheckCircle className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-white mb-2">No Resolved Incidents</h3>
-                  <p className="text-gray-400">You haven't resolved any incidents yet.</p>
+                  <p className="text-gray-400">You haven&apos;t resolved any incidents yet.</p>
                 </div>
               )}
             </div>
