@@ -1,0 +1,32 @@
+name: Deploy Backend to Hugging Face
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          lfs: true
+
+      - name: Push to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          cd backend
+          git config --global user.email "github-actions@github.com"
+          git config --global user.name "GitHub Actions"
+          git clone --depth 1 https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-space
+          cp -r ./* hf-space/ 2>/dev/null || true
+          cp -r ./.[!.]* hf-space/ 2>/dev/null || true
+          cd hf-space
+          git add .
+          git diff --staged --quiet || git commit -m "Deploy from GitHub"
+          git push
