@@ -13,6 +13,7 @@ interface ApplicationData {
 interface SecurityApplication {
   id: string;
   applicant_uid: string;
+  applicant_name?: string;
   reason: string;
   experience: string;
   certifications?: string;

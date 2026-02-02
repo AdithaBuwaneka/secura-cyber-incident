@@ -9,6 +9,7 @@ export interface User {
   full_name: string;
   role: 'employee' | 'security_team' | 'admin';
   phone_number?: string;
+  profile_picture_url?: string;
   created_at: string;
   last_login?: string;
   is_active: boolean;

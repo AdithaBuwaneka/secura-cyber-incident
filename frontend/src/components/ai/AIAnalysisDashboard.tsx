@@ -66,17 +66,48 @@ interface Incident {
   attachments?: IncidentAttachment[];
 }
 
+interface ThreatIntelligence {
+  trending_threats?: Array<{
+    threat_type: string;
+    risk_level: string;
+    increase_percentage: number;
+  }>;
+  industry_alerts?: Array<{
+    alert: string;
+    severity: string;
+    date: string;
+  }>;
+  recommendations?: string[];
+}
+
+interface PredictiveAnalytics {
+  predicted_incident_volume?: {
+    next_week: number;
+    next_month: number;
+    confidence: number;
+  };
+  risk_factors?: Array<{
+    factor: string;
+    impact_score: number;
+    likelihood: number;
+  }>;
+  recommended_actions?: string[];
+  data_summary?: {
+    analyzed_incidents: number;
+    trend_direction: string;
+    most_common_type: string;
+    timeframe_days: number;
+    note?: string;
+  };
+}
+
 export default function AIAnalysisDashboard() {
   const { idToken, userProfile } = useSelector((state: RootState) => state.auth);
   const [activeTab, setActiveTab] = useState('analysis');
-  const [analysisInput, setAnalysisInput] = useState({
-    title: '',
-    description: ''
-  });
   const [analysisResult, setAnalysisResult] = useState<AIAnalysisResult | null>(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [threatIntelligence, setThreatIntelligence] = useState<any>(null);
-  const [predictiveAnalytics, setPredictiveAnalytics] = useState<any>(null);
+  const [threatIntelligence, setThreatIntelligence] = useState<ThreatIntelligence | null>(null);
+  const [predictiveAnalytics, setPredictiveAnalytics] = useState<PredictiveAnalytics | null>(null);
   const [isLoadingIntel, setIsLoadingIntel] = useState(false);
   const [incidents, setIncidents] = useState<Incident[]>([]);
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
@@ -111,10 +142,6 @@ export default function AIAnalysisDashboard() {
     const incident = incidents.find(inc => inc.id === incidentId);
     if (incident) {
       setSelectedIncident(incident);
-      setAnalysisInput({
-        title: incident.title || '',
-        description: incident.description || ''
-      });
       setAnalysisResult(null);
     }
   };
@@ -171,6 +198,7 @@ export default function AIAnalysisDashboard() {
 
   React.useEffect(() => {
     fetchIncidents();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idToken]);
 
   React.useEffect(() => {
@@ -179,6 +207,7 @@ export default function AIAnalysisDashboard() {
     } else if (activeTab === 'predictive' && !predictiveAnalytics) {
       fetchPredictiveAnalytics();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeTab]);
 
   const handleAnalyze = async () => {
@@ -238,12 +267,12 @@ export default function AIAnalysisDashboard() {
             if (imageAnalysisText) {
               toast.success('Image OCR completed - text extracted');
             } else {
-              toast.info('Image analyzed but no text found');
+              toast('Image analyzed but no text found');
             }
           }
         } catch (imgError) {
           console.error('Image analysis error:', imgError);
-          toast.warning('Could not analyze image, proceeding with available text');
+          toast('Could not analyze image, proceeding with available text');
         }
       }
 
@@ -678,7 +707,7 @@ export default function AIAnalysisDashboard() {
                   Trending Threats
                 </h3>
                 <div className="space-y-3">
-                  {threatIntelligence.trending_threats?.map((threat: any, index: number) => (
+                  {threatIntelligence.trending_threats?.map((threat: { threat_type: string; risk_level: string; increase_percentage: number }, index: number) => (
                     <div key={index} className="p-4 bg-[#1A1D23] rounded-lg">
                       <div className="flex items-center justify-between mb-2">
                         <h4 className="font-medium text-white">{threat.threat_type}</h4>
@@ -706,7 +735,7 @@ export default function AIAnalysisDashboard() {
                   Industry Alerts
                 </h3>
                 <div className="space-y-3">
-                  {threatIntelligence.industry_alerts?.map((alert: any, index: number) => (
+                  {threatIntelligence.industry_alerts?.map((alert: { alert: string; severity: string; date: string }, index: number) => (
                     <div key={index} className="p-4 bg-[#1A1D23] rounded-lg border-l-4 border-orange-400">
                       <p className="text-white font-medium mb-1">{alert.alert}</p>
                       <div className="flex items-center justify-between">
@@ -787,7 +816,7 @@ export default function AIAnalysisDashboard() {
                   Risk Factors Analysis
                 </h3>
                 <div className="space-y-3">
-                  {predictiveAnalytics.risk_factors?.map((risk: any, index: number) => (
+                  {predictiveAnalytics.risk_factors?.map((risk: { factor: string; impact_score: number; likelihood: number }, index: number) => (
                     <div key={index} className="p-4 bg-[#1A1D23] rounded-lg">
                       <h4 className="font-medium text-white mb-2">{risk.factor}</h4>
                       <div className="grid grid-cols-2 gap-4 mb-2">
