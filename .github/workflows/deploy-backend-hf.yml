@@ -14,30 +14,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Install HuggingFace Hub
+        run: pip install huggingface_hub
+
       - name: Deploy to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          # Clone HF Space
-          git clone https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-space
-
-          # Remove old files in HF space (except .git)
-          cd hf-space
-          find . -mindepth 1 -maxdepth 1 ! -name '.git' -exec rm -rf {} +
-          cd ..
-
-          # Copy backend files to HF space root
-          cp -r backend/* hf-space/
-          cp backend/.env.example hf-space/ 2>/dev/null || true
-
-          # Remove unwanted files
-          rm -rf hf-space/__pycache__ hf-space/**/__pycache__ hf-space/hf-deploy 2>/dev/null || true
-
-          # Commit and push
-          cd hf-space
-          git config user.email "github-actions@github.com"
-          git config user.name "GitHub Actions"
-          git add .
-          git status
-          git diff --staged --quiet || git commit -m "Deploy from GitHub: ${{ github.event.head_commit.message }}"
-          git push
+          cd backend
+          rm -rf hf-deploy __pycache__ */__pycache__ */*/__pycache__ 2>/dev/null || true
+          huggingface-cli upload adithaf7/secura-backend . . --repo-type space --token $HF_TOKEN
