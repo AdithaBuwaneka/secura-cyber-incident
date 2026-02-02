@@ -1,0 +1,1299 @@
+Incident_Description,Attack_Type,Severity
+"User reported receiving suspicious email asking to verify bank account details with embedded link to fake banking site",phishing,high
+"Multiple employees received emails claiming to be from IT department requesting password reset through external link",phishing,high
+"Employee clicked on attachment in email supposedly from shipping company, computer now running slowly with popup ads",malware,medium
+"Website experiencing intermittent outages, server logs show massive traffic spike from multiple IP addresses",DDoS,high
+"Suspicious login attempts detected from unknown IP address in foreign country on admin account",unauthorized_access,medium
+"Employee laptop screen showing message demanding bitcoin payment to unlock files",ransomware,high
+"Security scan detected unauthorized software installed on marketing department computers",malware,low
+"Customer data found posted on dark web forum, appears to match our database structure",data_breach,high
+"Firewall logs show repeated connection attempts to command and control server",malware,high
+"Employee reported their email sending messages they didn't write to entire contact list",account_compromise,medium
+"Network monitoring detected large data transfer to unknown external IP address after hours",data_exfiltration,high
+"Users reporting inability to access company website, showing 'Service Unavailable' error",DDoS,medium
+"Antivirus detected trojan horse in downloaded software on finance computer",malware,high
+"Multiple failed login attempts on VPN from various geographical locations",brute_force,medium
+"Employee received call from someone claiming to be tech support asking for remote access",social_engineering,medium
+"Discovered bitcoin mining software running on several company servers",cryptojacking,medium
+"USB device found in parking lot was plugged into reception computer",malware,high
+"Abnormal database queries detected accessing customer payment information",SQL_injection,high
+"Email server sending thousands of spam messages, IP blacklisted",account_compromise,high
+"Employee reported fake job posting on external site using company branding",brand_abuse,low
+"Security certificate on internal application expired causing access issues",misconfiguration,low
+"Suspicious browser extension installed requesting access to all web traffic",malware,medium
+"Customer reported fraudulent charges after using our payment system",payment_fraud,high
+"Network scan revealed several systems running outdated vulnerable software versions",vulnerability,medium
+"Employee social media account compromised and posting company confidential information",account_compromise,medium
+"Wireless access point detected broadcasting company SSID but not managed by IT",rogue_device,medium
+"Log analysis shows privilege escalation attempt on database server",privilege_escalation,high
+"Fake mobile app using company logo discovered on third-party app store",brand_abuse,medium
+"Employee reported laptop stolen from coffee shop with customer data",physical_security,high
+"Automated script attempting to create multiple fake user accounts detected",bot_attack,low
+"Source code repository access logs show downloads from terminated employee account",insider_threat,high
+"Production server CPU at 100% due to process spawning infinite child processes",resource_exhaustion,medium
+"Phishing campaign targeting C-level executives with fake board meeting invites",spear_phishing,high
+"Network traffic analysis revealed data being sent to known malicious IP",malware,high
+"User reported popup claiming computer infected and providing fake tech support number",scareware,low
+"API experiencing unusual traffic pattern suggesting credential stuffing attack",credential_stuffing,medium
+"Discovered keylogger software on CFO's computer during routine maintenance",malware,high
+"Email quarantine caught message with malicious macro-enabled document",malware,medium
+"Physical security breach: unauthorized person tailgated into server room",physical_security,high
+"DNS logs show multiple lookups to newly registered suspicious domains",DNS_hijacking,medium
+"Employee fell for tech support scam and gave remote access to their computer",social_engineering,high
+"Backup system not running for past week due to ransomware encryption",ransomware,high
+"Marketing email platform account sending phishing emails to customer list",account_compromise,high
+"Detected modification of critical system files without authorization",rootkit,high
+"Customer support tickets system defaced with political messages",website_defacement,medium
+"Load balancer logs show traffic pattern consistent with slowloris attack",DDoS,medium
+"Financial application showing signs of form jacking code injection",web_skimming,high
+"Suspicious PowerShell commands executed on multiple domain computers",fileless_malware,high
+"Third-party vendor breach exposed our customer email addresses",supply_chain,medium
+"Employee reported receiving USB drive in mail claiming to contain invoice",malware,medium
+"Mobile device management detected jailbroken device accessing corporate email",policy_violation,low
+"Web application firewall blocked multiple XSS attempts on customer portal",XSS,medium
+"Unusual pattern of password reset requests for executive accounts",account_takeover,high
+"Network segment showing signs of lateral movement after initial compromise",APT,high
+"Public S3 bucket found containing sensitive internal documents",misconfiguration,high
+"Employee reported voice phishing call asking for VPN credentials",vishing,medium
+"Detected unauthorized wireless device performing man-in-the-middle attack",MITM,high
+"System logs show someone attempted to disable antivirus on multiple machines",malware,medium
+"Fake LinkedIn profile impersonating CEO sending connection requests",social_engineering,low
+"Database backup files found exposed on public file sharing service",data_exposure,high
+"Network printer accessed remotely and printing threatening messages",unauthorized_access,low
+"Suspicious Chrome extension stealing cookies and session tokens detected",session_hijacking,high
+"Email gateway detected business email compromise attempt on vendor payment",BEC,high
+"Temperature sensors in server room manipulated causing HVAC failure",physical_security,medium
+"Discovered rogue DHCP server on network assigning malicious DNS servers",rogue_device,high
+"Application logs show LDAP injection attempts on authentication system",LDAP_injection,medium
+"Employee laptop camera activated without user knowledge or consent",spyware,medium
+"Detected cryptocurrency wallet addresses replaced in clipboard by malware",clipboard_hijacking,medium
+"Office 365 account sending phishing emails after credential compromise",account_compromise,high
+"Network traffic shows beaconing behavior to command and control server",malware,high
+"Discovered credit card skimmer on e-commerce checkout page",web_skimming,high
+"Building access card cloned and used for unauthorized entry",physical_security,medium
+"Suspicious process injection detected in legitimate Windows processes",process_injection,high
+"Employee reported deepfake video call impersonating company executive",deepfake,high
+"Cloud storage bucket permissions changed to public without authorization",misconfiguration,high
+"Detected attempts to exploit recently disclosed zero-day vulnerability",zero_day,high
+"Malicious QR code posted in break room leading to credential harvesting site",phishing,medium
+"Network shares encrypted with ransom note demanding cryptocurrency payment",ransomware,high
+"IoT security camera in office streaming to unauthorized external server",IoT_compromise,medium
+"Discovered backdoor account in critical production application",backdoor,high
+"SMS phishing campaign targeting employees with fake IT security alerts",smishing,medium
+"Unauthorized modification of DNS records pointing to attacker infrastructure",DNS_hijacking,high
+"Employee reported blackmail attempt using stolen personal information",extortion,high
+"Detected watering hole attack on industry news website frequently visited",watering_hole,medium
+"Suspicious registry modifications detected across multiple workstations",malware,medium
+"Fake security update popup installed remote access trojan on user machine",trojan,high
+"API key exposed in public GitHub repository being actively exploited",secret_exposure,high
+"Network forensics revealed data staging in preparation for exfiltration",data_theft,high
+"Employee badge used to access building during non-business hours",insider_threat,medium
+"Detected attempts to bypass web application firewall using encoding tricks",WAF_bypass,medium
+"Malicious browser redirect sending users to tech support scam page",browser_hijack,low
+"Supply chain partner system compromise led to malware in software update",supply_chain,high
+"Discovered listening device in executive conference room",physical_security,high
+"Email impersonation attack targeting accounts payable for wire transfer",BEC,high
+"Detected living-off-the-land attack using legitimate Windows tools",fileless_malware,high
+"Customer reported SIM swapping attack to bypass two-factor authentication",SIM_swapping,high
+"Malicious insider downloaded entire customer database before resignation",insider_threat,high
+"DDoS attack using IoT botnet causing website outage during sales event",DDoS,high
+"Discovered formjacking code on payment processing page stealing card data",formjacking,high
+"Security researcher reported vulnerability in our mobile application",vulnerability_disclosure,medium
+"Detected cryptomining malware using 90% of server resources",cryptojacking,medium
+"Fake browser update popup delivered banking trojan to accounting department",trojan,high
+"Received email with PDF attachment containing embedded malicious JavaScript",malware,medium
+"Login page clone detected on typosquatted domain targeting our users",phishing,high
+"Firewall detected port scanning activity from internal network segment",reconnaissance,low
+"Customer service rep reported caller trying to extract customer information",social_engineering,medium
+"Unexpected spike in API calls suggesting automated data scraping attempt",data_scraping,low
+"Security audit found hardcoded credentials in production application code",vulnerability,high
+"Employee workstation infected with adware displaying inappropriate content",adware,low
+"Detected buffer overflow attempt on web server application",exploit,high
+"Unusual file encryption activity detected on shared network drive",ransomware,high
+"Company Twitter account posting spam links after password compromise",account_compromise,medium
+"Malicious macro in Excel file attempting to download additional payloads",malware,medium
+"VoIP system showing signs of toll fraud with calls to premium numbers",toll_fraud,medium
+"Database logs show attempt to extract data using blind SQL injection",SQL_injection,high
+"Employee reported suspicious person photographing security badge at cafe",physical_security,low
+"Detected rootkit hiding malicious processes from security software",rootkit,high
+"Phishing site discovered mimicking our customer login portal exactly",phishing,high
+"Network traffic to known cryptomining pools from multiple workstations",cryptojacking,medium
+"Executive assistant received spear phishing email about fake acquisition",spear_phishing,high
+"Vulnerability scanner detected unpatched Apache Struts on web server",vulnerability,high
+"Strange entries in Windows Event Log suggesting system compromise",malware,medium
+"Customer reported receiving our company emails with altered payment details",email_spoofing,high
+"Discovered unauthorized VPN connection from decommissioned user account",unauthorized_access,medium
+"Website contact form being used to send spam messages to users",spam,low
+"Memory analysis revealed fileless malware residing only in RAM",fileless_malware,high
+"Employee fell victim to romance scam revealing company information",social_engineering,medium
+"Detected XML external entity (XXE) injection attempt on API endpoint",XXE,medium
+"Security camera footage shows someone installing device on network port",physical_security,high
+"Antivirus quarantined cryptocurrency miner disguised as system update",cryptojacking,medium
+"Log correlation detected possible advanced persistent threat activity",APT,high
+"User reported browser homepage changed to malicious search engine",browser_hijack,low
+"Discovered exposed .git directory on production web server",misconfiguration,medium
+"SMS messages sent from company number without authorization",smishing,medium
+"Detected attempt to register domain similar to company name for fraud",typosquatting,medium
+"Employee reported USB keyboard behaving strangely, possible keylogger",hardware_keylogger,high
+"Cloud infrastructure billing shows resources in regions we don't use",cloud_compromise,high
+"Malware analysis revealed info stealer targeting browser saved passwords",password_stealer,high
+"Physical letter received with QR code leading to phishing website",phishing,low
+"Network IDS detected shellcode execution attempt from web application",exploit,high
+"Discovered Bitcoin wallet address in ransomware note on encrypted server",ransomware,high
+"Employee reported receiving package with malicious USB device inside",malware,medium
+"Detected cross-site request forgery attempt on admin panel",CSRF,medium
+"Security logs show PowerShell Empire framework indicators",APT,high
+"Customer data offered for sale on criminal forum matches our records",data_breach,high
+"Wireless network showing signs of WPA2 KRACK vulnerability exploitation",wireless_attack,medium
+"Employee reported fake recruiter asking about company security measures",social_engineering,medium
+"Detected malicious redirect chain leading to exploit kit landing page",exploit_kit,high
+"Office printer displaying ransom message and refusing to print",ransomware,low
+"Analysis shows supply chain attack through compromised npm package",supply_chain,high
+"User account locked after multiple login attempts with leaked passwords",credential_stuffing,medium
+"Discovered backdoored version of legitimate software on file server",trojan,high
+"Email analysis revealed conversation hijacking in ongoing thread",BEC,high
+"Network segment isolated after detecting Emotet malware infection",malware,high
+"Physical security report: lock on server room door tampered with",physical_security,high
+"Detected domain generation algorithm (DGA) activity from infected host",malware,high
+"Employee reported extortion email with personal photos attached",sextortion,medium
+"Web server logs show attempt to upload web shell through file upload",web_shell,high
+"Discovered rogue wireless access point in executive floor conference room",rogue_device,high
+"API logs show enumeration attempt on user email addresses",reconnaissance,low
+"Detected attempt to exploit Heartbleed vulnerability on old server",exploit,medium
+"Employee received USB fan as promotional gift containing malware",malware,medium
+"Network traffic shows TOR usage from accounting department computer",suspicious_activity,low
+"Discovered iframe injection on company blog serving malvertising",malvertising,medium
+"Security token theft detected through phishing site with valid SSL cert",phishing,high
+"Database query logs show union-based SQL injection successful attempt",SQL_injection,high
+"Employee reported tailgating attempt at secure facility entrance",physical_security,medium
+"Detected Mimikatz credential dumping tool execution on domain controller",credential_theft,high
+"Fake invoice email with macro-enabled Word document in attachment",malware,medium
+"Log analysis revealed privilege escalation using Windows UAC bypass",privilege_escalation,high
+"Customer reported account takeover after clicking email link",account_takeover,high
+"Discovered cryptominer installed through vulnerable WordPress plugin",cryptojacking,medium
+"Network probe detected from IP address registered to competitor",reconnaissance,low
+"Employee laptop showing signs of MBR (Master Boot Record) modification",bootkit,high
+"Phishing email using homograph attack with Cyrillic characters in URL",phishing,medium
+"Detected attempt to exfiltrate data through DNS tunneling technique",data_exfiltration,high
+"Security audit found default credentials on IoT devices in network",misconfiguration,medium
+"User reported fake antivirus software demanding payment for removal",scareware,low
+"Email server logs show attempt to relay spam through our domain",spam_relay,medium
+"Discovered logic bomb in code repository set to trigger on specific date",logic_bomb,high
+"Network traffic analysis shows command injection attempt on web form",command_injection,high
+"Employee badge cloning attempt detected by physical access control system",physical_security,medium
+"Malware sandbox analysis revealed VM evasion techniques in sample",malware,medium
+"Detected watering hole on vendor website we frequently access",watering_hole,high
+"User reported screen recording software installed without consent",spyware,high
+"API showing signs of race condition exploitation for duplicate transactions",race_condition,medium
+"Discovered exposed Elasticsearch cluster with customer data",misconfiguration,high
+"Employee reported vishing call requesting wire transfer authorization",vishing,high
+"Network logs show SMB relay attack attempt on file server",relay_attack,high
+"Detected malicious Office 365 OAuth app with excessive permissions",OAuth_abuse,high
+"Security camera tampered with adhesive spray blocking view",physical_security,low
+"User workstation showing signs of coin miner using GPU resources",cryptojacking,medium
+"Discovered subdomain takeover vulnerability being actively exploited",subdomain_takeover,medium
+"Email gateway blocked executable disguised with double extension",malware,medium
+"Detected BlueKeep vulnerability exploitation attempt on RDP service",exploit,high
+"Employee reported deepfake audio call impersonating CEO requesting funds",deepfake,high
+"Log analysis shows successful directory traversal attack on web server",path_traversal,medium
+"Discovered malicious browser extension exfiltrating form data",form_grabber,high
+"Network monitoring detected covert channel using ICMP packets",covert_channel,medium
+"User reported ransomware countdown timer on desktop background",ransomware,high
+"Detected attempt to poison machine learning training data",ML_poisoning,medium
+"Physical security: unauthorized drone spotted near data center",physical_security,low
+"Email containing shortened URL redirecting through multiple domains",phishing,medium
+"Discovered web cache poisoning attack affecting multiple users",cache_poisoning,medium
+"Employee reported Bluetooth skimming device found on ATM in lobby",skimming,high
+"Network traffic shows exploit attempt for ProxyLogon vulnerability",exploit,high
+"Detected malicious use of living-off-the-land binaries (LOLBins)",fileless_malware,medium
+"User account showing impossible travel login from two continents",account_compromise,high
+"Discovered typosquatted package in internal package repository",supply_chain,high
+"Security logs show attempt to dump LSASS process memory",credential_theft,high
+"Customer reported voice deepfake used in fraudulent support call",deepfake,high
+"Detected server-side request forgery attempt on cloud metadata service",SSRF,high
+"Employee reported finding hidden camera in office meeting room",physical_security,high
+"Network scan revealed Shadow IT cloud services storing company data",shadow_IT,medium
+"Malware using DNS over HTTPS to evade network monitoring",malware,medium
+"Discovered insider threat indicators in user behavior analytics",insider_threat,high
+"Email server showing signs of being used as command and control",C2,high
+"Detected attempt to exploit Java deserialization vulnerability",deserialization,high
+"User reported cursor moving on its own suggesting remote access",remote_access,high
+"Log files show successful LDAP pass-back attack on printer",LDAP_injection,medium
+"Discovered malicious QR code stickers placed over legitimate ones",phishing,low
+"Network traffic indicates data exfiltration via steganography in images",data_exfiltration,high
+"Employee reported business email requesting gift card purchases",BEC,medium
+"Detected Golden Ticket attack in Active Directory environment",kerberos_attack,high
+"Security assessment found exposed GraphQL endpoint leaking data",API_exposure,medium
+"User workstation infected with banking trojan targeting credentials",trojan,high
+"Discovered race condition in payment system allowing double spending",race_condition,high
+"Physical access logs show door held open beyond security threshold",physical_security,low
+"Email analysis revealed polymorphic malware evading signature detection",malware,high
+"Network monitoring detected cryptocurrency mining via browser scripts",cryptojacking,low
+"Employee reported receiving court summons phishing with malicious link",phishing,medium
+"Detected pass-the-hash attack moving laterally through network",lateral_movement,high
+"User reported fake Windows update screen locking computer for ransom",ransomware,high
+"API logs show GraphQL query attempting to extract entire database",API_abuse,high
+"Discovered supply chain compromise through malicious browser update",supply_chain,high
+"Security token found hardcoded in mobile application source code",secret_exposure,high
+"Network IDS detected exploit attempt for BlueKeep vulnerability",exploit,high
+"Employee reported USB charging station in airport installing malware",juice_jacking,medium
+"Email header analysis revealed sender spoofing executive email address",email_spoofing,high
+"Detected cryptographic downgrade attack on TLS connection",downgrade_attack,medium
+"User reported popup demanding payment to unlock encrypted files",ransomware,high
+"Log correlation shows signs of APT group TTPs (tactics, techniques)",APT,high
+"Discovered IDOR vulnerability allowing access to other users' data",IDOR,high
+"Physical security breach: server room door propped open overnight",physical_security,medium
+"Network traffic shows large ZIP file upload to personal cloud storage",data_exfiltration,high
+"Malware analysis revealed use of process hollowing technique",process_hollowing,high
+"Employee fell for fake software update installing remote access tool",trojan,high
+"Detected SQL truncation attack bypassing input validation",SQL_injection,medium
+"User reported Slack account posting cryptocurrency scams",account_compromise,medium
+"Security scan found Spring4Shell vulnerability on application server",vulnerability,high
+"Discovered evil twin WiFi access point in company cafeteria",rogue_device,medium
+"Email gateway caught spear phishing with malicious ISO file attachment",spear_phishing,high
+"Network logs show successful LLMNR poisoning attack",LLMNR_poisoning,medium
+"Employee reported finding GPS tracker on company vehicle",physical_security,medium
+"Detected attempt to exploit OGNL injection in Apache Struts",exploit,high
+"User workstation showing signs of bootkit infection persisting after reboot",bootkit,high
+"API rate limiting bypassed using distributed bot network",bot_attack,medium
+"Discovered cleartext passwords in application configuration files",misconfiguration,high
+"Security audit revealed VPN credentials shared in plain text email",credential_exposure,medium
+"Network monitoring detected domain fronting hiding C2 traffic",C2,high
+"Employee reported fake charity website using company branding",brand_abuse,low
+"Detected privilege escalation using DLL hijacking technique",privilege_escalation,medium
+"Customer data found in publicly accessible Kibana dashboard",data_exposure,high
+"User reported browser extensions disabled by malware infection",malware,medium
+"Email containing homograph domain targeting accounting department",phishing,high
+"Network scan detected EternalBlue exploitation attempt",exploit,high
+"Physical security: motion sensor triggered in restricted area after hours",physical_security,medium
+"Discovered container escape attempt in Kubernetes cluster",container_escape,high
+"Employee reported receiving black mail with old password in subject",extortion,medium
+"Log analysis shows XXE attack successfully reading system files",XXE,high
+"Detected DNS rebinding attack attempting to access internal services",DNS_rebinding,medium
+"User account created with admin privileges by unauthorized process",privilege_escalation,high
+"Security review found JWT tokens without expiration in API",vulnerability,medium
+"Network traffic shows file upload to known malware analysis site",suspicious_activity,low
+"Employee reported laser printer printing random binary data",malware,low
+"Discovered BGP hijacking affecting company IP address space",BGP_hijacking,high
+"Email server logs show attempt to exploit ProxyShell vulnerability",exploit,high
+"User reported cursor jacking on banking website",clickjacking,medium
+"Detected use of Cobalt Strike beacon on compromised endpoint",C2,high
+"Security camera showed unauthorized person in dumpster diving",physical_security,low
+"API logs reveal timing attack attempting to enumerate valid users",timing_attack,low
+"Discovered local file inclusion vulnerability in web application",LFI,medium
+"Network monitoring detected TOR hidden service running on workstation",suspicious_activity,medium
+"Employee reported job scam email requesting personal information",phishing,medium
+"Malware using DGA (Domain Generation Algorithm) for C2 communication",malware,high
+"Detected attempt to exploit PHP object injection vulnerability",object_injection,high
+"User reported system restore points deleted by ransomware",ransomware,high
+"Security logs show UAC bypass using fodhelper.exe",privilege_escalation,medium
+"Discovered MongoDB instance exposed without authentication",misconfiguration,high
+"Physical breach: cleaning staff reported finding listening device",physical_security,high
+"Network traffic analysis revealed HTTPS certificate pinning bypass",MITM,high
+"Employee fell for tech support scam allowing remote desktop access",social_engineering,high
+"Detected webshell uploaded through unrestricted file upload",web_shell,high
+"Email containing punycode domain impersonating company site",phishing,medium
+"User workstation showing signs of fileless PowerShell malware",fileless_malware,high
+"API showing signs of broken object level authorization",API_abuse,high
+"Discovered Samsung SmartTV in boardroom connecting to unknown server",IoT_compromise,medium
+"Security assessment found RCE through unsafe deserialization",deserialization,high
+"Network logs show ARP spoofing attack on local subnet",ARP_spoofing,medium
+"Employee reported QR code in bathroom leading to malicious site",phishing,low
+"Detected attempt to exploit log4shell vulnerability in Java app",exploit,high
+"User reported fake browser warning about expired antivirus",scareware,low
+"Email gateway blocked ZIP file with LNK file bypassing policies",malware,medium
+"Network monitoring shows beacon traffic to Pastebin C2",C2,medium
+"Physical security: badge reader showing signs of tampering",physical_security,medium
+"Discovered prototype pollution vulnerability in Node.js application",prototype_pollution,medium
+"Employee reported vishing caller had internal knowledge of projects",vishing,high
+"Log analysis revealed successful NoSQL injection extracting user data",NoSQL_injection,high
+"Detected DarkSide ransomware indicators on critical infrastructure",ransomware,high
+"User account locked after credential stuffing attack attempt",credential_stuffing,medium
+"Security scan found Shellshock vulnerability on legacy system",vulnerability,high
+"Network traffic shows HTTP parameter pollution attack attempt",HPP,low
+"Employee reported finding rogue Raspberry Pi connected to network",rogue_device,high
+"Email header injection attempt detected in contact form",email_injection,low
+"Discovered AWS S3 bucket with public write permissions",misconfiguration,high
+"User reported advertisement popup covering entire screen",adware,low
+"Detected Silver Ticket attack on Kerberos authentication",kerberos_attack,high
+"Security logs show scheduled task creation for persistence",persistence,medium
+"Network monitoring revealed SSL stripping attack in progress",SSL_stripping,high
+"Employee reported deepfake LinkedIn profile using their photo",identity_theft,medium
+"API logs show attempt to bypass rate limiting using cache poisoning",cache_poisoning,medium
+"Discovered XSLeak attack attempting to extract sensitive data",XSLeak,medium
+"Physical security: visitor log shows entry without corresponding exit",physical_security,low
+"User workstation compromised with Agent Tesla information stealer",malware,high
+"Email containing Microsoft Office document with CVE-2017-0199 exploit",exploit,high
+"Network scan detected SMBGhost vulnerability exploitation attempt",exploit,high
+"Employee reported finding hardware keylogger on keyboard cable",hardware_keylogger,high
+"Detected DOM-based XSS vulnerability being actively exploited",XSS,medium
+"Security assessment revealed CORS misconfiguration exposing API",misconfiguration,medium
+"User reported system running slowly with unknown process using CPU",cryptojacking,medium
+"Log files show successful blind XXE attack exfiltrating data",XXE,high
+"Discovered npm package typosquatting popular library name",supply_chain,medium
+"Network traffic indicates DNS cache poisoning attack",DNS_poisoning,high
+"Employee reported caller claiming to be from Microsoft support",social_engineering,low
+"Malware analysis shows use of Heaven's Gate technique",malware,medium
+"Detected WebDAV vulnerability exploitation on IIS server",exploit,medium
+"User account showing signs of session fixation attack",session_fixation,medium
+"API endpoint vulnerable to HTTP request smuggling",request_smuggling,high
+"Physical security: tailgating detected at employee entrance",physical_security,low
+"Email server logs show backscatter from spoofed email campaign",email_spoofing,medium
+"Network monitoring detected Fast Flux DNS for C2 infrastructure",C2,high
+"Employee reported finding USB drop in parking lot labeled 'Payroll'",social_engineering,medium
+"Detected Zeus banking trojan communication with C2 server",trojan,high
+"Security scan revealed Drupalgeddon vulnerability on CMS",vulnerability,high
+"User reported browser redirecting to fake virus warning page",browser_hijack,low
+"Log analysis shows timing attack on password reset function",timing_attack,medium
+"Discovered Firebase database exposed without authentication",misconfiguration,high
+"Network IDS detected buffer overflow exploit attempt",exploit,high
+"Employee reported smishing text about package delivery with link",smishing,medium
+"Email containing COVID-19 themed phishing with malicious attachment",phishing,medium
+"Detected pass-the-ticket attack in Active Directory",kerberos_attack,high
+"User workstation infected with Raccoon information stealer",malware,high
+"API logs show IDOR vulnerability exploitation accessing user records",IDOR,high
+"Physical security: server room temperature alarm triggered",physical_security,low
+"Network traffic shows ICMP tunnel used for data exfiltration",covert_channel,high
+"Employee reported finding AirTag in company vehicle",physical_security,medium
+"Discovered XSS vulnerability in third-party JavaScript library",XSS,medium
+"Security audit found weak password reset token generation",vulnerability,medium
+"User reported fake SSL certificate warning when accessing bank site",MITM,high
+"Detected DLL side-loading used to execute malicious code",dll_sideloading,medium
+"Email gateway caught business email with spoofed display name",BEC,high
+"Network logs show rainbow table attack on password hashes",password_attack,medium
+"Employee laptop showing signs of UEFI rootkit infection",rootkit,high
+"API showing excessive data exposure in error messages",information_disclosure,low
+"Discovered open redirect vulnerability used in phishing campaign",open_redirect,medium
+"User reported screen lock bypass using bootable USB",physical_security,medium
+"Log files indicate successful cache poisoning via HTTP headers",cache_poisoning,medium
+"Network monitoring detected botnet C2 communication via IRC",botnet,high
+"Employee reported extortion email with compromising webcam footage claim",sextortion,medium
+"Detected attempt to exploit Apache log4j vulnerability",exploit,high
+"Security scan found unencrypted backup files on web server",data_exposure,high
+"User workstation showing signs of formbook malware infection",malware,high
+"Email containing fake shipping notification with tracking link",phishing,medium
+"Network traffic analysis shows VPN bypass attempt",VPN_bypass,medium
+"Physical security: lock picking tools found near server room",physical_security,high
+"Discovered JWT token manipulation allowing privilege escalation",JWT_abuse,high
+"Employee reported Bluetooth beacon tracking in office area",privacy_violation,low
+"Log analysis revealed RFI (Remote File Inclusion) attack success",RFI,high
+"Detected Golden SAML attack on federated authentication",SAML_attack,high
+"User reported popup claiming iPhone won in contest",scareware,low
+"API logs show broken function level authorization exploitation",API_abuse,high
+"Network scan detected PrintNightmare vulnerability on print server",vulnerability,high
+"Employee fell for romance scam sharing confidential project details",social_engineering,high
+"Email server showing signs of outbound spam campaign",spam,medium
+"Discovered container breakout using kernel vulnerability",container_escape,high
+"Security assessment found IDN homograph in email gateway whitelist",phishing,medium
+"User workstation compromised with Qakbot banking malware",trojan,high
+"Network monitoring shows unauthorized SNMP queries from external IP",reconnaissance,low
+"Employee reported finding credit card skimmer on cafeteria POS",skimming,high
+"Detected clickjacking attack using invisible iframe overlay",clickjacking,medium
+"Physical security: motion sensors offline in critical areas",physical_security,medium
+"Log files show successful command injection via image EXIF data",command_injection,high
+"Email containing fake LinkedIn connection request with malware",social_engineering,medium
+"Network traffic indicates SYN flood attack on web servers",DDoS,high
+"User reported system files encrypted with .locked extension",ransomware,high
+"API endpoint leaking internal server paths in responses",information_disclosure,low
+"Discovered TeamViewer installed without IT approval on workstation",shadow_IT,medium
+"Security scan revealed multiple WordPress plugins with vulnerabilities",vulnerability,medium
+"Employee reported caller requesting employee directory information",social_engineering,low
+"Malware sandbox detected VM-aware evasion techniques",malware,medium
+"Network logs show DNS query for known sinkhole domain",malware,low
+"User account compromise led to internal spear phishing campaign",account_compromise,high
+"Detected binary padding used to evade antivirus detection",malware,medium
+"Email gateway blocked executable with PDF icon and extension",malware,medium
+"Physical security: RFID cloning device found in visitor area",physical_security,high
+"Network monitoring shows TLS callback hiding malicious code",malware,high
+"Employee reported SMS about account suspension with link",smishing,medium
+"Log analysis revealed MongoDB injection extracting collections",NoSQL_injection,high
+"Discovered BGP route leak affecting company services",BGP_leak,medium
+"User reported cursor replaced with custom image hiding clicks",clickjacking,low
+"API showing signs of excessive data exposure through GraphQL",API_exposure,medium
+"Security assessment found SSI (Server Side Includes) injection",SSI_injection,medium
+"Network traffic shows IRC botnet command and control",botnet,high
+"Employee laptop infected after visiting compromised industry site",watering_hole,high
+"Email containing DocuSign themed phishing with credential harvester",phishing,high
+"Detected Kerberoasting attack harvesting service account hashes",kerberos_attack,high
+"User workstation showing Cobalt Strike beacon persistence",APT,high
+"Physical security: pressure mat alarm triggered in restricted zone",physical_security,low
+"Network scan revealed Java RMI service with known vulnerability",vulnerability,medium
+"Employee reported vishing call about IT audit requiring passwords",vishing,high
+"Discovered terraform state file exposed in public repository",secret_exposure,high
+"Security logs show WMI used for lateral movement",lateral_movement,high
+"User reported fake McAfee popup demanding renewal payment",scareware,low
+"API logs reveal race condition in voucher redemption system",race_condition,high
+"Network monitoring detected double-flux hosting for phishing",phishing,high
+"Email server configuration allows open relay from internal network",misconfiguration,medium
+"Employee reported finding hidden WiFi pineapple device",rogue_device,high
+"Malware using stolen code signing certificate to appear legitimate",malware,high
+"Detected CSRF token prediction attack on web application",CSRF,medium
+"User account showing impossible travel between login locations",account_compromise,high
+"Log files indicate successful XPATH injection attack",XPATH_injection,medium
+"Physical security: unauthorized access attempt using cloned badge",physical_security,high
+"Network traffic shows exploit kit redirection chain",exploit_kit,high
+"Employee fell for fake HR email about policy updates",phishing,medium
+"Discovered insecure direct object reference in file download",IDOR,medium
+"Security scan found Apache Tomcat manager with default credentials",misconfiguration,high
+"User reported browser homepage changed to Russian search engine",browser_hijack,low
+"API endpoint vulnerable to verb tampering attack",API_abuse,low
+"Network logs show NBNS spoofing attack on Windows network",NBNS_spoofing,medium
+"Email containing ransomware disguised as resume attachment",ransomware,high
+"Detected DCShadow attack creating rogue domain controller",AD_attack,high
+"Employee reported drone with camera hovering near office windows",physical_security,medium
+"Web application firewall bypassed using HTTP parameter fragmentation",WAF_bypass,medium
+"User workstation compromised with Emotet malware dropper",malware,high
+"Security assessment revealed session puzzling vulnerability",session_puzzling,medium
+"Network monitoring shows covert data exfiltration via DNS",data_exfiltration,high
+"Employee reported finding GPS tracker on personal vehicle",physical_security,high
+"Log analysis shows successful HTTP response splitting attack",response_splitting,medium
+"Email gateway detected homoglyph attack using Unicode characters",phishing,medium
+"Discovered kubernetes dashboard exposed without authentication",misconfiguration,high
+"User reported system restore disabled by unknown process",malware,medium
+"API logs show attempt to exploit mass assignment vulnerability",mass_assignment,medium
+"Physical security: glass break sensor triggered in server room",physical_security,high
+"Network traffic indicates LDAP reconnaissance from compromised host",reconnaissance,medium
+"Employee received USB device in mail claiming to be from vendor",social_engineering,medium
+"Detected process injection using SetWindowsHookEx technique",process_injection,high
+"Security scan revealed Citrix NetScaler vulnerability",vulnerability,high
+"User account locked after brute force attack from botnet",brute_force,medium
+"Email containing fake FedEx delivery notification with link",phishing,medium
+"Network logs show successful relay attack on NTLM authentication",relay_attack,high
+"Employee reported shoulder surfing attempt at ATM machine",physical_security,low
+"Malware analysis revealed use of steganography in image files",malware,medium
+"Discovered webpack source map exposing application source code",information_disclosure,medium
+"User reported fake Java update popup installing adware",adware,low
+"API endpoint vulnerable to XML injection attack",XML_injection,medium
+"Network monitoring detected BGP prefix hijacking attempt",BGP_hijacking,high
+"Email server logs show header injection in contact form",email_injection,low
+"Physical security: tailgating attempt blocked by mantrap system",physical_security,low
+"Log files show successful business logic bypass in payment flow",logic_flaw,high
+"Employee fell for spear phishing about bonus payments",spear_phishing,high
+"Detected use of PSExec for unauthorized remote execution",lateral_movement,high
+"Security assessment found formula injection in CSV export",formula_injection,medium
+"User workstation showing signs of crypto-ransomware infection",ransomware,high
+"Network traffic shows command injection via user agent string",command_injection,medium
+"Employee reported finding Rubber Ducky USB in parking lot",malware,medium
+"Email containing SharePoint themed phishing for Office 365 creds",phishing,high
+"Discovered ElasticSearch instance with ransomware note",ransomware,high
+"User reported system running bitcoin miner after visiting website",cryptojacking,medium
+"API logs reveal server side request forgery to AWS metadata",SSRF,high
+"Physical security: vibration sensor triggered on server rack",physical_security,low
+"Network scan detected multiple systems with MS17-010 vulnerability",vulnerability,high
+"Employee reported vishing call about wire transfer verification",vishing,high
+"Malware using DLL search order hijacking for persistence",dll_hijacking,medium
+"Log analysis shows successful blind SQL injection data extraction",SQL_injection,high
+"Email gateway caught typosquatting domain in sender address",typosquatting,medium
+"User account compromise through password reuse from breach",credential_stuffing,high
+"Security logs show token impersonation for privilege escalation",privilege_escalation,high
+"Network monitoring detected HTTPS inspection bypass attempt",SSL_bypass,medium
+"Employee reported finding keylogger hardware in keyboard",hardware_keylogger,high
+"Discovered Git repository with AWS keys in commit history",secret_exposure,high
+"Web application showing signs of session donation attack",session_fixation,medium
+"User reported cursor moving to click on hidden elements",clickjacking,medium
+"API endpoint exposing stacktrace with database credentials",information_disclosure,high
+"Physical security: unauthorized person caught on CCTV in IT area",physical_security,medium
+"Network traffic shows SSRF attack chain to internal services",SSRF,high
+"Employee fell for fake parking violation email with malware",phishing,medium
+"Detected DCSync attack dumping Active Directory database",AD_attack,high
+"Security scan found Redis instance exposed without password",misconfiguration,high
+"User workstation infected with Dridex banking trojan",trojan,high
+"Email containing COVID vaccine appointment phishing",phishing,medium
+"Network logs show ARP cache poisoning on corporate subnet",ARP_poisoning,medium
+"Employee reported laser microphone pointed at conference room",physical_security,high
+"Log files indicate XPath injection in search functionality",XPATH_injection,medium
+"Discovered subdomain pointing to attacker-controlled server",subdomain_takeover,high
+"User reported fake Chrome update notification on website",malvertising,medium
+"API logs show authorization bypass through parameter pollution",API_abuse,medium
+"Network monitoring shows fast-flux DNS hosting malware",malware,high
+"Email server sending bounce messages to forged sender addresses",backscatter,low
+"Physical security: door sensor bypassed with magnet",physical_security,medium
+"Malware analysis revealed rootkit using DKOM technique",rootkit,high
+"Employee reported smishing about two-factor authentication setup",smishing,high
+"Detected Golden Ticket persistence in Active Directory",kerberos_attack,high
+"Security assessment found CRLF injection in HTTP headers",CRLF_injection,low
+"User account created through race condition in registration",race_condition,medium
+"Network scan revealed multiple IoT devices with default passwords",IoT_compromise,high
+"Email containing fake Zoom meeting invite with malicious link",phishing,medium
+"Log analysis shows successful cache deception attack",cache_deception,medium
+"Employee laptop showing signs of bootkit malware infection",bootkit,high
+"API endpoint leaking user emails through verbose errors",information_disclosure,medium
+"Physical security: HVAC system accessed remotely by unauthorized user",physical_security,high
+"Network traffic indicates data exfiltration to cloud storage",data_exfiltration,high
+"User reported popup claiming computer infected with viruses",scareware,low
+"Discovered Magento credit card skimmer on checkout page",web_skimming,high
+"Security logs show rundll32 used to execute malicious DLL",malware,medium
+"Employee fell for BEC scam attempting to change payroll deposit",BEC,high
+"Email gateway detected executable with right-to-left override",malware,medium
+"Network monitoring shows DNS tunneling for C2 communication",C2,high
+"User workstation compromised with RedLine information stealer",malware,high
+"API logs reveal GraphQL introspection exposing schema",API_exposure,low
+"Physical security: cleaning crew reported finding listening device",physical_security,high
+"Log files show successful stored XSS attack on forum",XSS,medium
+"Employee reported vishing call about suspended account",vishing,medium
+"Detected skeleton key malware on domain controller",malware,high
+"Security scan found Jupyter notebook with no authentication",misconfiguration,high
+"User reported system clock changed to bypass license check",tampering,low
+"Network traffic shows WebSocket used for reverse shell",reverse_shell,high
+"Email containing fake IRS tax refund notification",phishing,high
+"Discovered crypto wallet drainer on compromised website",cryptojacking,high
+"Employee reported finding hidden camera in changing room",physical_security,high
+"Malware using process doppelganging to evade detection",malware,high
+"Log analysis revealed successful LDAP injection attack",LDAP_injection,high
+"User account showing signs of password spraying attack",password_spraying,medium
+"API endpoint vulnerable to HTTP desync attack",request_smuggling,high
+"Physical security: badge reader offline allowing unrestricted access",physical_security,high
+"Network scan detected multiple systems with Log4j vulnerability",vulnerability,high
+"Employee fell for fake IT support call installing TeamViewer",social_engineering,high
+"Email server logs show attempt to exploit Postfix vulnerability",exploit,medium
+"User workstation showing Ryuk ransomware infection indicators",ransomware,high
+"Security assessment found prototype pollution in JavaScript",prototype_pollution,medium
+"Network monitoring detected DGA malware callouts",malware,high
+"Employee reported finding AirTag in laptop bag",physical_security,medium
+"Log files show successful HQL injection in Hibernate",HQL_injection,medium
+"Email containing OneDrive phishing with sharepoint lookalike",phishing,high
+"Discovered memcached server exposed and being used for DDoS",misconfiguration,medium
+"User reported browser extension changing cryptocurrency addresses",clipboard_hijacking,high
+"API logs show attempt to exploit GraphQL batching attack",API_abuse,medium
+"Physical security: fire suppression system triggered in server room",physical_security,low
+"Network traffic indicates NTLM relay attack in progress",relay_attack,high
+"Employee laptop infected through malicious ad on news site",malvertising,high
+"Detected attempt to abuse S3 bucket policy for data access",cloud_compromise,high
+"Security scan revealed multiple SQL injection points",SQL_injection,high
+"User account locked after impossible travel detection",account_compromise,high
+"Email gateway caught executable pretending to be PDF",malware,medium
+"Network logs show SMB brute force attack from internal IP",brute_force,medium
+"Employee reported tailgating attempt using food delivery disguise",physical_security,medium
+"Malware analysis shows use of reflective DLL injection",malware,high
+"Log analysis revealed successful expression language injection",EL_injection,high
+"User workstation compromised with BlackMatter ransomware",ransomware,high
+"API endpoint exposing PII through debug mode enabled",information_disclosure,high
+"Physical security: window sensor triggered in restricted area",physical_security,medium
+"Network monitoring shows TOR traffic from executive laptop",suspicious_activity,high
+"Email containing fake DocuSign request for W2 forms",phishing,high
+"Discovered Laravel debug mode exposing environment variables",misconfiguration,high
+"Employee fell for fake Microsoft license expiration email",phishing,medium
+"Security logs show mshta.exe downloading remote payload",malware,high
+"User reported fake payment page on legitimate looking domain",phishing,high
+"Network scan detected HeartBleed vulnerability on mail server",vulnerability,high
+"Employee reported drone dropping USB devices in parking lot",social_engineering,high
+"Log files indicate successful template injection attack",template_injection,high
+"Email server being used to send political propaganda",account_compromise,low
+"Detected DLL injection using SetWindowsHookEx",process_injection,medium
+"User workstation showing Conti ransomware precursor activity",ransomware,high
+"API logs show excessive data scraping violating rate limits",data_scraping,low
+"Physical security: someone attempted to jam door sensor",physical_security,medium
+"Network traffic shows ICMP redirect attack in progress",ICMP_redirect,medium
+"Employee reported finding hardware implant in network cable",hardware_implant,high
+"Malware using UAC bypass through eventvwr.exe",privilege_escalation,medium
+"Email containing sextortion threat with old password",sextortion,low
+"Discovered Kubernetes secrets exposed in container logs",secret_exposure,high
+"Security assessment found DOM clobbering vulnerability",DOM_clobbering,low
+"User reported system file associations changed by malware",malware,medium
+"Network monitoring detected DDoS amplification using CLDAP",DDoS,high
+"Employee fell victim to pig butchering cryptocurrency scam",social_engineering,high
+"Log analysis shows successful Server Side Request Forgery",SSRF,high
+"API endpoint vulnerable to replay attack on authentication",replay_attack,medium
+"Physical security: pressure sensor triggered under server floor",physical_security,low
+"Email gateway detected homograph attack on executive",phishing,high
+"User workstation infected with SystemBC proxy malware",malware,medium
+"Network scan revealed Apache Struts with RCE vulnerability",vulnerability,high
+"Employee reported blackmail using compromising browsing history",extortion,medium
+"Detected living off the land using certutil for downloads",fileless_malware,medium
+"Security logs show scheduled task created for persistence",persistence,medium
+"Email containing fake salary increase notification with link",phishing,medium
+"Discovered Docker API exposed without authentication",misconfiguration,high
+"User reported cursor automatically clicking on ads",clickjacking,low
+"Network traffic shows data exfiltration via Google Drive",data_exfiltration,medium
+"Employee laptop showing MBR overwritten with ransom message",ransomware,high
+"API logs reveal timing attack on 2FA verification",timing_attack,medium
+"Physical security: RF signal detector found transmitting device",physical_security,high
+"Malware analysis revealed VM detection evasion techniques",malware,medium
+"Log files show successful CSV injection attack",formula_injection,medium
+"Email server logs indicate compromised account sending spam",account_compromise,medium
+"User reported fake Windows Defender alert requesting payment",scareware,low
+"Network monitoring shows beaconing to Pastebin for commands",C2,medium
+"Employee fell for voice phishing claiming to be from bank",vishing,high
+"Detected attempt to exploit ProxyNotShell vulnerability",exploit,high
+"Security scan found world-writable files on web server",misconfiguration,medium
+"User workstation showing TrickBot infection indicators",trojan,high
+"Email containing Apple ID phishing with urgency tactics",phishing,medium
+"Network logs show successful DNS spoofing attack",DNS_spoofing,high
+"Employee reported someone filming computer screen with phone",physical_security,low
+"API endpoint leaking authorization tokens in URL",secret_exposure,high
+"Discovered supply chain attack through compromised update",supply_chain,high
+"User account showing brute force attempts from residential IPs",brute_force,medium
+"Physical security: lock on network closet cut with bolt cutters",physical_security,high
+"Log analysis revealed NoSQL injection in MongoDB query",NoSQL_injection,high
+"Email gateway caught PDF with embedded malicious JavaScript",malware,medium
+"Network traffic indicates lateral movement using WMI",lateral_movement,high
+"Employee reported finding USB keylogger on shared workstation",hardware_keylogger,high
+"Malware using Heaven's Gate technique to evade detection",malware,medium
+"Security assessment found race condition in authentication",race_condition,high
+"User reported ransomware countdown timer demanding Bitcoin",ransomware,high
+"API logs show GraphQL query depth attack attempting DoS",API_abuse,medium
+"Network monitoring detected cryptocurrency mining pool traffic",cryptojacking,medium
+"Email containing fake court summons with malicious attachment",phishing,medium
+"Physical security: motion activated camera found in air vent",physical_security,high
+"Detected Golden SAML attack on cloud authentication",SAML_attack,high
+"Employee fell for romance scam revealing company secrets",social_engineering,high
+"Log files show successful command injection via file upload",command_injection,high
+"User workstation compromised with Maze ransomware variant",ransomware,high
+"Security scan revealed exposed Prometheus metrics endpoint",information_disclosure,low
+"Network traffic shows MQTT broker exposed to internet",misconfiguration,medium
+"Email server configuration allowing subdomain spoofing",email_spoofing,medium
+"Employee reported receiving threatening messages demanding Bitcoin",extortion,medium
+"Discovered typosquatted NPM package in build pipeline",supply_chain,high
+"User reported fake antivirus performing unwanted system changes",scareware,medium
+"API endpoint vulnerable to authorization bypass via JWT",JWT_abuse,high
+"Physical security: RFID skimmer found on building entrance",physical_security,high
+"Network logs indicate successful buffer overflow exploitation",exploit,high
+"Malware analysis shows polymorphic code generation",malware,high
+"Email containing LinkedIn phishing for credential theft",phishing,medium
+"Detected DCSync attack attempting to replicate AD database",AD_attack,high
+"Employee laptop showing signs of BIOS level compromise",firmware_malware,high
+"Security logs show PowerShell downloading encoded payload",fileless_malware,high
+"User account compromised through session fixation attack",session_fixation,high
+"Network monitoring shows DNS exfiltration of sensitive data",data_exfiltration,high
+"Employee reported USB cable that logs keystrokes",hardware_keylogger,medium
+"Log analysis revealed successful blind XPath injection",XPATH_injection,high
+"Email gateway detected QR code leading to phishing site",phishing,medium
+"Discovered container escape using CVE-2019-5736",container_escape,high
+"User reported system displaying ransom note in multiple languages",ransomware,high
+"API logs show attempt to exploit insecure deserialization",deserialization,high
+"Physical security: authorized access used during unusual hours",insider_threat,medium
+"Network traffic indicates Command and Control via Twitter",C2,medium
+"Employee fell for fake job offer revealing internal information",social_engineering,medium
+"Malware using process hollowing to hide malicious code",process_hollowing,high
+"Security scan found GraphQL introspection enabled in production",API_exposure,low
+"Email containing weaponized Excel 4.0 macro",malware,high
+"User workstation infected with Sodinokibi ransomware",ransomware,high
+"Network logs show rainbow table attack on NTLM hashes",password_attack,high
+"Employee reported hidden microphone in conference phone",physical_security,high
+"Detected Skeleton Key attack on Active Directory",AD_attack,high
+"Log files indicate successful HTTP parameter pollution",HPP,medium
+"API endpoint exposing internal error messages with stack traces",information_disclosure,medium
+"User reported browser constantly redirecting to ad pages",browser_hijack,low
+"Physical security: infrared sensor detecting after-hours movement",physical_security,low
+"Network monitoring shows covert channel using DNS TXT records",covert_channel,medium
+"Email server logs show compromised account in email blast",account_compromise,high
+"Employee laptop displaying FBI ransomware lock screen",ransomware,medium
+"Security assessment revealed type confusion vulnerability",type_confusion,high
+"Discovered public Jenkins instance with no authentication",misconfiguration,high
+"User account locked after detection of password spray attack",password_spraying,medium
+"Network traffic shows successful MitM attack on HTTP traffic",MITM,high
+"Employee reported vishing call claiming account suspended",vishing,medium
+"Malware analysis shows anti-debugging techniques employed",malware,medium
+"Log analysis revealed successful ORM injection attack",ORM_injection,medium
+"Email containing DHL package phishing with tracking number",phishing,medium
+"Detected attempt to exploit Follina vulnerability in Office",exploit,high
+"User workstation showing Netwalker ransomware infection",ransomware,high
+"API logs show broken authentication allowing account takeover",API_abuse,high
+"Physical security: webcam LED activated without user action",spyware,medium
+"Network scan detected multiple printers with open admin panels",misconfiguration,medium
+"Employee fell for CEO fraud wire transfer request",BEC,high
+"Security logs show regsvr32 downloading remote script",malware,high
+"Email gateway caught homoglyph domain impersonating brand",typosquatting,medium
+"User reported system preventing access to security websites",malware,high
+"Network monitoring detected amplification attack using memcached",DDoS,high
+"Employee reported finding GPS tracker on company laptop bag",physical_security,medium
+"Discovered exposed AWS access keys in mobile app",secret_exposure,high
+"Log files show successful arbitrary file read via XXE",XXE,high
+"API endpoint vulnerable to mass assignment on user role",mass_assignment,high
+"User account showing authentication from TOR exit nodes",suspicious_activity,high
+"Physical security: glass break detector triggered after hours",physical_security,medium
+"Malware using DGA to generate C2 domains dynamically",malware,high
+"Email containing Google Drive phishing for corporate account",phishing,high
+"Network traffic indicates successful SSL pinning bypass",MITM,high
+"Employee laptop infected after watering hole attack",watering_hole,high
+"Security scan found Tomcat with exposed manager interface",misconfiguration,high
+"User workstation compromised with LockBit 2.0 ransomware",ransomware,high
+"Detected Pass-the-Hash attack moving through network",lateral_movement,high
+"Log analysis shows GraphQL nested query resource exhaustion",API_abuse,medium
+"Email server sending cryptocurrency investment scams",account_compromise,medium
+"Employee reported magic packet wake-on-LAN at 3 AM",suspicious_activity,low
+"Network logs reveal VLAN hopping attack attempt",VLAN_hopping,medium
+"Physical security: unauthorized drone near data center",physical_security,medium
+"API logs show authentication bypass using null byte",API_abuse,high
+"User reported fake Flash Player update installing malware",malware,medium
+"Discovered ZeroLogon vulnerability being actively exploited",exploit,high
+"Security assessment found path traversal in file download",path_traversal,high
+"Email containing Instagram phishing about account suspension",phishing,medium
+"Network monitoring shows beacon to residential IP as C2",C2,high
+"Employee fell for survey scam revealing personal information",social_engineering,low
+"Malware analysis revealed fileless persistence via WMI",fileless_malware,high
+"Log files indicate CRLF injection in log poisoning attack",log_poisoning,medium
+"User workstation showing Dharma ransomware encryption",ransomware,high
+"API endpoint leaking customer data through caching headers",cache_leak,medium
+"Physical security: someone cut fiber optic cable to building",physical_security,high
+"Network traffic shows successful relay attack on Kerberos",kerberos_attack,high
+"Email gateway detected macro-less malware using DDE",malware,high
+"Employee reported Bluetooth skimmer at building ATM",skimming,high
+"Detected living-off-the-land attack using msiexec",fileless_malware,medium
+"Security scan revealed Kubernetes API server exposed",misconfiguration,high
+"User account compromise leading to business email fraud",BEC,high
+"Network logs show data exfiltration via DNS A records",data_exfiltration,high
+"Employee laptop showing MBR ransomware preventing boot",ransomware,high
+"Log analysis revealed second order SQL injection",SQL_injection,high
+"Email containing Netflix phishing about payment problem",phishing,medium
+"API logs show JWT algorithm confusion vulnerability",JWT_abuse,high
+"Physical security: heat sensor shows server room intrusion",physical_security,medium
+"User reported cursor moving without input during banking",remote_access,high
+"Network monitoring detected reflection attack using NTP",DDoS,high
+"Employee fell for tech support scam via popup ad",social_engineering,medium
+"Malware using anti-VM techniques to avoid analysis",malware,medium
+"Security assessment found XML bomb in file upload",XXE,medium
+"Email server logs show lateral phishing from compromised account",account_compromise,high
+"User workstation infected with GandCrab ransomware",ransomware,high
+"Discovered hardcoded API keys in Android application",secret_exposure,high
+"Network traffic indicates HTTPS downgrade attack",downgrade_attack,high
+"Employee reported someone shoulder surfing password entry",physical_security,low
+"Log files show successful event log poisoning",log_poisoning,medium
+"API endpoint vulnerable to resource exhaustion attack",API_abuse,medium
+"Physical security: fake utility worker requesting server room access",social_engineering,high
+"Detected PrintNightmare exploit attempt on domain controller",exploit,high
+"Email containing PayPal phishing with urgent action required",phishing,high
+"User reported ransomware with cat pictures as wallpaper",ransomware,low
+"Network scan revealed RDP exposed with weak credentials",misconfiguration,high
+"Employee laptop showing cryptocurrency miner using GPU",cryptojacking,medium
+"Security logs indicate token replay attack successful",replay_attack,high
+"Malware analysis shows code injection via malicious DLL",dll_injection,high
+"Email gateway caught business email with lookalike domain",BEC,high
+"Network monitoring shows anomalous SMB traffic patterns",suspicious_activity,medium
+"Employee fell for sextortion email with password from breach",sextortion,low
+"Log analysis revealed successful cache poisoning attack",cache_poisoning,high
+"User workstation compromised with Clop ransomware",ransomware,high
+"API logs show GraphQL alias-based resource exhaustion",API_abuse,medium
+"Physical security: lockpicking marks found on server room door",physical_security,high
+"Discovered public Grafana dashboard showing infrastructure",information_disclosure,medium
+"Email containing UPS shipping notification with malware",phishing,medium
+"Network traffic shows successful BGP hijack of IP space",BGP_hijacking,high
+"Employee reported finding modified Ethernet cable with tap",hardware_implant,high
+"Security scan found multiple stored XSS vulnerabilities",XSS,high
+"User account showing concurrent sessions from different countries",account_compromise,high
+"Detected attempt to exploit PetitPotam vulnerability",exploit,high
+"Log files indicate OS command injection via user input",command_injection,high
+"Email server being used for cryptocurrency mining",cryptojacking,high
+"Network logs show successful cache deception attack",cache_deception,medium
+"Employee laptop infected through malicious browser extension",malware,medium
+"API endpoint exposing user sessions in response headers",session_exposure,high
+"Physical security: vibration detected on window after hours",physical_security,low
+"Malware using rootkit to hide network connections",rootkit,high
+"User reported fake virus scan demanding credit card",scareware,medium
+"Email containing Amazon phishing about suspended account",phishing,medium
+"Network monitoring detected data staging for exfiltration",data_theft,high
+"Employee fell for W-2 scam sending data to external email",social_engineering,high
+"Security assessment revealed insecure randomness in tokens",vulnerability,medium
+"User workstation showing WannaCry ransomware infection",ransomware,high
+"Log analysis shows successful union-based SQL injection",SQL_injection,high
+"API logs indicate excessive permissions in OAuth scope",OAuth_abuse,medium
+"Physical security: tamper seal broken on server cabinet",physical_security,medium
+"Network traffic shows C2 communication via cloud services",C2,high
+"Email gateway detected sender address spoofing CEO",email_spoofing,high
+"Employee reported laser listening device pointed at window",physical_security,high
+"Detected Golden Ticket attack with forged TGT",kerberos_attack,high
+"User account locked after distributed brute force attempt",brute_force,high
+"Discovered Shodan search revealing company infrastructure",reconnaissance,low
+"Network scan shows multiple MongoDB instances exposed",misconfiguration,high
+"Malware analysis revealed process migration techniques",malware,high
+"Email containing Microsoft Teams phishing for credentials",phishing,high
+"Security logs show successful DLL hijacking attack",dll_hijacking,high
+"User workstation compromised with Satan ransomware",ransomware,high
+"API endpoint vulnerable to IDOR on payment records",IDOR,high
+"Physical security: unauthorized access to cable management",physical_security,low
+"Network monitoring shows suspicious PowerShell activity",fileless_malware,medium
+"Employee laptop showing signs of firmware rootkit",firmware_malware,high
+"Log files reveal successful SSTI vulnerability exploitation",template_injection,high
+"Email server configuration exposing internal hostnames",information_disclosure,low
+"User reported system preventing Windows Defender updates",malware,high
+"Network traffic indicates crypto mining botnet activity",cryptojacking,high
+"Employee fell for fake invoice payment redirection",BEC,high
+"Security scan found Git config with stored credentials",secret_exposure,medium
+"API logs show broken object level authorization",API_abuse,high
+"Physical security: CCTV system showing looped footage",physical_security,high
+"Detected attempt to exploit ProxyLogon Exchange vulnerability",exploit,high
+"Email containing WhatsApp phishing about account verification",phishing,medium
+"User workstation infected with REvil ransomware",ransomware,high
+"Network logs indicate ARP spoofing between critical servers",ARP_spoofing,high
+"Employee reported malicious QR code in parking garage",phishing,low
+"Malware using COM hijacking for persistence mechanism",persistence,medium
+"Log analysis shows successful blind boolean SQL injection",SQL_injection,high
+"API endpoint exposing detailed error messages with paths",information_disclosure,medium
+"User account showing password reuse from public breach",credential_stuffing,medium
+"Physical security: weight sensor triggered in restricted area",physical_security,low
+"Network monitoring detected covert channel in HTTP headers",covert_channel,medium
+"Email gateway caught phishing using IDN homograph attack",phishing,high
+"Employee laptop compromised through supply chain attack",supply_chain,high
+"Security assessment found JWT none algorithm vulnerability",JWT_abuse,high
+"User reported browser cryptojacking on company portal",cryptojacking,low
+"Network traffic shows data exfiltration to Telegram bot",data_exfiltration,high
+"Employee fell for grandparent scam revealing org structure",social_engineering,low
+"Detected Pass-the-Ticket attack using golden ticket",kerberos_attack,high
+"Log files indicate successful OOB XXE attack",XXE,high
+"Email containing bank phishing with valid SSL certificate",phishing,high
+"API logs reveal rate limiting bypass using race condition",race_condition,medium
+"Physical security: magnetic lock showing signs of bypass",physical_security,medium
+"User workstation showing Ryuk ransomware precursors",ransomware,high
+"Network scan detected Java serialization endpoint exposed",vulnerability,high
+"Malware analysis shows anti-sandboxing time checks",malware,medium
+"Email server sending spam due to compromised credentials",account_compromise,medium
+"Security logs indicate successful container breakout",container_escape,high
+"Employee reported evil maid attack on laptop in hotel",physical_security,high
+"Network monitoring shows MySQL traffic to external IP",data_exfiltration,high
+"User account created through parameter tampering",API_abuse,medium
+"Log analysis revealed GraphQL introspection data leak",API_exposure,low
+"Email containing COVID test result phishing with attachment",phishing,medium
+"Detected DarkSide ransomware on critical infrastructure",ransomware,high
+"API endpoint vulnerable to XXE via SVG file upload",XXE,high
+"Physical security: ultrasonic sensor detecting movement",physical_security,low
+"Network traffic indicates successful VLAN escape",VLAN_hopping,high
+"Employee fell for pig butchering crypto investment scam",social_engineering,high
+"Malware using AppInit DLLs for injection",dll_injection,medium
+"User workstation infected with Sodinokibi ransomware",ransomware,high
+"Security scan revealed Spring Boot actuator exposed",misconfiguration,medium
+"Email gateway detected executive impersonation attempt",BEC,high
+"Network logs show lateral movement via RDP",lateral_movement,high
+"Employee reported finding hidden recorder in meeting room",physical_security,high
+"Log files show successful PHP object injection",object_injection,high
+"API logs indicate authorization bypass in REST endpoint",API_abuse,high
+"User reported fake online shopping site using company logo",brand_abuse,medium
+"Physical security: door contact sensor showing tampering",physical_security,medium
+"Detected living-off-the-land attack using wmic.exe",fileless_malware,medium
+"Email containing FedEx phishing with package tracking",phishing,medium
+"Network monitoring detected Fast Flux hosting network",C2,high
+"Employee laptop showing bootkit preventing security updates",bootkit,high
+"Security assessment found formula injection in export",formula_injection,medium
+"User account compromise through credential stuffing list",credential_stuffing,high
+"Network traffic shows IRC bot communication channel",botnet,high
+"Malware analysis revealed Heaven's Gate technique usage",malware,medium
+"Email server logs indicate open relay configuration",misconfiguration,medium
+"Employee fell for technical support refund scam",social_engineering,medium
+"Log analysis shows NoSQL injection in user search",NoSQL_injection,high
+"API endpoint leaking authentication tokens in logs",secret_exposure,high
+"Physical security: perimeter fence sensor triggered",physical_security,low
+"User workstation compromised with Petya ransomware",ransomware,high
+"Network scan found multiple systems with BlueKeep",vulnerability,high
+"Email containing Office 365 phishing for admin credentials",phishing,high
+"Detected DCSync attack replicating password hashes",AD_attack,high
+"Security logs show successful LSASS memory dump",credential_theft,high
+"Employee reported Bluetooth credit card skimmer in lobby",skimming,high
+"Network monitoring shows suspicious LDAP queries",reconnaissance,medium
+"User reported system clock manipulation to extend trial",tampering,low
+"API logs show GraphQL query complexity attack",API_abuse,medium
+"Physical security: motion detector disabled with spray",physical_security,medium
+"Malware using reflective DLL loading technique",malware,high
+"Email gateway caught typosquatting domain registration",typosquatting,low
+"Log files indicate successful command injection via ImageMagick",command_injection,high
+"Employee laptop infected with CryptoLocker variant",ransomware,high
+"Network traffic reveals MITM attack on VoIP calls",MITM,high
+"Security scan found Swagger UI exposing all endpoints",API_exposure,medium
+"User account showing brute force from IoT botnet",brute_force,medium
+"Email containing Apple iTunes phishing for payment update",phishing,medium
+"Detected attempt to exploit EternalBlue SMB vulnerability",exploit,high
+"Employee fell for romance scam on dating platform",social_engineering,medium
+"API endpoint vulnerable to broken function authorization",API_abuse,high
+"Physical security: IR beam sensor triggered in vault",physical_security,high
+"Network logs show data exfiltration via FTP to China",data_exfiltration,high
+"User workstation showing Locky ransomware infection",ransomware,high
+"Malware analysis shows VM detection via hardware check",malware,medium
+"Email server being used for business email compromise",BEC,high
+"Security assessment revealed host header injection",host_header_injection,medium
+"Employee reported evil twin WiFi at coffee shop",rogue_device,medium
+"Log analysis shows successful PostgreSQL injection",SQL_injection,high
+"Network monitoring detected amplification DDoS via SSDP",DDoS,high
+"User reported fake Java update hijacking downloads",malware,medium
+"API logs indicate mass data scraping via pagination",data_scraping,low
+"Physical security: someone attempted to clone master key",physical_security,high
+"Email containing IRS phishing about tax refund",phishing,high
+"Detected Golden SAML attack on SSO infrastructure",SAML_attack,high
+"Employee laptop compromised via malicious Teams GIF",malware,high
+"Network traffic shows successful DNS rebinding attack",DNS_rebinding,high
+"Security logs reveal WMI persistence mechanism installed",persistence,high
+"User workstation infected with Maze ransomware",ransomware,high
+"Log files show ORM injection in Hibernate query",ORM_injection,medium
+"API endpoint exposing MongoDB connection string",secret_exposure,high
+"Physical security: laser sensor detecting smoke in server room",physical_security,low
+"Malware using process ghosting to avoid detection",malware,high
+"Email gateway detected QR code phishing in image",phishing,medium
+"Network scan revealed Jenkins with script console exposed",misconfiguration,high
+"Employee fell for grant money advance fee scam",social_engineering,low
+"Security assessment found SSRF via PDF generator",SSRF,high
+"User account locked after credential stuffing attack",credential_stuffing,medium
+"Network monitoring shows covert channel using HTTPS",covert_channel,high
+"Email containing DHL shipping phishing with PDF malware",phishing,medium
+"Detected Kerberoasting attack harvesting SPN hashes",kerberos_attack,high
+"Employee reported hidden device in USB charger",hardware_implant,medium
+"API logs show broken authentication on password reset",API_abuse,high
+"Physical security: turnstile allowing multiple entries",physical_security,low
+"User workstation showing TeslaCrypt ransomware",ransomware,high
+"Network traffic indicates successful BGP prefix leak",BGP_leak,medium
+"Malware analysis revealed sandbox evasion via sleep",malware,medium
+"Email server sending pharmaceutical spam campaigns",spam,medium
+"Log analysis shows blind time-based SQL injection",SQL_injection,high
+"Security scan found Travis CI logs exposing secrets",secret_exposure,high
+"Employee laptop infected through poisoned search result",SEO_poisoning,medium
+"Network logs reveal NTLM hash capture via responder",credential_theft,high
+"User reported cursor hijacking during online banking",clickjacking,high
+"API endpoint vulnerable to HTTP verb tampering",API_abuse,low
+"Physical security: glass break sensor malfunction",physical_security,low
+"Email containing SharePoint phishing for O365 credentials",phishing,high
+"Detected DLL side-loading attack using legitimate app",dll_sideloading,high
+"Employee fell for charity scam revealing donor database",social_engineering,medium
+"Network monitoring detected mining pool communication",cryptojacking,medium
+"Security logs show UAC bypass via fodhelper.exe",privilege_escalation,medium
+"User workstation compromised with Cerber ransomware",ransomware,high
+"Log files indicate successful CRLF injection attack",CRLF_injection,medium
+"API logs reveal excessive data exposure in responses",API_exposure,medium
+"Physical security: tamper evident tape broken on rack",physical_security,medium
+"Malware using API hammering to crash security tools",malware,medium
+"Email gateway caught homograph attack using Unicode",phishing,high
+"Network traffic shows RDP brute force from botnet",brute_force,high
+"Employee reported vishing about IT security audit",vishing,high
+"Security assessment found RCE via file upload",RCE,high
+"User account showing login from sanctioned country",suspicious_activity,high
+"Network scan detected Drupal with SQLi vulnerability",vulnerability,high
+"Email containing fake LinkedIn invitation with malware",social_engineering,medium
+"Detected attempt to exploit PrintSpooler vulnerability",exploit,high
+"Employee laptop showing MBR ransomware infection",ransomware,high
+"API endpoint leaking stack traces on errors",information_disclosure,medium
+"Physical security: badge reader showing card skimming",physical_security,high
+"Log analysis revealed successful XPath injection",XPATH_injection,medium
+"Network monitoring shows data exfiltration to Dropbox",data_exfiltration,medium
+"User reported fake McAfee renewal popup scam",scareware,low
+"Malware analysis shows rootkit hiding in boot sector",rootkit,high
+"Email server configuration allowing email spoofing",misconfiguration,medium
+"Security logs indicate shadow IT VPN usage",shadow_IT,low
+"Employee fell for fake parking ticket phishing",phishing,low
+"Network traffic reveals cryptocurrency wallet theft",cryptojacking,high
+"API logs show authorization bypass via JWT tampering",JWT_abuse,high
+"Physical security: motion sensor covered with tape",physical_security,medium
+"User workstation infected with NotPetya malware",ransomware,high
+"Detected Golden Ticket attack with 10-year validity",kerberos_attack,high
+"Email containing ransomware disguised as invoice",ransomware,high
+"Network scan found Redis allowing command execution",misconfiguration,high
+"Employee reported evil maid attack on hotel laptop",physical_security,high
+"Log files show successful HQL injection attack",HQL_injection,high
+"Security assessment revealed DOM XSS in search",XSS,medium
+"User account compromise via leaked database",credential_stuffing,high
+"Network monitoring detected DNS sinkhole redirection",suspicious_activity,low
+"Malware using LOLBins to download second stage",fileless_malware,medium
+"Email gateway detected SPF failure from partner domain",email_spoofing,low
+"API endpoint exposing user PII without authentication",API_exposure,high
+"Physical security: unauthorized person in secured area",physical_security,high
+"Employee laptop showing PowerShell Empire indicators",APT,high
+"Network traffic indicates lateral movement via SMB",lateral_movement,high
+"User reported system disabled after failed ransomware",ransomware,medium
+"Security scan revealed multiple outdated WordPress plugins",vulnerability,medium
+"Email containing COVID vaccine card phishing",phishing,medium
+"Detected Pass-the-Hash attack using NTLM relay",relay_attack,high
+"Employee fell for inheritance scam revealing bank details",social_engineering,medium
+"Log analysis shows NoSQL injection via MongoDB",NoSQL_injection,high
+"API logs indicate broken object authorization",API_abuse,high
+"Physical security: car tailgating at parking gate",physical_security,low
+"Network monitoring shows TOR bridge usage",suspicious_activity,medium
+"User workstation compromised with BlackCat ransomware",ransomware,high
+"Malware analysis revealed anti-debugging tricks",malware,medium
+"Email server logs show successful relay attack",relay_attack,medium
+"Security assessment found JWT signature not verified",JWT_abuse,high
+"Employee reported smishing about package delivery",smishing,medium
+"Network scan detected Apache with directory listing",misconfiguration,low
+"User account showing impossible geography logins",account_compromise,high
+"API endpoint vulnerable to GraphQL DoS attack",API_abuse,medium
+"Physical security: server room door found propped open",physical_security,high
+"Detected SolarWinds supply chain compromise indicator",supply_chain,high
+"Email containing Netflix phishing for payment info",phishing,medium
+"Network traffic reveals LDAP injection success",LDAP_injection,high
+"Employee laptop infected with Emotet dropper",malware,high
+"Log files indicate command injection via file name",command_injection,high
+"Security logs show DLL injection into lsass.exe",process_injection,high
+"User reported fake Chrome security warning",scareware,low
+"Network monitoring detected BGP route manipulation",BGP_hijacking,high
+"Malware using timestomping to hide file dates",malware,medium
+"Email gateway caught sender using look-alike domain",typosquatting,medium
+"API logs show authentication bypass on admin endpoint",API_abuse,high
+"Physical security: HVAC vent removed in server room",physical_security,medium
+"Employee fell for lottery scam providing personal info",social_engineering,low
+"User workstation showing GandCrab ransomware",ransomware,high
+"Security scan found S3 bucket with public write",misconfiguration,high
+"Network traffic indicates C2 via DNS TXT records",C2,high
+"Email containing OneDrive phishing link",phishing,medium
+"Detected DarkHotel APT targeting executive laptop",APT,high
+"Log analysis revealed successful LDAP pass-back",LDAP_injection,medium
+"Employee reported finding keylogger in keyboard",hardware_keylogger,high
+"API endpoint exposing database schema information",information_disclosure,medium
+"Physical security: window lock tampered with",physical_security,low
+"User account created via race condition exploit",race_condition,medium
+"Network monitoring shows mining traffic to Monero pool",cryptojacking,medium
+"Malware analysis shows code cave injection technique",malware,high
+"Email server being used for political spam campaign",spam,low
+"Security assessment found open redirect in OAuth",open_redirect,medium
+"Employee laptop compromised via watering hole attack",watering_hole,high
+"Network logs indicate successful SQL map attack",SQL_injection,high
+"User reported ransomware using cat photos as theme",ransomware,low
+"API logs reveal timing attack on login endpoint",timing_attack,medium
+"Physical security: false fire alarm during shift change",physical_security,low
+"Email containing Amazon phishing about account lock",phishing,medium
+"Detected living-off-the-land using bitsadmin.exe",fileless_malware,medium
+"Employee fell for CEO impersonation wire fraud",BEC,high
+"Network traffic shows successful MITM on WiFi",MITM,high
+"Security logs indicate Mimikatz credential dump",credential_theft,high
+"User workstation infected with CoinMiner malware",cryptojacking,medium
+"Log files show blind XXE attack exfiltrating files",XXE,high
+"API endpoint vulnerable to path traversal attack",path_traversal,high
+"Physical security: someone cut network cable outside",physical_security,high
+"Malware using RunPE technique for process injection",process_injection,high
+"Email gateway detected homoglyph in sender domain",phishing,high
+"Network scan revealed phpMyAdmin with weak password",misconfiguration,high
+"Employee reported vishing call about tax audit",vishing,medium
+"Security assessment found template injection flaw",template_injection,high
+"User account showing brute force via credential list",credential_stuffing,medium
+"Network monitoring detected ICMP tunnel for C2",covert_channel,high
+"Email containing DocuSign phishing for signatures",phishing,high
+"Detected attempt to exploit Citrix Bleed vulnerability",exploit,high
+"Employee laptop showing persistence via scheduled task",persistence,medium
+"API logs indicate GraphQL query depth attack",API_abuse,medium
+"Physical security: badge cloning attempt detected",physical_security,high
+"User workstation compromised with DarkSide ransomware",ransomware,high
+"Network traffic reveals data staging before exfiltration",data_theft,high
+"Malware analysis shows VM escape attempt",malware,high
+"Email server sending investment scam messages",spam,medium
+"Log analysis revealed cache poisoning success",cache_poisoning,high
+"Security scan found multiple XSS in web app",XSS,high
+"Employee fell for romance scam on social media",social_engineering,medium
+"Network logs show lateral movement using PsExec",lateral_movement,high
+"User reported fake antivirus blocking security sites",scareware,medium
+"API endpoint exposing sensitive data in URLs",information_disclosure,high
+"Physical security: thermal camera triggered after hours",physical_security,low
+"Email containing Wells Fargo phishing for login",phishing,high
+"Detected Golden SAML attack on Azure AD",SAML_attack,high
+"Employee reported GPS tracker on personal vehicle",physical_security,high
+"Network monitoring shows beacon to residential C2",C2,high
+"Security logs reveal token replay attack success",replay_attack,high
+"User workstation infected with Dharma ransomware",ransomware,high
+"Malware using DLL search order hijacking",dll_hijacking,medium
+"Log files indicate NoSQL injection in REST API",NoSQL_injection,high
+"API logs show broken function level auth",API_abuse,high
+"Physical security: lock impressioning marks found",physical_security,medium
+"Network traffic indicates DNS tunneling exfiltration",data_exfiltration,high
+"Email gateway caught QR code phishing attempt",phishing,medium
+"Employee laptop compromised through supply chain",supply_chain,high
+"Security assessment revealed SSTI vulnerability",template_injection,high
+"User account locked after impossible travel alert",account_compromise,high
+"Network scan detected exposed Docker daemon",misconfiguration,high
+"Email containing PayPal phishing about limited account",phishing,high
+"Detected Zerologon attack on domain controller",exploit,high
+"Employee fell for grandparent emergency scam",social_engineering,low
+"API endpoint vulnerable to XXE via file upload",XXE,high
+"Physical security: pressure mat sensor malfunction",physical_security,low
+"User workstation showing Conti ransomware indicators",ransomware,high
+"Network monitoring detected amplification attack",DDoS,high
+"Malware analysis revealed fileless WMI persistence",fileless_malware,high
+"Email server configuration exposing internal IPs",information_disclosure,low
+"Log analysis shows successful command injection",command_injection,high
+"Security logs indicate UAC bypass attempt",privilege_escalation,medium
+"Employee reported evil twin WiFi at conference",rogue_device,high
+"Network traffic shows LDAP brute force attack",brute_force,medium
+"User reported cursor automatically clicking ads",clickjacking,low
+"API logs reveal mass assignment vulnerability",mass_assignment,medium
+"Physical security: door sensor battery dead",physical_security,low
+"Email containing Chase bank phishing for account",phishing,high
+"Detected DCSync attack dumping NTDS.dit",AD_attack,high
+"Employee laptop infected with info stealer malware",malware,high
+"Network scan found Tomcat with default creds",misconfiguration,high
+"Security assessment found race condition in payment",race_condition,high
+"User workstation compromised with REvil ransomware",ransomware,high
+"Malware using Heaven's Gate for 64-bit evasion",malware,medium
+"Log files show HQL injection in search query",HQL_injection,medium
+"API endpoint exposing AWS credentials in response",secret_exposure,high
+"Physical security: vibration on window detected",physical_security,low
+"Network monitoring shows suspicious registry changes",malware,medium
+"Email gateway detected typosquatting attempt",typosquatting,medium
+"Employee fell for IRS impersonation phone scam",vishing,high
+"User account showing concurrent impossible logins",account_compromise,high
+"Security scan revealed outdated SSL protocols",vulnerability,medium
+"Network traffic indicates botnet check-in behavior",botnet,medium
+"Email containing Microsoft phishing for Office 365",phishing,high
+"Detected Kerberos Bronze Bit attack attempt",kerberos_attack,high
+"Employee reported hidden camera in restroom",physical_security,high
+"API logs show GraphQL complexity attack",API_abuse,medium
+"User workstation infected with WannaCry variant",ransomware,high
+"Network logs reveal SSH brute force success",brute_force,high
+"Malware analysis shows anti-VM detection code",malware,medium
+"Email server logs indicate spam relay abuse",spam_relay,medium
+"Log analysis revealed blind boolean injection",SQL_injection,high
+"Physical security: mantrap door held open alarm",physical_security,medium
+"Security assessment found DOM clobbering issue",DOM_clobbering,low
+"Employee laptop showing cryptocurrency miner",cryptojacking,medium
+"Network monitoring detected TOR hidden service",suspicious_activity,medium
+"User reported fake Windows license expiration",scareware,low
+"API endpoint vulnerable to IDOR attack",IDOR,high
+"Email containing UPS phishing with tracking link",phishing,medium
+"Detected attempt to exploit ProxyShell chain",exploit,high
+"Employee fell for prize winner notification scam",social_engineering,low
+"Network traffic shows data exfiltration via SSH",data_exfiltration,high
+"Security logs show successful privilege escalation",privilege_escalation,high
+"User workstation compromised with Sodinokibi",ransomware,high
+"Malware using process doppelganging technique",malware,high
+"Log files indicate XPath injection success",XPATH_injection,high
+"API logs reveal authentication bypass flaw",API_abuse,high
+"Physical security: ceiling tile displaced in IT room",physical_security,medium
+"Network scan found MongoDB exposed to internet",misconfiguration,high
+"Email gateway caught CEO fraud attempt",BEC,high
+"Employee reported laser mic pointed at office",physical_security,high
+"User account locked after password spray attack",password_spraying,medium
+"Security assessment revealed JWT key confusion",JWT_abuse,high
+"Network monitoring shows C2 beacon via Twitter",C2,medium
+"Email containing Bank of America phishing",phishing,high
+"Detected living-off-the-land attack pattern",fileless_malware,high
+"Employee laptop infected through fake update",malware,high
+"API endpoint exposing debug information",information_disclosure,medium
+"Physical security: emergency exit used after hours",physical_security,low
+"User workstation showing Petya ransomware",ransomware,high
+"Network traffic indicates successful ARP poisoning",ARP_poisoning,high
+"Malware analysis revealed rootkit in MBR",rootkit,high
+"Email server being used for crypto scams",spam,medium
+"Log analysis shows OOB XXE data theft",XXE,high
+"Security logs indicate lateral RDP movement",lateral_movement,high
+"Employee fell for technical support refund fraud",social_engineering,medium
+"Network scan detected Java deserialization flaw",vulnerability,high
+"User reported fake virus popup with phone number",scareware,low
+"API logs show broken access control",API_abuse,high
+"Physical security: window sensor offline",physical_security,low
+"Email containing Apple ID phishing attempt",phishing,medium
+"Detected Golden Ticket with 20-year lifetime",kerberos_attack,high
+"Employee reported USB dead drop exchange",espionage,high
+"Network monitoring detected mining pool DNS",cryptojacking,low
+"Security assessment found prototype pollution",prototype_pollution,medium
+"User workstation infected with BlackMatter",ransomware,high
+"Malware using API hooking for keylogging",malware,high
+"Log files show successful ORM injection",ORM_injection,high
+"API endpoint vulnerable to timing attack",timing_attack,medium
+"Physical security: safe combination written nearby",physical_security,medium
+"Network traffic shows VLAN hopping success",VLAN_hopping,high
+"Email gateway detected phish using punycode",phishing,high
+"Employee laptop compromised via browser exploit",exploit,high
+"User account showing distributed login attempts",brute_force,medium
+"Security scan revealed Shellshock vulnerability",vulnerability,high
+"Network logs indicate C2 via Slack API",C2,medium
+"Email containing Google phishing for account",phishing,medium
+"Detected DLL injection into Explorer.exe",process_injection,high
+"Employee fell for lottery winner email scam",social_engineering,low
+"API logs reveal GraphQL introspection enabled",API_exposure,low
+"Physical security: badge reader wires exposed",physical_security,high
+"User workstation showing LockBit ransomware",ransomware,high
+"Network monitoring shows DNS cache poisoning",DNS_poisoning,high
+"Malware analysis revealed packed executable",malware,medium
+"Email server sending pharma spam campaigns",spam,low
+"Log analysis indicates command injection success",command_injection,high
+"Security logs show Mimikatz execution detected",credential_theft,high
+"Employee reported evil maid attack at hotel",physical_security,high
+"Network traffic reveals MITM certificate swap",MITM,high
+"User reported ransomware with anime theme",ransomware,low
+"API endpoint exposing user enumeration",information_disclosure,medium
+"Physical security: motion in server room at 4am",physical_security,medium
+"Email containing LinkedIn phishing message",phishing,medium
+"Detected attempt to exploit log4j RCE",exploit,high
+"Employee laptop infected with banking trojan",trojan,high
+"Network scan found exposed Kubernetes dashboard",misconfiguration,high
+"Security assessment revealed SSRF vulnerability",SSRF,high
+"User account compromise via credential stuffing",credential_stuffing,high
+"Network monitoring detected botnet traffic",botnet,high
+"Malware using WMI for fileless persistence",fileless_malware,high
+"Email gateway caught BEC wire transfer fraud",BEC,high
+"API logs show authorization bypass via IDOR",IDOR,high
+"Physical security: forced entry on equipment closet",physical_security,high
+"Employee fell for COVID contact tracing scam",social_engineering,medium
+"Log files reveal successful SQL injection",SQL_injection,high
+"User workstation compromised with Ryuk",ransomware,high
+"Network traffic indicates DNS exfiltration",data_exfiltration,high
+"Security logs reveal Pass-the-Hash success",lateral_movement,high
+"Email containing Instagram phishing link",phishing,medium
+"Detected Skeleton Key on domain controller",AD_attack,high
+"Employee reported Bluetooth skimmer at ATM",skimming,high
+"API endpoint vulnerable to XXE attack",XXE,high
+"Physical security: camera showing static image",physical_security,high
+"User reported fake Flash update malware",malware,medium
+"Network monitoring shows TOR exit node usage",suspicious_activity,medium
+"Malware analysis revealed VM evasion",malware,medium
+"Email server configuration allows spoofing",misconfiguration,medium
+"Log analysis shows NoSQL injection success",NoSQL_injection,high
+"Security scan found default Tomcat password",misconfiguration,high
+"Employee laptop showing ransomware countdown",ransomware,high
+"Network logs reveal LDAP injection attempt",LDAP_injection,medium
+"User account locked after brute force",brute_force,medium
+"API logs indicate rate limit bypass",API_abuse,medium
+"Physical security: lock cylinder damaged",physical_security,high
+"Email containing Wells Fargo phishing",phishing,high
+"Detected Golden SAML persistence method",SAML_attack,high
+"Employee fell for inheritance scam email",social_engineering,low
+"Network traffic shows covert DNS channel",covert_channel,high
+"Security assessment found path traversal",path_traversal,medium
+"User workstation infected with CryptoWall",ransomware,high
+"Malware using process hollowing evasion",process_hollowing,high
+"Log files show command injection via filename",command_injection,high
+"API endpoint exposing internal endpoints",API_exposure,medium
+"Physical security: door held open too long",physical_security,low
+"Network monitoring detected amplification DDoS",DDoS,high
+"Email gateway caught phishing with attachment",phishing,high
+"Employee reported vishing for VPN credentials",vishing,high
+"User account showing session hijacking",session_hijacking,high
+"Security logs indicate UAC bypass success",privilege_escalation,medium
+"Network scan revealed exposed Redis server",misconfiguration,high
+"Email containing Netflix phishing attempt",phishing,medium
+"Detected PrintNightmare exploitation",exploit,high
+"Employee laptop compromised via USB malware",malware,high
+"API logs show mass data extraction",data_scraping,medium
+"Physical security: server room door ajar",physical_security,high
+"User workstation showing Cerber ransomware",ransomware,high
+"Network traffic indicates BGP hijacking",BGP_hijacking,high
+"Malware analysis shows rootkit behavior",rootkit,high
+"Email server being used for spam relay",spam_relay,medium
+"Log analysis revealed SSTI exploitation",template_injection,high
+"Security assessment found JWT vulnerability",JWT_abuse,high
+"Employee fell for tech support popup scam",social_engineering,medium
+"Network monitoring shows mining pool traffic",cryptojacking,medium
+"User reported fake antivirus alert",scareware,low
+"API endpoint vulnerable to GraphQL attack",API_abuse,medium
+"Physical security: tamper seal broken",physical_security,high
+"Email containing PayPal phishing link",phishing,high
+"Detected Kerberoasting attack in progress",kerberos_attack,high
+"Employee reported GPS tracker on laptop",physical_security,medium
+"Network logs show successful MITM attack",MITM,high
+"Security logs reveal credential dumping",credential_theft,high
+"User workstation infected with GandCrab",ransomware,high
+"Malware using DGA for C2 domains",malware,high
+"Log files indicate blind XXE success",XXE,high
+"API logs show broken authentication",API_abuse,high
+"Physical security: false motion alarm",physical_security,low
+"Network traffic shows data staging",data_theft,high
+"Email gateway detected sender spoofing",email_spoofing,medium
+"Employee laptop showing APT indicators",APT,high
+"User account compromise via phishing",account_compromise,high
+"Security scan found SQLi vulnerability",SQL_injection,high
+"Network monitoring detected C2 beacon",C2,high
+"Email containing Amazon phishing scam",phishing,medium
+"Detected DCShadow attack attempt",AD_attack,high
+"Employee fell for survey scam",social_engineering,low
+"API endpoint exposing user data",information_disclosure,high
+"Physical security: lock picked on cabinet",physical_security,medium
+"User workstation showing NotPetya",ransomware,high
+"Network logs reveal DNS tunneling",data_exfiltration,high
+"Malware analysis shows anti-debug",malware,medium
+"Email server sending crypto scams",spam,medium
+"Log analysis revealed RCE success",RCE,high
+"Security assessment found IDOR flaw",IDOR,high
+"Employee reported evil twin WiFi",rogue_device,high
+"Network traffic indicates ARP spoof",ARP_spoofing,medium
+"User reported ransomware message",ransomware,high
+"API logs show auth bypass",API_abuse,high
+"Physical security: window broken",physical_security,high
+"Email containing Chase phishing",phishing,high
+"Detected Pass-the-Ticket attack",kerberos_attack,high
+"Employee laptop with keylogger",hardware_keylogger,high
+"Network monitoring shows botnet",botnet,high
+"Security logs show lateral movement",lateral_movement,high
+"User workstation has cryptominer",cryptojacking,medium
+"Malware using fileless technique",fileless_malware,high
+"Log files show NoSQL injection",NoSQL_injection,high
+"API endpoint has XXE vulnerability",XXE,high
+"Physical security: alarm disabled",physical_security,high
