@@ -1,3 +1,13 @@
+---
+title: Secura Backend
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 🛡️ Secura Backend - AI-Powered Security API
 
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688)](https://fastapi.tiangolo.com/)
