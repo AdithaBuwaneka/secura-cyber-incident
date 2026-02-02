@@ -14,19 +14,26 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          lfs: true
 
       - name: Push to Hugging Face
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           cd backend
-          git config --global user.email "github-actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git clone --depth 1 https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-space
-          cp -r ./* hf-space/ 2>/dev/null || true
-          cp -r ./.[!.]* hf-space/ 2>/dev/null || true
-          cd hf-space
+          git config user.email "github-actions@github.com"
+          git config user.name "GitHub Actions"
+
+          # Remove hf-deploy if exists
+          rm -rf hf-deploy
+
+          # Clone HF Space
+          git clone https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-deploy
+
+          # Copy files (exclude .git and hf-deploy)
+          rsync -av --exclude='.git' --exclude='hf-deploy' --exclude='__pycache__' . hf-deploy/
+
+          # Push to HF
+          cd hf-deploy
           git add .
-          git diff --staged --quiet || git commit -m "Deploy from GitHub"
+          git diff --staged --quiet || git commit -m "Auto-deploy from GitHub: ${{ github.sha }}"
           git push
