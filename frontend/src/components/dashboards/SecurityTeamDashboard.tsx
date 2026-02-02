@@ -33,6 +33,59 @@ import AIInsightsPanel from '@/components/security/AIInsightsPanel';
 import IncidentChatButton from '@/components/messaging/IncidentChatButton';
 import toast from 'react-hot-toast';
 
+interface Attachment {
+  file_id?: string;
+  filename?: string;
+  original_filename?: string;
+  file_size?: number;
+  file_type?: string;
+  file_url?: string;
+}
+
+interface Incident {
+  id: string;
+  title?: string;
+  description?: string;
+  status: string;
+  severity: string;
+  incident_type?: string;
+  created_at: string;
+  updated_at: string;
+  resolved_at?: string;
+  reporter_name?: string;
+  reporter_email?: string;
+  reporter_department?: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  assigned_at?: string;
+  location?: {
+    address?: string;
+    building?: string;
+    floor?: string;
+    room?: string;
+  };
+  attachments?: Attachment[];
+}
+
+interface TeamMember {
+  user_id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  is_online: boolean;
+  last_activity?: string;
+  last_login?: string;
+}
+
+interface ImageAnalysisResult {
+  summary: string;
+  assessment?: string;
+  confidence: number;
+  extracted_text: string;
+  threat_indicators: string[];
+  recommendations: string[];
+}
+
 export default function SecurityTeamDashboard() {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
   const dispatch = useDispatch<AppDispatch>();
@@ -41,14 +94,14 @@ export default function SecurityTeamDashboard() {
   const [showMessaging, setShowMessaging] = useState(false);
   const [showAnalytics, setShowAnalytics] = useState(false);
   const [showAI, setShowAI] = useState(false);
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedIncident, setSelectedIncident] = useState<any>(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [showIncidentDetails, setShowIncidentDetails] = useState(false);
   const [showImageAnalysis, setShowImageAnalysis] = useState(false);
-  const [imageAnalysis, setImageAnalysis] = useState<any>(null);
+  const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysisResult | null>(null);
   const [analyzingImage, setAnalyzingImage] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [showTeamDetails, setShowTeamDetails] = useState(false);
   const [showCriticalIncidents, setShowCriticalIncidents] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
@@ -81,7 +134,7 @@ export default function SecurityTeamDashboard() {
             setIncidents(data);
           }
           
-          console.log('First incident with attachments:', (data.incidents || data).find((inc: any) => inc.attachments && inc.attachments.length > 0));
+          console.log('First incident with attachments:', (data.incidents || data).find((inc: Incident) => inc.attachments && inc.attachments.length > 0));
         }
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
@@ -119,9 +172,9 @@ export default function SecurityTeamDashboard() {
             
             if (fallbackResponse.ok) {
               const allUsers = await fallbackResponse.json();
-              const securityTeam = allUsers.filter((user: any) => 
+              const securityTeam = allUsers.filter((user: { role: string }) =>
                 user.role === 'security_team'
-              ).map((user: any) => ({
+              ).map((user: { uid: string; email: string; full_name: string; role: string; last_login?: string }) => ({
                 user_id: user.uid,
                 email: user.email,
                 full_name: user.full_name,
@@ -154,15 +207,15 @@ export default function SecurityTeamDashboard() {
           console.log('New incident notification received:', data);
           // Refresh incidents when a new one is reported
           fetchIncidents();
-          toast.info(`New incident reported: ${data.title || 'Untitled'}`);
+          toast(`New incident reported: ${data.title || 'Untitled'}`);
         }
-      } catch (error) {
+      } catch {
         // Ignore non-JSON messages
       }
     };
-    
+
     // Add WebSocket listener if available
-    const ws = (window as any).securaWebSocket;
+    const ws = (window as unknown as { securaWebSocket?: WebSocket }).securaWebSocket;
     if (ws) {
       ws.addEventListener('message', handleWebSocketMessage);
     }
@@ -172,6 +225,7 @@ export default function SecurityTeamDashboard() {
         ws.removeEventListener('message', handleWebSocketMessage);
       }
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idToken, API_URL]);
 
   const handleLogout = async () => {
@@ -227,13 +281,13 @@ export default function SecurityTeamDashboard() {
         });
 
         if (response.ok) {
-          setSelectedIncident(prev => ({
+          setSelectedIncident(prev => prev ? ({
             ...prev,
-            assigned_to: null,
-            assigned_to_name: null,
-            assigned_at: null,
+            assigned_to: undefined,
+            assigned_to_name: undefined,
+            assigned_at: undefined,
             status: 'new'
-          }));
+          }) : null);
           
           fetchIncidents();
           toast.success('Incident unassigned successfully');
@@ -259,13 +313,13 @@ export default function SecurityTeamDashboard() {
         const assigneeName = teamMembers.find(m => m.user_id === assigneeId)?.full_name;
         
         // Update the selected incident with assignment info
-        setSelectedIncident(prev => ({
+        setSelectedIncident(prev => prev ? ({
           ...prev,
           assigned_to: assigneeId,
           assigned_to_name: assigneeName,
           assigned_at: new Date().toISOString(),
           status: 'investigating'
-        }));
+        }) : null);
         
         // Refresh incidents list to update the UI and stats
         fetchIncidents();
@@ -287,7 +341,7 @@ export default function SecurityTeamDashboard() {
   };
 
   // Handle incident click - fetch full details
-  const handleIncidentClick = async (incident: any) => {
+  const handleIncidentClick = async (incident: Incident) => {
     try {
       const response = await fetch(`${API_URL}/api/incidents/${incident.id}`, {
         headers: {
@@ -345,32 +399,9 @@ export default function SecurityTeamDashboard() {
     return `${Math.floor(seconds / 86400)} days ago`;
   };
   
-  // Filter incidents based on search term
-  const filteredIncidents = incidents.filter(incident => {
-    const searchLower = searchTerm.toLowerCase();
-    return (
-      (incident.title?.toLowerCase().includes(searchLower) || false) ||
-      (incident.description?.toLowerCase().includes(searchLower) || false) ||
-      (incident.reporter_name?.toLowerCase().includes(searchLower) || false) ||
-      (incident.incident_type?.toLowerCase().includes(searchLower) || false)
-    );
-  });
-
   // Calculate team online status
   const totalTeamMembers = teamMembers.length;
   const onlineTeamMembers = teamMembers.filter(member => member.is_online === true).length;
-
-  // Calculate other stats
-  const underInvestigationCount = incidents.filter(i => 
-    i.status === 'investigating' || i.status === 'in_progress'
-  ).length;
-
-  const resolvedTodayCount = incidents.filter(i => {
-    if (i.status !== 'resolved' && i.status !== 'closed') return false;
-    const resolvedDate = new Date(i.resolved_at || i.updated_at);
-    const today = new Date();
-    return resolvedDate.toDateString() === today.toDateString();
-  }).length;
 
   return (
     <div className="min-h-screen bg-[#1A1D23]">
@@ -591,8 +622,6 @@ export default function SecurityTeamDashboard() {
               )}
 
               {/* Attachments */}
-              {console.log('Selected incident:', selectedIncident)}
-              {console.log('Selected incident attachments:', selectedIncident.attachments)}
               {selectedIncident.attachments && selectedIncident.attachments.length > 0 && (
                 <div className="bg-[#2A2D35] p-4 rounded-lg border border-gray-700 mb-6">
                   <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center">
@@ -600,10 +629,10 @@ export default function SecurityTeamDashboard() {
                     Attachments ({selectedIncident.attachments.length})
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {selectedIncident.attachments.map((attachment: any, index: number) => {
-                      const isImage = attachment.file_type?.startsWith('image/') || 
+                    {selectedIncident.attachments.map((attachment: Attachment, index: number) => {
+                      const isImage = attachment.file_type?.startsWith('image/') ||
                                      attachment.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                      
+
                       return (
                         <div key={index} className="bg-[#1A1D23] p-3 rounded-lg border border-gray-700">
                           <div className="flex items-start space-x-3">
@@ -621,8 +650,9 @@ export default function SecurityTeamDashboard() {
                               </p>
                               {isImage && attachment.file_url && (
                                 <div className="mt-2">
-                                  <img 
-                                    src={attachment.file_url} 
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={attachment.file_url}
                                     alt={attachment.original_filename || 'Attachment'}
                                     className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                     onClick={() => window.open(attachment.file_url, '_blank')}
@@ -642,7 +672,7 @@ export default function SecurityTeamDashboard() {
                               )}
                               {isImage && attachment.file_url && (
                                 <button
-                                  onClick={() => analyzeImage(attachment.file_url)}
+                                  onClick={() => analyzeImage(attachment.file_url!)}
                                   className="p-2 text-gray-400 hover:text-[#00D4FF] transition-colors"
                                   title="Analyze Image"
                                   disabled={analyzingImage}
@@ -1177,7 +1207,7 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
                           </div>
                           
                           {/* Additional Info */}
-                          {(incident.location || incident.attachments?.length > 0) && (
+                          {(incident.location || (incident.attachments?.length ?? 0) > 0) && (
                             <div className="pt-3 border-t border-gray-700">
                               <div className="flex flex-wrap items-center gap-4">
                                 {incident.location && (
@@ -1193,10 +1223,10 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
                                     </span>
                                   </div>
                                 )}
-                                {incident.attachments?.length > 0 && (
+                                {(incident.attachments?.length ?? 0) > 0 && (
                                   <div className="flex items-center space-x-1 text-xs text-gray-400">
                                     <Paperclip className="h-3 w-3" />
-                                    <span>{incident.attachments.length} attachment{incident.attachments.length > 1 ? 's' : ''}</span>
+                                    <span>{incident.attachments!.length} attachment{incident.attachments!.length > 1 ? 's' : ''}</span>
                                   </div>
                                 )}
                               </div>

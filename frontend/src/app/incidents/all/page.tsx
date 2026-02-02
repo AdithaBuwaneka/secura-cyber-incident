@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useSelector } from 'react-redux';
-import { 
-  Search, 
-  Filter, 
-  Eye, 
+import {
+  Search,
+  Filter,
+  Eye,
   ChevronLeft,
   ChevronRight,
   RefreshCw,
@@ -16,16 +16,13 @@ import {
   Shield,
   AlertTriangle,
   CheckCircle,
-  Clock,
-  MoreHorizontal,
   X,
   MapPin,
   Paperclip,
   UserCheck,
   Download,
   ScanLine,
-  ImageIcon,
-  MessageSquare
+  ImageIcon
 } from 'lucide-react';
 import { RootState } from '@/store';
 import Link from 'next/link';
@@ -46,9 +43,60 @@ interface PaginationInfo {
   incidents_per_page: number;
 }
 
+interface Attachment {
+  file_id: string;
+  filename: string;
+  original_filename?: string;
+  file_size?: number;
+  file_type?: string;
+  file_url?: string;
+}
+
+interface Incident {
+  id: string;
+  title?: string;
+  description?: string;
+  status: string;
+  severity: string;
+  incident_type?: string;
+  created_at: string;
+  updated_at: string;
+  reporter_name?: string;
+  reporter_email?: string;
+  reporter_department?: string;
+  assigned_to?: string;
+  assigned_to_name?: string;
+  assigned_at?: string;
+  resolved_at?: string;
+  location?: {
+    address?: string;
+    building?: string;
+  };
+  attachments?: Attachment[];
+}
+
+interface TeamMember {
+  user_id: string;
+  email: string;
+  full_name: string;
+  role: string;
+  is_online: boolean;
+  last_activity: string;
+  last_login?: string;
+}
+
+interface ImageAnalysisResult {
+  summary: string;
+  assessment?: string;
+  confidence: number;
+  extracted_text: string;
+  threat_indicators: string[];
+  recommendations: string[];
+}
+
 export default function AllIncidentsPage() {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
-  const [incidents, setIncidents] = useState<any[]>([]);
+  const [incidents, setIncidents] = useState<Incident[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [showFilters, setShowFilters] = useState(false);
@@ -68,13 +116,13 @@ export default function AllIncidentsPage() {
   });
 
   // Incident details modal state
-  const [selectedIncident, setSelectedIncident] = useState<any>(null);
+  const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [showIncidentDetails, setShowIncidentDetails] = useState(false);
-  const [teamMembers, setTeamMembers] = useState<any[]>([]);
-  
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+
   // Image analysis state
   const [showImageAnalysis, setShowImageAnalysis] = useState(false);
-  const [imageAnalysis, setImageAnalysis] = useState<any>(null);
+  const [imageAnalysis, setImageAnalysis] = useState<ImageAnalysisResult | null>(null);
   const [analyzingImage, setAnalyzingImage] = useState(false);
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
@@ -103,9 +151,9 @@ export default function AllIncidentsPage() {
         
         if (fallbackResponse.ok) {
           const allUsers = await fallbackResponse.json();
-          const securityTeam = allUsers.filter((user: any) => 
+          const securityTeam = allUsers.filter((user: { role: string }) =>
             user.role === 'security_team'
-          ).map((user: any) => ({
+          ).map((user: { uid: string; email: string; full_name: string; role: string; last_login?: string }) => ({
             user_id: user.uid,
             email: user.email,
             full_name: user.full_name,
@@ -173,14 +221,17 @@ export default function AllIncidentsPage() {
         });
 
         if (response.ok) {
-          setSelectedIncident(prev => ({
-            ...prev,
-            assigned_to: null,
-            assigned_to_name: null,
-            assigned_at: null,
-            status: 'new'
-          }));
-          
+          setSelectedIncident(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              assigned_to: undefined,
+              assigned_to_name: undefined,
+              assigned_at: undefined,
+              status: 'new'
+            };
+          });
+
           toast.success('Incident unassigned successfully');
         } else {
           toast.error('Failed to unassign incident');
@@ -202,15 +253,18 @@ export default function AllIncidentsPage() {
 
       if (response.ok) {
         const assigneeName = teamMembers.find(m => m.user_id === assigneeId)?.full_name;
-        
-        setSelectedIncident(prev => ({
-          ...prev,
-          assigned_to: assigneeId,
-          assigned_to_name: assigneeName,
-          assigned_at: new Date().toISOString(),
-          status: 'investigating'
-        }));
-        
+
+        setSelectedIncident(prev => {
+          if (!prev) return null;
+          return {
+            ...prev,
+            assigned_to: assigneeId,
+            assigned_to_name: assigneeName,
+            assigned_at: new Date().toISOString(),
+            status: 'investigating'
+          };
+        });
+
         toast.success(`Incident assigned to ${assigneeName}`);
       } else {
         const error = await response.json();
@@ -294,6 +348,7 @@ export default function AllIncidentsPage() {
   useEffect(() => {
     fetchIncidents(currentPage, searchTerm, filters);
     fetchTeamMembers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, fetchIncidents, fetchTeamMembers]);
 
   // Handle search
@@ -331,7 +386,7 @@ export default function AllIncidentsPage() {
   };
 
   // Handle incident click - fetch full details
-  const handleIncidentClick = async (incident: any) => {
+  const handleIncidentClick = async (incident: Incident) => {
     try {
       const response = await fetch(`${API_URL}/api/incidents/${incident.id}`, {
         headers: {
@@ -401,7 +456,7 @@ export default function AllIncidentsPage() {
           <div className="text-center">
             <Shield className="h-16 w-16 text-gray-600 mx-auto mb-4" />
             <h1 className="text-2xl font-bold text-white mb-2">Access Denied</h1>
-            <p className="text-gray-400 mb-6">You don't have permission to view all incidents.</p>
+            <p className="text-gray-400 mb-6">You don&apos;t have permission to view all incidents.</p>
             <Link 
               href="/dashboard"
               className="bg-[#00D4FF] text-[#1A1D23] px-6 py-3 rounded-lg font-medium hover:bg-[#00C4EF] transition-colors"
@@ -654,7 +709,7 @@ export default function AllIncidentsPage() {
                             <span>Assigned: {incident.assigned_to_name}</span>
                           </div>
                         )}
-                        {incident.attachments?.length > 0 && (
+                        {incident.attachments && incident.attachments.length > 0 && (
                           <div className="flex items-center space-x-1">
                             <FileText className="h-3 w-3" />
                             <span>{incident.attachments.length} attachment{incident.attachments.length > 1 ? 's' : ''}</span>
@@ -950,10 +1005,10 @@ export default function AllIncidentsPage() {
                       Attachments ({selectedIncident.attachments.length})
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {selectedIncident.attachments.map((attachment: any, index: number) => {
-                        const isImage = attachment.file_type?.startsWith('image/') || 
+                      {selectedIncident.attachments.map((attachment: Attachment, index: number) => {
+                        const isImage = attachment.file_type?.startsWith('image/') ||
                                        attachment.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                        
+
                         return (
                           <div key={index} className="bg-[#1A1D23] p-3 rounded-lg border border-gray-700">
                             <div className="flex items-start space-x-3">
@@ -971,8 +1026,9 @@ export default function AllIncidentsPage() {
                                 </p>
                                 {isImage && attachment.file_url && (
                                   <div className="mt-2">
-                                    <img 
-                                      src={attachment.file_url} 
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img
+                                      src={attachment.file_url}
                                       alt={attachment.original_filename || 'Attachment'}
                                       className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                       onClick={() => window.open(attachment.file_url, '_blank')}
@@ -992,7 +1048,7 @@ export default function AllIncidentsPage() {
                                 )}
                                 {isImage && attachment.file_url && (
                                   <button
-                                    onClick={() => analyzeImage(attachment.file_url)}
+                                    onClick={() => attachment.file_url && analyzeImage(attachment.file_url)}
                                     className="p-2 text-gray-400 hover:text-[#00D4FF] transition-colors"
                                     title="Analyze Image"
                                     disabled={analyzingImage}
