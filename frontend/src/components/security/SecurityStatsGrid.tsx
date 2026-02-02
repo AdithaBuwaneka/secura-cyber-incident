@@ -1,19 +1,21 @@
 'use client';
 
 import React from 'react';
-import { 
-  AlertCircle, 
-  Clock, 
-  Users, 
-  CheckCircle2,
+import {
+  Users,
   FileText,
   AlertTriangle,
   Search,
   CheckCircle
 } from 'lucide-react';
 
+interface Incident {
+  id: string;
+  status: string;
+}
+
 interface SecurityStatsGridProps {
-  incidents: any[];
+  incidents: Incident[];
   onlineTeamMembers: number;
   totalTeamMembers: number;
   onTeamDetailsClick: () => void;

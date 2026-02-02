@@ -24,12 +24,42 @@ import { RootState, AppDispatch } from '@/store';
 import { logoutUser } from '@/store/auth/authSlice';
 import { checkCanApply } from '@/store/applications/applicationSlice';
 import IncidentReportForm from '@/components/forms/IncidentReportForm';
-import MessageThread from '@/components/messaging/MessageThread';
 import SecurityMessaging from '@/components/messaging/SecurityMessaging';
 import IncidentChatButton from '@/components/messaging/IncidentChatButton';
 import { useMessaging } from '@/components/messaging/MessagingProvider';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+
+interface Attachment {
+  file_id?: string;
+  filename?: string;
+  original_filename?: string;
+  file_size?: number;
+  file_type?: string;
+  file_url?: string;
+  thumbnail_url?: string;
+}
+
+interface Incident {
+  id: string;
+  title?: string;
+  description?: string;
+  status: string;
+  severity: string;
+  incident_type?: string;
+  created_at: string;
+  updated_at?: string;
+  resolved_at?: string;
+  location?: string | {
+    address?: string;
+    building?: string;
+    floor?: string;
+    room?: string;
+  };
+  attachments?: Attachment[];
+  assigned_to?: string;
+  assigned_to_name?: string;
+}
 
 export default function EmployeeDashboard() {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
@@ -39,7 +69,7 @@ export default function EmployeeDashboard() {
   const [showIncidentForm, setShowIncidentForm] = useState(false);
   const [showMessaging, setShowMessaging] = useState(false);
   const [showMyIncidents, setShowMyIncidents] = useState(false);
-  const [myIncidents, setMyIncidents] = useState<any[]>([]);
+  const [myIncidents, setMyIncidents] = useState<Incident[]>([]);
       const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
   // Fetch user's incidents
@@ -70,13 +100,14 @@ export default function EmployeeDashboard() {
   useEffect(() => {
     dispatch(checkCanApply());
     fetchMyIncidents();
-    
+
     // Refresh incidents every 30 seconds
     const interval = setInterval(() => {
       fetchMyIncidents();
     }, 30000);
-    
+
     return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, idToken, API_URL]);
 
   const handleLogout = async () => {
@@ -119,7 +150,9 @@ export default function EmployeeDashboard() {
   const investigatingIncidents = myIncidents.filter(i => i.status === 'investigating' || i.status === 'in_progress').length;
   const resolvedThisMonth = myIncidents.filter(i => {
     if (i.status !== 'resolved' && i.status !== 'closed') return false;
-    const resolvedDate = new Date(i.resolved_at || i.updated_at);
+    const dateValue = i.resolved_at || i.updated_at;
+    if (!dateValue) return false;
+    const resolvedDate = new Date(dateValue);
     const now = new Date();
     return resolvedDate.getMonth() === now.getMonth() && resolvedDate.getFullYear() === now.getFullYear();
   }).length;
@@ -487,7 +520,7 @@ export default function EmployeeDashboard() {
                         </div>
                         
                         {/* Additional Info */}
-                        {(incident.location || incident.attachments?.length > 0 || incident.assigned_to_name) && (
+                        {(incident.location || (incident.attachments?.length ?? 0) > 0 || incident.assigned_to_name) && (
                           <div className="space-y-3 pt-3 border-t border-gray-700">
                             <div className="flex flex-wrap items-center gap-4">
                               {incident.location && (
@@ -503,10 +536,10 @@ export default function EmployeeDashboard() {
                                   </span>
                                 </div>
                               )}
-                              {incident.attachments?.length > 0 && (
+                              {(incident.attachments?.length ?? 0) > 0 && (
                                 <div className="flex items-center space-x-1 text-xs text-gray-400">
                                   <Paperclip className="h-3 w-3" />
-                                  <span>{incident.attachments.length} attachment{incident.attachments.length > 1 ? 's' : ''}</span>
+                                  <span>{incident.attachments!.length} attachment{incident.attachments!.length > 1 ? 's' : ''}</span>
                                 </div>
                               )}
                               {incident.assigned_to_name && (
@@ -522,11 +555,11 @@ export default function EmployeeDashboard() {
                               <div>
                                 <h5 className="text-xs font-medium text-gray-400 mb-2">Attachments:</h5>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                  {incident.attachments.map((attachment: any, index: number) => {
-                                    const isImage = attachment.file_type?.startsWith('image/') || 
+                                  {incident.attachments.map((attachment: Attachment, index: number) => {
+                                    const isImage = attachment.file_type?.startsWith('image/') ||
                                                    attachment.filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i) ||
                                                    attachment.original_filename?.match(/\.(jpg|jpeg|png|gif|webp)$/i);
-                                    
+
                                     return (
                                       <div key={index} className="bg-[#2A2D35] p-2 rounded border border-gray-600">
                                         <div className="flex items-start space-x-2">
@@ -542,12 +575,13 @@ export default function EmployeeDashboard() {
                                             <p className="text-xs text-gray-400">
                                               {attachment.file_size ? `${(attachment.file_size / 1024 / 1024).toFixed(2)} MB` : 'Size unknown'}
                                             </p>
-                                            
+
                                             {/* Image Preview */}
                                             {isImage && attachment.file_url && (
                                               <div className="mt-2">
-                                                <img 
-                                                  src={attachment.thumbnail_url || attachment.file_url} 
+                                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                                <img
+                                                  src={attachment.thumbnail_url || attachment.file_url}
                                                   alt={attachment.original_filename || 'Attachment'}
                                                   className="w-full h-20 object-cover rounded cursor-pointer hover:opacity-90 transition-opacity"
                                                   onClick={() => window.open(attachment.file_url, '_blank')}
@@ -583,7 +617,7 @@ export default function EmployeeDashboard() {
                 <div className="p-12 text-center">
                   <FileText className="h-16 w-16 text-gray-600 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-white mb-2">No Incidents Yet</h3>
-                  <p className="text-gray-400 mb-4">You haven't reported any security incidents yet.</p>
+                  <p className="text-gray-400 mb-4">You haven&apos;t reported any security incidents yet.</p>
                   <button
                     onClick={() => {
                       setShowMyIncidents(false);

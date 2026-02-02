@@ -25,6 +25,22 @@ interface Conversation {
   priority: 'low' | 'medium' | 'high' | 'critical';
 }
 
+interface Participant {
+  user_id: string;
+  user_name?: string;
+  user_role?: string;
+}
+
+interface RawConversation {
+  id: string;
+  incident_id?: string;
+  conversation_type?: string;
+  participants?: Participant[];
+  last_message_content?: string;
+  last_message_time?: string;
+  created_at?: string;
+}
+
 interface SecurityMessagingProps {
   onClose?: () => void;
 }
@@ -120,15 +136,15 @@ export default function SecurityMessaging({ onClose }: SecurityMessagingProps) {
         console.log('SecurityMessaging: Total conversations:', conversations.length);
         
         // Filter out team internal conversations - those belong in Team Chat only
-        const incidentConversations = conversations.filter((conv: any) => 
+        const incidentConversations = conversations.filter((conv: RawConversation) =>
           conv.conversation_type !== 'team_internal' && conv.conversation_type !== 'direct_message'
         );
-        
+
         console.log('SecurityMessaging: Incident conversations:', incidentConversations.length);
-        
-        let formattedConversations: Conversation[] = incidentConversations.map((conv: any) => {
-          const participantName = getOtherParticipantName(conv.participants);
-          const participantRole = getOtherParticipantRole(conv.participants);
+
+        let formattedConversations: Conversation[] = incidentConversations.map((conv: RawConversation) => {
+          const participantName = getOtherParticipantName(conv.participants || []);
+          const participantRole = getOtherParticipantRole(conv.participants || []);
           
           console.log(`Conversation ${conv.id}: participant_name=${participantName}, role=${participantRole}`);
           
@@ -160,14 +176,14 @@ export default function SecurityMessaging({ onClose }: SecurityMessagingProps) {
             const newData = await newResponse.json();
             const newConversations = newData.conversations || [];
             // Filter out team internal conversations - those belong in Team Chat only
-            const newIncidentConversations = newConversations.filter((conv: any) => 
+            const newIncidentConversations = newConversations.filter((conv: RawConversation) =>
               conv.conversation_type !== 'team_internal' && conv.conversation_type !== 'direct_message'
             );
-            formattedConversations = newIncidentConversations.map((conv: any) => ({
+            formattedConversations = newIncidentConversations.map((conv: RawConversation) => ({
               id: conv.id,
               incident_id: conv.incident_id,
-              participant_name: getOtherParticipantName(conv.participants) || 'Security Team',
-              participant_role: getOtherParticipantRole(conv.participants),
+              participant_name: getOtherParticipantName(conv.participants || []) || 'Security Team',
+              participant_role: getOtherParticipantRole(conv.participants || []),
               last_message: conv.last_message_content || 'No messages yet',
               last_message_time: conv.last_message_time || conv.created_at,
               unread_count: 0,
@@ -193,10 +209,11 @@ export default function SecurityMessaging({ onClose }: SecurityMessagingProps) {
       console.log('SecurityMessaging: Setting isLoading to false');
       setIsLoading(false);
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idToken, API_URL, userProfile?.role, userProfile]);
 
   // Helper functions for participant handling
-  const getOtherParticipantName = (participants: any[]) => {
+  const getOtherParticipantName = (participants: Participant[]) => {
     console.log('getOtherParticipantName: participants =', participants);
     console.log('getOtherParticipantName: current user uid =', userProfile?.uid);
     console.log('getOtherParticipantName: current user role =', userProfile?.role);
@@ -223,7 +240,7 @@ export default function SecurityMessaging({ onClose }: SecurityMessagingProps) {
     }
   };
 
-  const getOtherParticipantRole = (participants: any[]) => {
+  const getOtherParticipantRole = (participants: Participant[]) => {
     if (!participants || participants.length === 0) {
       return 'security_team';
     }

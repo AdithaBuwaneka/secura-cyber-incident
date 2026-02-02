@@ -38,13 +38,14 @@ interface MessageThreadProps {
 
 export default function MessageThread({ incidentId, conversationId, onClose }: MessageThreadProps) {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
-  const { isConnected: globalConnected, sendMessage: sendGlobalMessage, joinRoom, leaveRoom } = useMessaging();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _messaging = useMessaging();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(undefined);
   const [isConnected, setIsConnected] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -221,7 +222,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         console.log('Raw messages from API:', messages);
         
         // Ensure messages have proper structure for display
-        const processedMessages = messages.map((msg: any) => ({
+        const processedMessages = messages.map((msg: Partial<Message> & { id: string; sender_id: string; created_at: string }) => ({
           id: msg.id,
           sender_id: msg.sender_id,
           sender_name: msg.sender_name || 'Unknown User',
@@ -274,7 +275,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
             const latestMessages = data.messages || [];
             
             setMessages(prev => {
-              const processedMessages = latestMessages.map((msg: any) => ({
+              const processedMessages = latestMessages.map((msg: Partial<Message> & { id: string; sender_id: string; created_at: string }) => ({
                 id: msg.id,
                 sender_id: msg.sender_id,
                 sender_name: msg.sender_name || 'Unknown User',
@@ -286,7 +287,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
                 message_type: msg.message_type || 'text'
               }));
               
-              const newMessages = processedMessages.filter(msg => 
+              const newMessages = processedMessages.filter((msg: Message) => 
                 !prev.some(existingMsg => existingMsg.id === msg.id)
               );
               
@@ -362,7 +363,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           toast.error('Failed to find conversation');
           return;
         }
-      } catch (error) {
+      } catch {
         toast.error('Error finding conversation');
         return;
       }
