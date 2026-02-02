@@ -1,3 +1,13 @@
+---
+title: Secura Backend
+emoji: 🛡️
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 🛡️ Secura - AI-Powered Cyber Incident Management System
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.5-black)](https://nextjs.org/)

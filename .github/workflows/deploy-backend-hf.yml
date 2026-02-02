@@ -1,4 +1,4 @@
-name: Deploy Backend to Hugging Face
+name: Deploy to HuggingFace Spaces
 
 on:
   push:
@@ -6,25 +6,24 @@ on:
       - main
     paths:
       - 'backend/**'
-  workflow_dispatch:
+      - 'Dockerfile'
+      - '.github/workflows/deploy-backend-hf.yml'
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          lfs: true
 
-      - name: Push backend to HF Space
+      - name: Push to HuggingFace Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          git config user.email "action@github.com"
-          git config user.name "GitHub Action"
-
-          # Create a new branch with only backend contents at root
-          git subtree split --prefix=backend -b hf-deploy
-
-          # Push to HuggingFace
-          git push -f https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-deploy:main
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git remote add hf https://adithaf7:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend || true
+          git push hf main --force
