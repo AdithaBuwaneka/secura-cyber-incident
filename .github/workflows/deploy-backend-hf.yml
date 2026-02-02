@@ -11,23 +11,20 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
         with:
-          python-version: '3.11'
+          fetch-depth: 0
 
-      - name: Install huggingface_hub
-        run: pip install huggingface_hub
-
-      - name: Upload to Hugging Face
+      - name: Push backend to HF Space
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          cd backend
-          rm -rf hf-deploy hf-temp __pycache__ 2>/dev/null || true
-          find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || true
-          huggingface-cli upload adithaf7/secura-backend . . --repo-type space --token $HF_TOKEN --delete "*"
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+
+          # Create a new branch with only backend contents at root
+          git subtree split --prefix=backend -b hf-deploy
+
+          # Push to HuggingFace
+          git push -f https://user:$HF_TOKEN@huggingface.co/spaces/adithaf7/secura-backend hf-deploy:main
