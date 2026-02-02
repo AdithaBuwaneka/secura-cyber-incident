@@ -132,4 +132,9 @@ __pycache__/
 
 # OS specific files
 .DS_Store
-Thumbs.db
+Thumbs.dbdocs/*.png
+docs/*.jpg
+docs/*.jpeg
+docs/**/*.png
+docs/**/*.jpg
+docs/**/*.jpeg
