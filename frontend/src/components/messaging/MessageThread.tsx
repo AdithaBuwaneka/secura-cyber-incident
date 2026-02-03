@@ -60,7 +60,6 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
   const initializeWebSocket = useCallback(async (cachedConvId?: string) => {
     if (!idToken || !userProfile?.uid) {
-      console.log('[MessageThread] Cannot initialize WebSocket: missing auth');
       setIsConnected(false);
       return;
     }
@@ -69,34 +68,22 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     let targetConversationId = cachedConvId || conversationId || currentConversationId;
 
     if (!targetConversationId) {
-      console.log('[MessageThread] Cannot initialize WebSocket: missing conversation ID');
       setIsConnected(false);
       return;
     }
 
     // Close existing connection if any
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
-      console.log('[MessageThread] WebSocket already connected');
       return; // Already connected
-    }
-
-    // Check if backend supports WebSocket (HuggingFace Spaces doesn't)
-    const isHuggingFace = API_URL.includes('hf.space') || API_URL.includes('huggingface');
-    if (isHuggingFace) {
-      console.log('[MessageThread] HuggingFace detected - using polling only');
-      setIsConnected(false);
-      return;
     }
 
     try {
       const wsUrl = `${WS_URL}/api/messaging/ws/${targetConversationId}?token=${idToken}`;
-      console.log('[MessageThread] Attempting WebSocket connection...');
       wsRef.current = new WebSocket(wsUrl);
 
       // Set a timeout to fallback to polling if connection fails
       const connectionTimeout = setTimeout(() => {
         if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
-          console.log('[MessageThread] WebSocket timeout - using polling');
           wsRef.current.close();
           setIsConnected(false);
         }
@@ -105,7 +92,6 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       wsRef.current.onopen = () => {
         clearTimeout(connectionTimeout);
         setIsConnected(true);
-        console.log('[MessageThread] WebSocket connected');
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'join_room',
@@ -145,25 +131,21 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           } else if (data.type === 'typing') {
             setIsTyping(data.is_typing && data.user_id !== userProfile?.uid);
           }
-        } catch (error) {
-          console.error('[MessageThread] Failed to parse message:', error);
+        } catch {
+          // Silent fail
         }
       };
 
-      wsRef.current.onclose = (event) => {
+      wsRef.current.onclose = () => {
         clearTimeout(connectionTimeout);
         setIsConnected(false);
-        console.log(`[MessageThread] WebSocket closed. Code: ${event.code}`);
-        // Don't auto-reconnect - polling will handle it
       };
 
       wsRef.current.onerror = () => {
         clearTimeout(connectionTimeout);
-        console.log('[MessageThread] WebSocket error - using polling');
         setIsConnected(false);
       };
-    } catch (error) {
-      console.log('[MessageThread] WebSocket failed - using polling:', error);
+    } catch {
       setIsConnected(false);
     }
   }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL, API_URL]);
@@ -205,17 +187,13 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     }
     // For incident chats: fetch conversation by incident ID
     else if (!targetConversationId && incidentId) {
-      console.log('[MessageThread] Fetching conversation for incident:', incidentId);
       try {
         const convResponse = await fetch(`${API_URL}/api/messaging/conversations/incident/${incidentId}`, {
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
 
-        console.log('[MessageThread] Conversation fetch status:', convResponse.status);
-
         if (convResponse.ok) {
           const conversation = await convResponse.json();
-          console.log('[MessageThread] Conversation loaded:', conversation);
           targetConversationId = conversation.id;
 
           // Cache conversation data
@@ -241,16 +219,21 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           // Initialize WebSocket with the conversation ID
           initializeWebSocket(targetConversationId);
         } else {
-          console.error('[MessageThread] Conversation not found for incident:', incidentId, 'Status:', convResponse.status);
-          const errorText = await convResponse.text();
-          console.error('[MessageThread] Error response:', errorText);
-          toast.error('Conversation not found. Please try reloading the incident.');
+          // For 404, the conversation might not exist yet - retry after a delay
+          if (convResponse.status === 404) {
+            toast.error('Creating conversation, please wait...');
+            setTimeout(() => {
+              loadMessages();
+            }, 2000);
+          } else {
+            toast.error('Failed to load conversation. Please refresh the page.');
+          }
+          
           setIsLoading(false);
           return;
         }
-      } catch (error) {
-        console.error('[MessageThread] Failed to fetch conversation:', error);
-        toast.error('Failed to load conversation');
+      } catch {
+        toast.error('Failed to load conversation. Check your connection.');
         setIsLoading(false);
         return;
       }
@@ -265,18 +248,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     targetConversationId = conversationId || currentConversationId || targetConversationId;
 
     if (!targetConversationId) {
-      console.error('[MessageThread] No conversation ID available after all attempts');
-      console.error('[MessageThread] Debug info:', {
-        incidentId,
-        conversationId,
-        currentConversationId,
-        cached: conversationCacheRef.current?.id
-      });
       setIsLoading(false);
       return;
     }
-
-    console.log('[MessageThread] Loading messages for conversation:', targetConversationId);
 
     try {
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
@@ -320,11 +294,8 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
     // Only poll if not connected and we have a conversation
     if (isConnected || !currentConversationId || !idToken) {
-      console.log('[MessageThread] Polling not started:', { isConnected, hasConversation: !!currentConversationId, hasToken: !!idToken });
       return;
     }
-
-    console.log('[MessageThread] Starting message polling every 5 seconds');
 
     messagePollingRef.current = setInterval(async () => {
       if (isConnected || !currentConversationId) return;
@@ -355,19 +326,13 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               !prev.some(existingMsg => existingMsg.id === msg.id)
             );
 
-            if (newMessages.length > 0) {
-              console.log('[MessageThread] Polling found new messages:', newMessages.length);
-            }
-
             return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
           });
-        } else {
-          console.error('[MessageThread] Polling error - status:', response.status);
         }
-      } catch (error) {
-        console.error('[MessageThread] Polling error:', error);
+      } catch {
+        // Silent fail
       }
-    }, 5000); // Poll every 5 seconds when disconnected
+    }, 2000); // Poll every 2 seconds when WebSocket disconnected
   }, [isConnected, currentConversationId, idToken, API_URL]);
 
   useEffect(() => {
@@ -414,12 +379,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     const targetConversationId = conversationId || currentConversationId || conversationCacheRef.current?.id;
 
     if (!targetConversationId) {
-      console.error('[MessageThread] Cannot send message: No conversation ID');
       toast.error('No conversation available');
       return;
     }
-
-    console.log('[MessageThread] Sending message to conversation:', targetConversationId);
 
     try {
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
@@ -434,11 +396,8 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         })
       });
 
-      console.log('[MessageThread] Send message response status:', response.status);
-
       if (response.ok) {
         const result = await response.json();
-        console.log('[MessageThread] Message sent successfully:', result);
 
         // Add message immediately to UI
         const tempMessage: Message = {
@@ -470,14 +429,11 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
         setNewMessage('');
         setAttachments([]);
-        toast.success('Message sent');
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error('[MessageThread] Failed to send message:', errorData);
         toast.error(errorData.detail || 'Failed to send message');
       }
-    } catch (error) {
-      console.error('[MessageThread] Error sending message:', error);
+    } catch {
       toast.error('Failed to send message');
     }
   };
@@ -747,9 +703,14 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                placeholder={!currentConversationId ? "Loading conversation..." : "Type your message..."}
-                className="flex-1 p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+                placeholder={
+                  isLoading ? "Loading..." : 
+                  !currentConversationId ? "Unable to load conversation" : 
+                  "Type your message..."
+                }
+                className="flex-1 p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!currentConversationId || isLoading}
+                title={!currentConversationId ? "Waiting for conversation to load" : ""}
               />
               <label className="p-2 text-gray-400 hover:text-white cursor-pointer transition-colors">
                 <Paperclip className="h-4 w-4" />

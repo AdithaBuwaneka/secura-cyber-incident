@@ -68,18 +68,32 @@ export default function SystemConfig() {
           headers: { 'Authorization': `Bearer ${idToken}` }
         })
       ]);
-      if (!statsResponse.ok || !configResponse.ok) {
-        throw new Error('Failed to fetch system data');
+      
+      // Handle stats response
+      let statsData = null;
+      if (statsResponse.ok) {
+        statsData = await statsResponse.json();
+      } else {
+        const errorText = await statsResponse.text();
+        console.error('Stats error:', statsResponse.status, errorText);
+        toast.error('Failed to load system stats');
       }
-      const [statsData, configData] = await Promise.all([
-        statsResponse.json(),
-        configResponse.json()
-      ]);
+      
+      // Handle config response
+      let configData = null;
+      if (configResponse.ok) {
+        configData = await configResponse.json();
+      } else {
+        const errorText = await configResponse.text();
+        console.error('Config error:', configResponse.status, errorText);
+        toast.error('Failed to load system configuration');
+      }
+      
       setSystemStats(statsData);
       setConfig(configData);
     } catch (error) {
       console.error('Error fetching system data:', error);
-      toast.error('Failed to load system data');
+      toast.error('Failed to load system data. Check connection.');
     } finally {
       setLoading(false);
     }
