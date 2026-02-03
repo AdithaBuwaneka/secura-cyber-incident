@@ -80,24 +80,32 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       return; // Already connected
     }
 
+    // Check if backend supports WebSocket (HuggingFace Spaces doesn't)
+    const isHuggingFace = API_URL.includes('hf.space') || API_URL.includes('huggingface');
+    if (isHuggingFace) {
+      console.log('[MessageThread] HuggingFace detected - using polling only');
+      setIsConnected(false);
+      return;
+    }
+
     try {
       const wsUrl = `${WS_URL}/api/messaging/ws/${targetConversationId}?token=${idToken}`;
-      console.log('[MessageThread] Connecting to WebSocket:', WS_URL, 'Conversation:', targetConversationId);
+      console.log('[MessageThread] Attempting WebSocket connection...');
       wsRef.current = new WebSocket(wsUrl);
 
       // Set a timeout to fallback to polling if connection fails
       const connectionTimeout = setTimeout(() => {
         if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
-          console.log('[MessageThread] WebSocket connection timeout - falling back to polling');
+          console.log('[MessageThread] WebSocket timeout - using polling');
           wsRef.current.close();
           setIsConnected(false);
         }
-      }, 5000); // 5 second timeout
+      }, 3000); // 3 second timeout
 
       wsRef.current.onopen = () => {
         clearTimeout(connectionTimeout);
         setIsConnected(true);
-        console.log('[MessageThread] WebSocket connected successfully');
+        console.log('[MessageThread] WebSocket connected');
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'join_room',
@@ -145,25 +153,20 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       wsRef.current.onclose = (event) => {
         clearTimeout(connectionTimeout);
         setIsConnected(false);
-        console.log(`[MessageThread] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
-        // Don't auto-reconnect - let polling handle it
+        console.log(`[MessageThread] WebSocket closed. Code: ${event.code}`);
+        // Don't auto-reconnect - polling will handle it
       };
 
-      wsRef.current.onerror = (error) => {
+      wsRef.current.onerror = () => {
         clearTimeout(connectionTimeout);
-        console.error('[MessageThread] WebSocket error - falling back to polling:', {
-          readyState: wsRef.current?.readyState,
-          url: WS_URL,
-          conversationId: targetConversationId,
-          error: error
-        });
+        console.log('[MessageThread] WebSocket error - using polling');
         setIsConnected(false);
       };
     } catch (error) {
-      console.error('[MessageThread] Failed to initialize WebSocket - using polling:', error);
+      console.log('[MessageThread] WebSocket failed - using polling:', error);
       setIsConnected(false);
     }
-  }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL]);
+  }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL, API_URL]);
 
   const loadMessages = useCallback(async () => {
     if (!idToken) {
@@ -297,7 +300,12 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     }
 
     // Only poll if not connected and we have a conversation
-    if (isConnected || !currentConversationId || !idToken) return;
+    if (isConnected || !currentConversationId || !idToken) {
+      console.log('[MessageThread] Polling not started:', { isConnected, hasConversation: !!currentConversationId, hasToken: !!idToken });
+      return;
+    }
+
+    console.log('[MessageThread] Starting message polling every 5 seconds');
 
     messagePollingRef.current = setInterval(async () => {
       if (isConnected || !currentConversationId) return;
@@ -328,13 +336,19 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               !prev.some(existingMsg => existingMsg.id === msg.id)
             );
 
+            if (newMessages.length > 0) {
+              console.log('[MessageThread] Polling found new messages:', newMessages.length);
+            }
+
             return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
           });
+        } else {
+          console.error('[MessageThread] Polling error - status:', response.status);
         }
-      } catch {
-        // Silent fail
+      } catch (error) {
+        console.error('[MessageThread] Polling error:', error);
       }
-    }, 5000); // Poll every 5 seconds when disconnected (was 3)
+    }, 5000); // Poll every 5 seconds when disconnected
   }, [isConnected, currentConversationId, idToken, API_URL]);
 
   useEffect(() => {
@@ -381,9 +395,12 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     const targetConversationId = conversationId || currentConversationId || conversationCacheRef.current?.id;
 
     if (!targetConversationId) {
+      console.error('[MessageThread] Cannot send message: No conversation ID');
       toast.error('No conversation available');
       return;
     }
+
+    console.log('[MessageThread] Sending message to conversation:', targetConversationId);
 
     try {
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
@@ -398,8 +415,11 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         })
       });
 
+      console.log('[MessageThread] Send message response status:', response.status);
+
       if (response.ok) {
         const result = await response.json();
+        console.log('[MessageThread] Message sent successfully:', result);
 
         // Add message immediately to UI
         const tempMessage: Message = {
@@ -415,7 +435,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         };
         setMessages(prev => [...prev, tempMessage]);
 
-        // Send via WebSocket for real-time delivery
+        // Send via WebSocket for real-time delivery (if connected)
         if (wsRef.current?.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'new_message',
@@ -431,11 +451,14 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
         setNewMessage('');
         setAttachments([]);
+        toast.success('Message sent');
       } else {
         const errorData = await response.json().catch(() => ({}));
+        console.error('[MessageThread] Failed to send message:', errorData);
         toast.error(errorData.detail || 'Failed to send message');
       }
-    } catch {
+    } catch (error) {
+      console.error('[MessageThread] Error sending message:', error);
       toast.error('Failed to send message');
     }
   };
@@ -527,9 +550,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               {conversationTitle}
             </h3>
             <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-orange-400'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-green-400'}`}></div>
               <span className="text-xs text-gray-400">
-                {isConnected ? 'Connected' : 'Polling Mode'}
+                Connected
               </span>
             </div>
           </div>
