@@ -4,9 +4,10 @@ Handles system settings, monitoring, and configuration
 """
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 import psutil
 import os
+import time
 from datetime import datetime, timedelta
 from app.models.user import User
 from app.models.common import UserRole
@@ -15,6 +16,26 @@ from app.core.firebase_config import FirebaseConfig
 from app.utils.logging import log_system_activity
 
 router = APIRouter(tags=["System Configuration"])
+
+
+# PERFORMANCE: Cache for system overview data
+class SystemOverviewCache:
+    def __init__(self, ttl_seconds: int = 60):
+        self._cache: Optional[Dict] = None
+        self._timestamp: float = 0
+        self._ttl = ttl_seconds
+
+    def get(self) -> Optional[Dict]:
+        if self._cache and time.time() - self._timestamp < self._ttl:
+            return self._cache
+        return None
+
+    def set(self, value: Dict):
+        self._cache = value
+        self._timestamp = time.time()
+
+
+_overview_cache = SystemOverviewCache(ttl_seconds=60)
 
 @router.get("/stats")
 async def get_system_stats(
@@ -323,82 +344,84 @@ async def get_system_overview(
 ):
     """
     Get system overview data for admin dashboard
-    Admin only endpoint
+    Admin only endpoint - CACHED for 60 seconds
     """
     if current_user.role != UserRole.ADMIN:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin access required"
         )
-    
+
+    # PERFORMANCE: Check cache first
+    cached = _overview_cache.get()
+    if cached:
+        return cached
+
     try:
         db = FirebaseConfig.get_firestore()
-        
-        # Count users by role
+
+        # PERFORMANCE FIX: Convert to_dict() once and reuse
+        # Count users by role - single pass through data
         users_ref = db.collection('users')
-        users = list(users_ref.stream())
-        
-        total_users = len(users)
-        security_team_count = len([u for u in users if u.to_dict().get('role') == 'security_team'])
-        admin_count = len([u for u in users if u.to_dict().get('role') == 'admin'])
-        employee_count = len([u for u in users if u.to_dict().get('role') == 'employee'])
-        
-        # Count applications
+        users_data = [u.to_dict() for u in users_ref.stream()]
+
+        total_users = len(users_data)
+        security_team_count = sum(1 for u in users_data if u.get('role') == 'security_team')
+        admin_count = sum(1 for u in users_data if u.get('role') == 'admin')
+        employee_count = sum(1 for u in users_data if u.get('role') == 'employee')
+
+        # Count applications - single pass
         apps_ref = db.collection('security_applications')
-        applications = list(apps_ref.stream())
-        
-        total_applications = len(applications)
-        pending_applications = len([a for a in applications if a.to_dict().get('status') == 'pending'])
-        approved_applications = len([a for a in applications if a.to_dict().get('status') == 'approved'])
-        
-        # Count incidents (if you have incidents collection)
+        apps_data = [a.to_dict() for a in apps_ref.stream()]
+
+        total_applications = len(apps_data)
+        pending_applications = sum(1 for a in apps_data if a.get('status') == 'pending')
+        approved_applications = sum(1 for a in apps_data if a.get('status') == 'approved')
+
+        # Count incidents - single pass with date filtering
+        thirty_days_ago = datetime.utcnow() - timedelta(days=30)
         try:
             incidents_ref = db.collection('incidents')
-            incidents = list(incidents_ref.stream())
-            total_incidents = len(incidents)
-            
-            # Recent incidents (last 30 days)
-            from datetime import datetime, timedelta
-            thirty_days_ago = datetime.utcnow() - timedelta(days=30)
+            incidents_data = [i.to_dict() for i in incidents_ref.stream()]
+            total_incidents = len(incidents_data)
+
+            # Count recent incidents in single pass
             recent_incidents = 0
-            
-            for i in incidents:
-                incident_data = i.to_dict()
-                created_at = incident_data.get('created_at')
+            for incident in incidents_data:
+                created_at = incident.get('created_at')
                 if created_at:
                     try:
-                        # Handle different datetime formats
-                        if hasattr(created_at, 'timestamp'):
-                            # Firestore timestamp
-                            incident_date = created_at.replace(tzinfo=None)
-                        elif isinstance(created_at, datetime):
-                            # Regular datetime
-                            incident_date = created_at.replace(tzinfo=None) if created_at.tzinfo else created_at
+                        if hasattr(created_at, 'replace'):
+                            incident_date = created_at.replace(tzinfo=None) if hasattr(created_at, 'tzinfo') and created_at.tzinfo else created_at
                         else:
                             continue
-                        
                         if incident_date > thirty_days_ago:
                             recent_incidents += 1
                     except:
                         continue
-                        
+
         except Exception as e:
             print(f"Error counting incidents: {e}")
             total_incidents = 0
             recent_incidents = 0
-        
-        # Calculate real growth rate (users created in last 30 days vs previous 30 days)
+
+        # Calculate growth rate - reuse users_data (already converted)
+        sixty_days_ago = datetime.utcnow() - timedelta(days=60)
         try:
-            thirty_days_ago = datetime.utcnow() - timedelta(days=30)
-            sixty_days_ago = datetime.utcnow() - timedelta(days=60)
-            
-            recent_users = len([u for u in users 
-                              if u.to_dict().get('created_at') and 
-                              u.to_dict().get('created_at').replace(tzinfo=None) > thirty_days_ago])
-            previous_users = len([u for u in users 
-                                if u.to_dict().get('created_at') and 
-                                sixty_days_ago < u.to_dict().get('created_at').replace(tzinfo=None) <= thirty_days_ago])
-            
+            recent_users = 0
+            previous_users = 0
+            for u in users_data:
+                created_at = u.get('created_at')
+                if created_at and hasattr(created_at, 'replace'):
+                    try:
+                        user_date = created_at.replace(tzinfo=None) if hasattr(created_at, 'tzinfo') and created_at.tzinfo else created_at
+                        if user_date > thirty_days_ago:
+                            recent_users += 1
+                        elif user_date > sixty_days_ago:
+                            previous_users += 1
+                    except:
+                        continue
+
             if previous_users > 0:
                 growth_rate = ((recent_users - previous_users) / previous_users) * 100
                 growth_rate_str = f"{'↑' if growth_rate >= 0 else '↓'} {abs(growth_rate):.1f}%"
@@ -424,7 +447,7 @@ async def get_system_overview(
         except:
             uptime_str = "99.9%"
 
-        return {
+        result = {
             "users": {
                 "total": total_users,
                 "security_team": security_team_count,
@@ -449,6 +472,10 @@ async def get_system_overview(
                 "last_issue": "No recent issues" if uptime_percentage > 99 else "System monitoring active"
             }
         }
+
+        # PERFORMANCE: Cache the result for 60 seconds
+        _overview_cache.set(result)
+        return result
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,

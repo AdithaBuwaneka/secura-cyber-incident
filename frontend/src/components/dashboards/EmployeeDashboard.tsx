@@ -101,12 +101,29 @@ export default function EmployeeDashboard() {
     dispatch(checkCanApply());
     fetchMyIncidents();
 
-    // Refresh incidents every 30 seconds
-    const interval = setInterval(() => {
-      fetchMyIncidents();
-    }, 30000);
+    // Listen for WebSocket updates instead of polling
+    const handleWebSocketMessage = (event: MessageEvent) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'incident_update' || data.type === 'new_message') {
+          // Refresh incidents when there's an update
+          fetchMyIncidents();
+        }
+      } catch {
+        // Ignore non-JSON messages
+      }
+    };
 
-    return () => clearInterval(interval);
+    const ws = (window as unknown as { securaWebSocket?: WebSocket }).securaWebSocket;
+    if (ws) {
+      ws.addEventListener('message', handleWebSocketMessage);
+    }
+
+    return () => {
+      if (ws) {
+        ws.removeEventListener('message', handleWebSocketMessage);
+      }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, idToken, API_URL]);
 

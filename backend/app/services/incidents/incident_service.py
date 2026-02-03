@@ -822,6 +822,16 @@ class IncidentService:
             stats['open'] = stats['pending'] + stats['investigating']
             stats['closed_total'] = stats['resolved'] + stats['closed']
 
+            # Count critical/high severity open incidents (for alert banner)
+            critical_high_open = 0
+            for doc in all_docs:
+                data = doc.to_dict()
+                status = str(data.get('status', '')).lower()
+                severity = str(data.get('severity', '')).lower()
+                if severity in ['critical', 'high'] and status not in ['resolved', 'closed']:
+                    critical_high_open += 1
+            stats['critical_high_open'] = critical_high_open
+
             self.cache.set(cache_key, stats)
             return stats
 

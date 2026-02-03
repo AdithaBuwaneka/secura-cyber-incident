@@ -138,9 +138,12 @@ export default function AdminDashboard() {
     useEffect(() => {
       dispatch(fetchPendingApplications());
       if (activeTab === 'overview' && idToken && isAuthenticated) {
-        fetchOverviewData();
-        fetchRecentLogs();
-        fetchRecentIncidents();
+        // PERFORMANCE: Fetch all data in parallel instead of sequential
+        Promise.all([
+          fetchOverviewData(),
+          fetchRecentLogs(),
+          fetchRecentIncidents()
+        ]).catch(err => console.error('Error loading dashboard data:', err));
       }
     }, [dispatch, activeTab, idToken, isAuthenticated, fetchOverviewData, fetchRecentLogs, fetchRecentIncidents]);
 
