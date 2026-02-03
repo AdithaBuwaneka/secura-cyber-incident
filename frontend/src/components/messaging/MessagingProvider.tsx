@@ -92,7 +92,17 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
       console.log('[MessagingProvider] Connecting to WebSocket:', WS_URL);
       wsRef.current = new WebSocket(wsUrl);
 
+      // Set a timeout to handle connection failures
+      const connectionTimeout = setTimeout(() => {
+        if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
+          console.log('[MessagingProvider] WebSocket connection timeout');
+          wsRef.current.close();
+          setIsConnected(false);
+        }
+      }, 5000); // 5 second timeout
+
       wsRef.current.onopen = () => {
+        clearTimeout(connectionTimeout);
         setIsConnected(true);
         console.log('[MessagingProvider] WebSocket connected successfully');
         
@@ -113,20 +123,22 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
       };
 
       wsRef.current.onclose = (event) => {
+        clearTimeout(connectionTimeout);
         setIsConnected(false);
         console.log(`[MessagingProvider] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
         
-        // Attempt to reconnect after 3 seconds if authenticated
+        // Attempt to reconnect after 10 seconds if authenticated (increased from 3)
         if (isAuthenticated && !reconnectTimeoutRef.current) {
-          console.log('[MessagingProvider] Will attempt reconnect in 3s...');
+          console.log('[MessagingProvider] Will attempt reconnect in 10s...');
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectTimeoutRef.current = null;
             initializeWebSocket();
-          }, 3000);
+          }, 10000);
         }
       };
 
       wsRef.current.onerror = (error) => {
+        clearTimeout(connectionTimeout);
         console.error('[MessagingProvider] WebSocket error:', {
           readyState: wsRef.current?.readyState,
           url: WS_URL,

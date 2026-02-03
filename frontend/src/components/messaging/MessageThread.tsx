@@ -61,6 +61,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
   const initializeWebSocket = useCallback(async (cachedConvId?: string) => {
     if (!idToken || !userProfile?.uid) {
       console.log('[MessageThread] Cannot initialize WebSocket: missing auth');
+      setIsConnected(false);
       return;
     }
 
@@ -69,6 +70,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
     if (!targetConversationId) {
       console.log('[MessageThread] Cannot initialize WebSocket: missing conversation ID');
+      setIsConnected(false);
       return;
     }
 
@@ -83,7 +85,17 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       console.log('[MessageThread] Connecting to WebSocket:', WS_URL, 'Conversation:', targetConversationId);
       wsRef.current = new WebSocket(wsUrl);
 
+      // Set a timeout to fallback to polling if connection fails
+      const connectionTimeout = setTimeout(() => {
+        if (wsRef.current && wsRef.current.readyState !== WebSocket.OPEN) {
+          console.log('[MessageThread] WebSocket connection timeout - falling back to polling');
+          wsRef.current.close();
+          setIsConnected(false);
+        }
+      }, 5000); // 5 second timeout
+
       wsRef.current.onopen = () => {
+        clearTimeout(connectionTimeout);
         setIsConnected(true);
         console.log('[MessageThread] WebSocket connected successfully');
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
@@ -131,19 +143,15 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       };
 
       wsRef.current.onclose = (event) => {
+        clearTimeout(connectionTimeout);
         setIsConnected(false);
         console.log(`[MessageThread] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
-        // Reconnect after 5 seconds
-        if (currentConversationId) {
-          console.log('[MessageThread] Will attempt reconnect in 5s...');
-          setTimeout(() => {
-            initializeWebSocket(currentConversationId);
-          }, 5000);
-        }
+        // Don't auto-reconnect - let polling handle it
       };
 
       wsRef.current.onerror = (error) => {
-        console.error('[MessageThread] WebSocket error:', {
+        clearTimeout(connectionTimeout);
+        console.error('[MessageThread] WebSocket error - falling back to polling:', {
           readyState: wsRef.current?.readyState,
           url: WS_URL,
           conversationId: targetConversationId,
@@ -152,7 +160,8 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         setIsConnected(false);
       };
     } catch (error) {
-      console.error('[MessageThread] Failed to initialize WebSocket:', error);
+      console.error('[MessageThread] Failed to initialize WebSocket - using polling:', error);
+      setIsConnected(false);
     }
   }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL]);
 
@@ -518,9 +527,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               {conversationTitle}
             </h3>
             <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-orange-400'}`}></div>
               <span className="text-xs text-gray-400">
-                {isConnected ? 'Connected' : 'Connecting...'}
+                {isConnected ? 'Connected' : 'Polling Mode'}
               </span>
             </div>
           </div>
