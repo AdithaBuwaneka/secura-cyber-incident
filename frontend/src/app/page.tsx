@@ -26,12 +26,12 @@ export default function Home() {
             <span className="text-xs min-[400px]:text-sm font-medium text-[#00D4FF]">AI-Powered Security Platform</span>
           </div>
 
-          <h2 className="text-3xl min-[400px]:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 min-[400px]:mb-8 leading-tight">
-            <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent">
+          <h2 className="text-3xl min-[400px]:text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 min-[400px]:mb-8 leading-tight pb-1">
+            <span className="bg-gradient-to-r from-white via-gray-100 to-gray-300 bg-clip-text text-transparent inline-block pb-1">
               Enterprise Security
             </span>
             <br />
-            <span className="bg-gradient-to-r from-[#00D4FF] via-[#0EA5E9] to-[#3B82F6] bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-[#00D4FF] via-[#0EA5E9] to-[#3B82F6] bg-clip-text text-transparent inline-block pb-1">
               Incident Management
             </span>
           </h2>
@@ -72,8 +72,8 @@ export default function Home() {
         {/* Features Grid */}
         <div className="py-12 min-[400px]:py-16 sm:py-20 md:py-24">
           <div className="text-center mb-10 min-[400px]:mb-12 sm:mb-16">
-            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-3 min-[400px]:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Revolutionary Features
+            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-3 min-[400px]:mb-4 pb-1">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Revolutionary Features</span>
             </h3>
             <p className="text-gray-400 text-sm min-[400px]:text-base sm:text-lg max-w-2xl mx-auto">
               Cutting-edge technology meets intuitive design for unparalleled security management
@@ -134,8 +134,8 @@ export default function Home() {
         {/* User Roles Section */}
         <div className="py-12 min-[400px]:py-16 sm:py-20 md:py-24">
           <div className="text-center mb-10 min-[400px]:mb-12 sm:mb-16">
-            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-3 min-[400px]:mb-4 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Built for Every Role
+            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-3 min-[400px]:mb-4 pb-1">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Built for Every Role</span>
             </h3>
             <p className="text-gray-400 text-sm min-[400px]:text-base sm:text-lg max-w-2xl mx-auto">
               Tailored experiences that empower every team member to contribute to your organization&apos;s security
@@ -220,8 +220,8 @@ export default function Home() {
         {/* CTA Section */}
         <div className="py-12 min-[400px]:py-16 sm:py-20 md:py-24 text-center">
           <div className="bg-gradient-to-r from-[#00D4FF]/10 to-[#0EA5E9]/10 rounded-2xl min-[400px]:rounded-3xl p-6 min-[400px]:p-8 sm:p-12 border border-[#00D4FF]/20 backdrop-blur-sm">
-            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 min-[400px]:mb-6 bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">
-              Ready to Transform Your Security?
+            <h3 className="text-2xl min-[400px]:text-3xl sm:text-4xl md:text-5xl font-bold mb-4 min-[400px]:mb-6 pb-1">
+              <span className="bg-gradient-to-r from-white to-gray-300 bg-clip-text text-transparent">Ready to Transform Your Security?</span>
             </h3>
             <p className="text-base min-[400px]:text-lg sm:text-xl text-gray-300 mb-6 min-[400px]:mb-8 max-w-3xl mx-auto">
               Join thousands of organizations already protecting their digital assets with Secura&apos;s intelligent security platform.
