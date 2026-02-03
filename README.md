@@ -17,6 +17,15 @@ app_port: 7860
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)](https://typescriptlang.org/)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 
+## 🌐 **Live Deployment**
+
+- **🌍 Frontend (Vercel):** [https://secura-cyber-incident.vercel.app](https://secura-cyber-incident.vercel.app)
+- **🚀 Backend API (HuggingFace):** [https://adithaf7-secura-backend.hf.space](https://adithaf7-secura-backend.hf.space)
+- **💚 Health Check:** [https://adithaf7-secura-backend.hf.space/health](https://adithaf7-secura-backend.hf.space/health)
+- **📖 API Docs:** [https://adithaf7-secura-backend.hf.space/docs](https://adithaf7-secura-backend.hf.space/docs)
+- **🤗 HuggingFace Space:** [https://huggingface.co/spaces/adithaf7/secura-backend](https://huggingface.co/spaces/adithaf7/secura-backend)
+- **🔄 GitHub Actions:** [View CI/CD Pipeline](https://github.com/AdithaBuwaneka/secura-cyber-incident/actions)
+
 **Secura** is a comprehensive, AI-powered cybersecurity incident management platform designed to streamline incident reporting, enhance threat analysis, and facilitate real-time collaboration between employees, security teams, and administrators.
 
 ## 🎯 **Key Features**
