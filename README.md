@@ -148,6 +148,9 @@ npm run dev
 - **Access**: Incident management & AI tools
 
 **Employee Account:**
+- **Email**: `employee1@secura.com`
+- **Password**: `SecuraEmployee123!`
+- **Access**: Incident reporting & status tracking
 - **Create New**: Register at http://localhost:3000/auth/register
 - **Auto Role**: Employee (can apply for security team)
 
