@@ -134,41 +134,68 @@ class ConversationService:
         offset: int = 0
     ) -> List[ConversationResponse]:
         """Get conversations for a user based on their role and permissions"""
-        
+
         # Get conversations where user is a participant
         participant_query = self.participants_collection.where('user_id', '==', user_id)
-        participant_docs = participant_query.stream()
-        
+        participant_docs = list(participant_query.stream())
+
         conversation_ids = [doc.to_dict()['conversation_id'] for doc in participant_docs]
-        
+
         if not conversation_ids:
             return []
-        
+
+        # PERFORMANCE FIX: Batch load conversations instead of N+1 queries
+        # Firestore 'in' query has limit of 10, so batch if needed
+        conversations_data = []
+        for i in range(0, len(conversation_ids), 10):
+            batch_ids = conversation_ids[i:i+10]
+            batch_docs = self.conversations_collection.where('id', 'in', batch_ids).stream()
+            for doc in batch_docs:
+                data = doc.to_dict()
+                conversations_data.append(data)
+
+        # Batch load all participants for these conversations
+        all_participants = {}
+        for i in range(0, len(conversation_ids), 10):
+            batch_ids = conversation_ids[i:i+10]
+            participant_docs = self.participants_collection.where('conversation_id', 'in', batch_ids).stream()
+            for pdoc in participant_docs:
+                pdata = pdoc.to_dict()
+                conv_id = pdata.get('conversation_id')
+                if conv_id not in all_participants:
+                    all_participants[conv_id] = []
+                all_participants[conv_id].append(pdata)
+
         conversations = []
-        for conv_id in conversation_ids:
-            conv = await self.get_conversation(conv_id)
-            if conv:
+        for data in conversations_data:
+            try:
+                conv_id = data.get('id')
+
                 # Filter by conversation type if specified
-                if conversation_type and conv.conversation_type != conversation_type:
+                conv_type_str = data.get('conversation_type')
+                conv_type = ConversationType(conv_type_str) if conv_type_str else None
+
+                if conversation_type and conv_type != conversation_type:
                     continue
-                
-                # Additional filtering based on user role
-                if user_role == "employee":
-                    # Employees can only see incident chats they're part of
-                    if conv.conversation_type == ConversationType.TEAM_INTERNAL:
-                        continue
-                elif user_role == "security_team":
-                    # Security team can see incident chats and team internal
-                    pass
-                elif user_role == "admin":
-                    # Admin can see everything
-                    pass
-                
-                conversations.append(conv)
-        
+
+                # Role-based filtering
+                if user_role == "employee" and conv_type == ConversationType.TEAM_INTERNAL:
+                    continue
+
+                # Add participants from batch-loaded data
+                data['participants'] = all_participants.get(conv_id, [])
+                data['participant_count'] = len(data['participants'])
+                data['conversation_type'] = conv_type
+                data['status'] = ConversationStatus(data.get('status', 'active'))
+
+                conversations.append(ConversationResponse(**data))
+            except Exception as e:
+                print(f"Error processing conversation: {e}")
+                continue
+
         # Sort by last message time
         conversations.sort(key=lambda x: x.last_message_time or x.created_at, reverse=True)
-        
+
         # Apply pagination
         return conversations[offset:offset + limit]
 

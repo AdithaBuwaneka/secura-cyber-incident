@@ -104,37 +104,88 @@ export default function SecurityTeamDashboard() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [showTeamDetails, setShowTeamDetails] = useState(false);
   const [showCriticalIncidents, setShowCriticalIncidents] = useState(false);
+  const [criticalIncidents, setCriticalIncidents] = useState<Incident[]>([]);
+  const [loadingCritical, setLoadingCritical] = useState(false);
   const [showProfile, setShowProfile] = useState(false);
+  const [stats, setStats] = useState({
+    total: 0,
+    pending: 0,
+    investigating: 0,
+    resolved: 0,
+    closed: 0,
+    open: 0,
+    closed_total: 0,
+    critical_high_open: 0
+  });
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
-  // Fetch incidents function (moved outside useEffect for reusability)
-  const fetchIncidents = async () => {
+  // Fetch critical/high incidents for the modal
+  const fetchCriticalIncidents = async () => {
     if (idToken) {
       try {
-        setLoading(true);
-        // Fetch ALL incidents for accurate statistics
-        // Use the pagination endpoint to get all incidents with accurate counts
-        const response = await fetch(`${API_URL}/api/incidents/?limit=10000&include_pagination=true`, {
+        setLoadingCritical(true);
+        // Fetch incidents with severity filter
+        const response = await fetch(`${API_URL}/api/incidents/?limit=100`, {
           headers: {
             'Authorization': `Bearer ${idToken}`
           }
         });
-        
+
         if (response.ok) {
           const data = await response.json();
-          
-          // Check if we got paginated response
-          if (data.incidents && data.pagination) {
-            console.log('Security team fetched incidents with pagination:', data);
-            console.log(`Total incidents: ${data.pagination.total_incidents}`);
-            setIncidents(data.incidents);
-          } else {
-            // Fallback to old format
-            console.log('Security team fetched incidents:', data);
-            setIncidents(data);
+          const allIncidents = data.incidents || data;
+          // Filter for critical/high severity that are not resolved
+          const critical = allIncidents.filter((i: Incident) =>
+            (i.severity === 'critical' || i.severity === 'high') &&
+            i.status !== 'resolved' && i.status !== 'closed'
+          );
+          setCriticalIncidents(critical);
+        }
+      } catch (error) {
+        console.error('Failed to fetch critical incidents:', error);
+      } finally {
+        setLoadingCritical(false);
+      }
+    }
+  };
+
+  // FAST: Fetch dashboard stats (counts only)
+  const fetchDashboardStats = async () => {
+    if (idToken) {
+      try {
+        const response = await fetch(`${API_URL}/api/incidents/dashboard/stats`, {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
           }
-          
-          console.log('First incident with attachments:', (data.incidents || data).find((inc: Incident) => inc.attachments && inc.attachments.length > 0));
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Dashboard stats:', data);
+          setStats(data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch dashboard stats:', error);
+      }
+    }
+  };
+
+  // FAST: Fetch recent incidents for queue (no attachments)
+  const fetchIncidents = async () => {
+    if (idToken) {
+      try {
+        setLoading(true);
+        // Use FAST endpoint - only gets 10 recent incidents without attachments
+        const response = await fetch(`${API_URL}/api/incidents/dashboard/queue?limit=10`, {
+          headers: {
+            'Authorization': `Bearer ${idToken}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Dashboard queue:', data);
+          setIncidents(data.incidents || data);
         }
       } catch (error) {
         console.error('Failed to fetch incidents:', error);
@@ -194,6 +245,7 @@ export default function SecurityTeamDashboard() {
     };
     
     fetchIncidents();
+    fetchDashboardStats();
     fetchTeamMembers();
     
     // Note: Removed automatic 30-second refresh to reduce server load
@@ -205,8 +257,9 @@ export default function SecurityTeamDashboard() {
         const data = JSON.parse(event.data);
         if (data.type === 'new_incident') {
           console.log('New incident notification received:', data);
-          // Refresh incidents when a new one is reported
+          // Refresh incidents and stats when a new one is reported
           fetchIncidents();
+          fetchDashboardStats();
           toast(`New incident reported: ${data.title || 'Untitled'}`);
         }
       } catch {
@@ -288,8 +341,9 @@ export default function SecurityTeamDashboard() {
             assigned_at: undefined,
             status: 'new'
           }) : null);
-          
+
           fetchIncidents();
+          fetchDashboardStats();
           toast.success('Incident unassigned successfully');
         } else {
           toast.error('Failed to unassign incident');
@@ -320,10 +374,11 @@ export default function SecurityTeamDashboard() {
           assigned_at: new Date().toISOString(),
           status: 'investigating'
         }) : null);
-        
-        // Refresh incidents list to update the UI and stats
+
+        // Refresh incidents list and stats to update the UI
         fetchIncidents();
-        
+        fetchDashboardStats();
+
         toast.success(`Incident assigned to ${assigneeName}`);
       } else {
         const error = await response.json();
@@ -420,7 +475,7 @@ export default function SecurityTeamDashboard() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Critical Alert Banner */}
-        {incidents.filter(i => (i.severity === 'critical' || i.severity === 'high') && i.status !== 'resolved' && i.status !== 'closed').length > 0 && (
+        {stats.critical_high_open > 0 && (
           <div className="bg-gradient-to-r from-red-500/20 to-orange-500/20 border border-red-500/30 p-4 rounded-lg mb-8">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -428,12 +483,15 @@ export default function SecurityTeamDashboard() {
                 <div>
                   <p className="font-semibold text-red-200">Critical Incidents Require Attention</p>
                   <p className="text-sm text-red-300">
-                    {incidents.filter(i => (i.severity === 'critical' || i.severity === 'high') && i.status !== 'resolved' && i.status !== 'closed').length} high-priority incidents need immediate investigation
+                    {stats.critical_high_open} high-priority incidents need immediate investigation
                   </p>
                 </div>
               </div>
-              <button 
-                onClick={() => setShowCriticalIncidents(true)}
+              <button
+                onClick={() => {
+                  fetchCriticalIncidents();
+                  setShowCriticalIncidents(true);
+                }}
                 className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
               >
                 Review Now
@@ -444,7 +502,7 @@ export default function SecurityTeamDashboard() {
 
         {/* Stats Grid */}
         <SecurityStatsGrid
-          incidents={incidents}
+          stats={stats}
           onlineTeamMembers={onlineTeamMembers}
           totalTeamMembers={totalTeamMembers}
           onTeamDetailsClick={() => setShowTeamDetails(true)}
@@ -1120,7 +1178,7 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
                 <div>
                   <h2 className="text-xl font-bold text-white">Critical Incidents</h2>
                   <p className="text-sm text-red-300 mt-1">
-                    {incidents.filter(i => (i.severity === 'critical' || i.severity === 'high') && i.status !== 'resolved' && i.status !== 'closed').length} high-priority incidents requiring immediate attention
+                    {stats.critical_high_open} high-priority incidents requiring immediate attention
                   </p>
                 </div>
               </div>
@@ -1134,10 +1192,14 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
 
             {/* Modal Content */}
             <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
-              {incidents.filter(i => (i.severity === 'critical' || i.severity === 'high') && i.status !== 'resolved' && i.status !== 'closed').length > 0 ? (
+              {loadingCritical ? (
+                <div className="p-12 text-center">
+                  <div className="animate-spin h-8 w-8 border-2 border-[#00D4FF] border-t-transparent rounded-full mx-auto mb-4" />
+                  <p className="text-gray-400">Loading critical incidents...</p>
+                </div>
+              ) : criticalIncidents.length > 0 ? (
                 <div className="p-6 space-y-4">
-                  {incidents
-                    .filter(i => (i.severity === 'critical' || i.severity === 'high') && i.status !== 'resolved' && i.status !== 'closed')
+                  {criticalIncidents
                     .sort((a, b) => {
                       // Sort by severity (critical first) then by creation date
                       if (a.severity === 'critical' && b.severity !== 'critical') return -1;

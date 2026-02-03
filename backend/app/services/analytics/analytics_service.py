@@ -2,6 +2,7 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime, timezone, timedelta
 from collections import defaultdict
 import time
+import asyncio
 
 from app.core.firebase_config import FirebaseConfig
 from app.models.common import IncidentType, IncidentSeverity, IncidentStatus
@@ -324,13 +325,16 @@ class AnalyticsService:
     
     async def get_executive_dashboard(self, days: int = 90) -> Dict[str, Any]:
         """Get executive dashboard with comprehensive KPIs"""
-        basic_metrics = await self.get_basic_metrics(days)
-        user_metrics = await self.get_user_activity_metrics()
-        incident_trends = await self.get_incident_trends(days)
-        
-        # Generate data-driven executive summary
+        # PERFORMANCE FIX: Run independent queries in parallel
+        basic_metrics, user_metrics, incident_trends = await asyncio.gather(
+            self.get_basic_metrics(days),
+            self.get_user_activity_metrics(),
+            self.get_incident_trends(days)
+        )
+
+        # Generate data-driven executive summary (depends on above results)
         executive_summary = await self._generate_executive_summary(basic_metrics, user_metrics, incident_trends, days)
-        
+
         return {
             **basic_metrics,
             "user_metrics": user_metrics,
