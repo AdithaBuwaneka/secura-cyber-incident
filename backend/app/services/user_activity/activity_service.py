@@ -129,39 +129,73 @@ class UserActivityService:
             # Get only security team members (excluding admin)
             users_ref = self.db.collection('users')
             security_members_query = users_ref.where('role', '==', 'security_team').where('is_active', '==', True)
-            security_members = security_members_query.stream()
-            
+            security_members = list(security_members_query.stream())
+
+            if not security_members:
+                return TeamStatusResponse(total_members=0, online_members=0, members=[])
+
+            # PERFORMANCE FIX: Batch load all user statuses in one query
+            member_ids = [m.to_dict().get('uid') for m in security_members if m.to_dict().get('uid')]
+
+            # Batch fetch all user statuses (Firestore 'in' limit is 10)
+            all_statuses = {}
+            for i in range(0, len(member_ids), 10):
+                batch_ids = member_ids[i:i+10]
+                status_docs = self.db.collection('user_status').where('user_id', 'in', batch_ids).stream()
+                for doc in status_docs:
+                    data = doc.to_dict()
+                    all_statuses[data.get('user_id')] = data
+
             team_members = []
             online_count = 0
-            
+            now = datetime.utcnow()
+            threshold_seconds = self.online_threshold_minutes * 60
+
             for member_doc in security_members:
                 member_data = member_doc.to_dict()
-                user_id = member_data['uid']
-                
-                # Get user status
-                is_online = await self.is_user_online(user_id)
-                status = await self.get_user_status(user_id)
-                
+                user_id = member_data.get('uid')
+                if not user_id:
+                    continue
+
+                # Get status from batch-loaded data
+                status_data = all_statuses.get(user_id)
+
+                # Check if online based on batch-loaded status
+                is_online = False
+                last_activity = now
+                last_login = None
+
+                if status_data:
+                    last_activity = status_data.get('last_activity', now)
+                    last_login = status_data.get('last_login')
+                    if status_data.get('is_online') and last_activity:
+                        try:
+                            activity_time = last_activity.replace(tzinfo=None) if hasattr(last_activity, 'replace') else last_activity
+                            time_diff = (now - activity_time).total_seconds()
+                            is_online = time_diff < threshold_seconds
+                        except:
+                            is_online = False
+
                 if is_online:
                     online_count += 1
-                
+
                 member_status = OnlineStatusResponse(
                     user_id=user_id,
-                    email=member_data['email'],
-                    full_name=member_data['full_name'],
-                    role=member_data['role'],
+                    email=member_data.get('email', ''),
+                    full_name=member_data.get('full_name', 'Unknown'),
+                    role=member_data.get('role', 'security_team'),
                     is_online=is_online,
-                    last_activity=status.last_activity if status else datetime.utcnow(),
-                    last_login=status.last_login if status else None
+                    last_activity=last_activity,
+                    last_login=last_login
                 )
                 team_members.append(member_status)
-            
+
             return TeamStatusResponse(
                 total_members=len(team_members),
                 online_members=online_count,
                 members=team_members
             )
-            
+
         except Exception as e:
             logger.error(f"Error getting team online status: {str(e)}")
             return TeamStatusResponse(
