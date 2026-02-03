@@ -9,38 +9,35 @@ import {
   CheckCircle
 } from 'lucide-react';
 
-interface Incident {
-  id: string;
-  status: string;
+interface IncidentStats {
+  total: number;
+  pending: number;
+  investigating: number;
+  resolved: number;
+  closed: number;
+  open: number;
+  closed_total: number;
+  critical_high_open: number;
 }
 
 interface SecurityStatsGridProps {
-  incidents: Incident[];
+  stats: IncidentStats;
   onlineTeamMembers: number;
   totalTeamMembers: number;
   onTeamDetailsClick: () => void;
 }
 
 export default function SecurityStatsGrid({
-  incidents,
+  stats,
   onlineTeamMembers,
   totalTeamMembers,
   onTeamDetailsClick
 }: SecurityStatsGridProps) {
-  // Calculate comprehensive stats
-  const totalIncidentsCount = incidents.length;
-  
-  const pendingIncidentsCount = incidents.filter(i => 
-    i.status === 'pending' || i.status === 'new'
-  ).length;
-
-  const investigatingCount = incidents.filter(i => 
-    i.status === 'investigating' || i.status === 'in_progress'
-  ).length;
-
-  const resolvedIncidentsCount = incidents.filter(i => 
-    i.status === 'resolved' || i.status === 'closed'
-  ).length;
+  // Use pre-calculated stats from API
+  const totalIncidentsCount = stats.total;
+  const pendingIncidentsCount = stats.pending; // Awaiting assignment
+  const investigatingCount = stats.investigating;
+  const resolvedIncidentsCount = stats.closed_total;
 
 
   return (

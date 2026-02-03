@@ -116,9 +116,13 @@ export default function AIAnalysisDashboard() {
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
 
   const fetchIncidents = async () => {
+    // Skip if already loaded (cache in memory)
+    if (incidents.length > 0) return;
+
     setIsLoadingIncidents(true);
     try {
-      const response = await fetch(`${API_URL}/api/incidents?limit=100`, {
+      // PERFORMANCE: Only fetch 20 recent incidents for analysis dropdown
+      const response = await fetch(`${API_URL}/api/incidents/dashboard/queue?limit=20`, {
         headers: {
           'Authorization': `Bearer ${idToken}`
         }
@@ -126,7 +130,7 @@ export default function AIAnalysisDashboard() {
 
       if (response.ok) {
         const data = await response.json();
-        setIncidents(data);
+        setIncidents(data.incidents || data);
       } else {
         toast.error('Failed to fetch incidents');
       }
