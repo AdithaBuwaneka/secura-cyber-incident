@@ -31,6 +31,7 @@ import IncidentQueue from '@/components/security/IncidentQueue';
 import TeamStatusPanel from '@/components/security/TeamStatusPanel';
 import AIInsightsPanel from '@/components/security/AIInsightsPanel';
 import IncidentChatButton from '@/components/messaging/IncidentChatButton';
+import { Footer } from '@/components/layout';
 import toast from 'react-hot-toast';
 
 interface Attachment {
@@ -471,6 +472,9 @@ export default function SecurityTeamDashboard() {
         onProfileClick={() => setShowProfile(true)}
         onLogout={handleLogout}
       />
+
+      {/* Spacer for fixed header */}
+      <div className="h-16"></div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1314,6 +1318,9 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
       {showProfile && (
         <SecurityTeamProfile onClose={() => setShowProfile(false)} />
       )}
+
+      {/* Footer */}
+      <Footer variant="dashboard" />
     </div>
   );
 }

@@ -29,6 +29,7 @@ import IncidentChatButton from '@/components/messaging/IncidentChatButton';
 import { useMessaging } from '@/components/messaging/MessagingProvider';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
+import { Footer } from '@/components/layout';
 
 interface Attachment {
   file_id?: string;
@@ -175,41 +176,39 @@ export default function EmployeeDashboard() {
   }).length;
   return (
     <div className="min-h-screen bg-[#1A1D23]">
-      {/* Header */}
-      <header className="bg-[#2A2D35] border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
+      {/* Header - Fixed */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#2A2D35] border-b border-gray-700">
+        <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-8">
+          <div className="flex justify-between items-center h-14 sm:h-16">
             {/* Logo and Title */}
-            <div className="flex items-center space-x-4">
-              <Shield className="h-8 w-8 text-[#00D4FF]" />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <Shield className="h-6 w-6 sm:h-8 sm:w-8 text-[#00D4FF]" />
               <div>
-                <h1 className="text-xl font-bold text-white">Secura</h1>
-                <p className="text-xs text-gray-400">👤 Employee Dashboard</p>
+                <h1 className="text-base sm:text-xl font-bold text-white">Secura</h1>
+                <p className="text-[10px] sm:text-xs text-gray-400 hidden min-[400px]:block">👤 Employee Dashboard</p>
               </div>
             </div>
 
             {/* User Info and Actions */}
-            <div className="flex items-center space-x-4">
-              <button className="p-2 text-gray-400 hover:text-white transition-colors relative">
-                <Bell className="h-5 w-5" />
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <button className="p-1.5 sm:p-2 text-gray-400 hover:text-white transition-colors relative">
+                <Bell className="h-4 w-4 sm:h-5 sm:w-5" />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-1 -right-1 h-4 w-4 bg-red-500 rounded-full flex items-center justify-center">
-                    <span className="text-xs text-white font-bold">{unreadCount}</span>
+                  <span className="absolute -top-1 -right-1 h-3.5 w-3.5 sm:h-4 sm:w-4 bg-red-500 rounded-full flex items-center justify-center">
+                    <span className="text-[8px] sm:text-xs text-white font-bold">{unreadCount}</span>
                   </span>
                 )}
               </button>
-              
-              <div className="flex items-center space-x-3">
-                
-                
-                <div className="text-right">
-                  <p className="text-sm font-medium text-white">{userProfile?.full_name}</p>
-                  <p className="text-xs text-gray-400">{userProfile?.email}</p>
+
+              <div className="flex items-center space-x-2 sm:space-x-3">
+                <div className="text-right hidden sm:block">
+                  <p className="text-sm font-medium text-white truncate max-w-[120px]">{userProfile?.full_name}</p>
+                  <p className="text-xs text-gray-400 truncate max-w-[120px]">{userProfile?.email}</p>
                 </div>
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-1 sm:space-x-2">
                   {/* Profile Avatar */}
                   <Link href="/profile/edit" className="relative group">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#00D4FF] to-[#0099CC] flex items-center justify-center text-white font-semibold text-sm border-2 border-gray-600 hover:border-[#00D4FF] transition-all duration-200 group-hover:scale-105">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-gradient-to-br from-[#00D4FF] to-[#0099CC] flex items-center justify-center text-white font-semibold text-xs sm:text-sm border-2 border-gray-600 hover:border-[#00D4FF] transition-all duration-200 group-hover:scale-105">
                       {userProfile?.full_name ? (
                         userProfile.full_name.split(' ').map(name => name[0]).join('').toUpperCase().slice(0, 2)
                       ) : (
@@ -217,15 +216,11 @@ export default function EmployeeDashboard() {
                       )}
                     </div>
                     {/* Online Status Indicator */}
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 rounded-full border-2 border-[#2A2D35]"></div>
-                    {/* Tooltip */}
-                    <div className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
-                      Edit Profile
-                    </div>
+                    <div className="absolute -bottom-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-400 rounded-full border-2 border-[#2A2D35]"></div>
                   </Link>
                   <button
                     onClick={handleLogout}
-                    className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                    className="p-1.5 sm:p-2 text-gray-400 hover:text-red-400 transition-colors"
                     title="Logout"
                   >
                     <LogOut className="h-4 w-4" />
@@ -236,6 +231,9 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       </header>
+
+      {/* Spacer for fixed header */}
+      <div className="h-14 sm:h-16"></div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -650,6 +648,9 @@ export default function EmployeeDashboard() {
           </div>
         </div>
       )}
+
+      {/* Footer */}
+      <Footer variant="dashboard" />
     </div>
   );
 }
