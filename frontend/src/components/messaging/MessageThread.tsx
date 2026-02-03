@@ -205,13 +205,17 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     }
     // For incident chats: fetch conversation by incident ID
     else if (!targetConversationId && incidentId) {
+      console.log('[MessageThread] Fetching conversation for incident:', incidentId);
       try {
         const convResponse = await fetch(`${API_URL}/api/messaging/conversations/incident/${incidentId}`, {
           headers: { 'Authorization': `Bearer ${idToken}` }
         });
 
+        console.log('[MessageThread] Conversation fetch status:', convResponse.status);
+
         if (convResponse.ok) {
           const conversation = await convResponse.json();
+          console.log('[MessageThread] Conversation loaded:', conversation);
           targetConversationId = conversation.id;
 
           // Cache conversation data
@@ -237,10 +241,16 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           // Initialize WebSocket with the conversation ID
           initializeWebSocket(targetConversationId);
         } else {
+          console.error('[MessageThread] Conversation not found for incident:', incidentId, 'Status:', convResponse.status);
+          const errorText = await convResponse.text();
+          console.error('[MessageThread] Error response:', errorText);
+          toast.error('Conversation not found. Please try reloading the incident.');
           setIsLoading(false);
           return;
         }
-      } catch {
+      } catch (error) {
+        console.error('[MessageThread] Failed to fetch conversation:', error);
+        toast.error('Failed to load conversation');
         setIsLoading(false);
         return;
       }
@@ -255,9 +265,18 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
     targetConversationId = conversationId || currentConversationId || targetConversationId;
 
     if (!targetConversationId) {
+      console.error('[MessageThread] No conversation ID available after all attempts');
+      console.error('[MessageThread] Debug info:', {
+        incidentId,
+        conversationId,
+        currentConversationId,
+        cached: conversationCacheRef.current?.id
+      });
       setIsLoading(false);
       return;
     }
+
+    console.log('[MessageThread] Loading messages for conversation:', targetConversationId);
 
     try {
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
@@ -550,10 +569,24 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               {conversationTitle}
             </h3>
             <div className="flex items-center space-x-2">
-              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400 animate-pulse' : 'bg-green-400'}`}></div>
-              <span className="text-xs text-gray-400">
-                Connected
-              </span>
+              {isLoading ? (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></div>
+                  <span className="text-xs text-gray-400">Loading...</span>
+                </>
+              ) : currentConversationId ? (
+                <>
+                  <div className={`w-2 h-2 rounded-full ${
+                    isConnected ? 'bg-green-400 animate-pulse' : 'bg-green-400'
+                  }`}></div>
+                  <span className="text-xs text-gray-400">Ready</span>
+                </>
+              ) : (
+                <>
+                  <div className="w-2 h-2 rounded-full bg-red-400"></div>
+                  <span className="text-xs text-red-400">Not Connected</span>
+                </>
+              )}
             </div>
           </div>
         </div>
@@ -573,7 +606,22 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           <div className="flex items-center justify-center h-32">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#00D4FF]"></div>
           </div>
-                          ) : messages.length === 0 ? (
+        ) : !currentConversationId ? (
+          <div className="flex flex-col items-center justify-center h-32 text-gray-400">
+            <Shield className="h-8 w-8 mb-2 opacity-50" />
+            <p className="text-sm text-red-400">Unable to load conversation</p>
+            <p className="text-xs mt-1">Check console for details</p>
+            <button
+              onClick={() => {
+                setIsLoading(true);
+                loadMessages();
+              }}
+              className="mt-3 px-4 py-2 bg-[#00D4FF] hover:bg-[#00C4EF] text-[#1A1D23] rounded-lg text-sm transition-colors"
+            >
+              Retry
+            </button>
+          </div>
+        ) : messages.length === 0 ? (
            <div className="flex flex-col items-center justify-center h-32 text-gray-400">
              <Shield className="h-8 w-8 mb-2" />
              <p className="text-sm">No messages yet. Start the conversation!</p>
@@ -717,8 +765,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           </div>
           <button
             onClick={sendMessage}
-            disabled={(!newMessage.trim() && attachments.length === 0) || !isConnected}
+            disabled={(!newMessage.trim() && attachments.length === 0) || !currentConversationId}
             className="p-3 bg-[#00D4FF] hover:bg-[#00C4EF] text-[#1A1D23] rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            title={!currentConversationId ? 'Loading conversation...' : 'Send message'}
           >
             <Send className="h-4 w-4" />
           </button>
