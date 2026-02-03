@@ -801,18 +801,80 @@ export default function IncidentReportForm({ onClose, onSuccess }: IncidentRepor
                       <div className="flex-1">
                         <p className="text-sm text-white">{file.name}</p>
                         <p className="text-xs text-gray-400">{(file.size / 1024 / 1024).toFixed(2)} MB</p>
-                        {/* Show OCR analysis status */}
+                        {/* Show OCR analysis status and detailed results */}
                         {file.type.startsWith('image/') && imageAnalysisResults[file.name] && (
-                          <div className="mt-1">
+                          <div className="mt-2">
                             {imageAnalysisResults[file.name].status === 'analyzing' ? (
-                              <p className="text-xs text-[#00D4FF] flex items-center">
+                              <div className="text-xs text-[#00D4FF] flex items-center">
                                 <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-[#00D4FF] mr-2"></div>
-                                Analyzing with OCR + Gemini AI...
+                                <span>Analyzing with OCR + Gemini AI...</span>
+                              </div>
+                            ) : imageAnalysisResults[file.name].status === 'failed' ? (
+                              <p className="text-xs text-red-400">
+                                ✗ Analysis failed: {imageAnalysisResults[file.name].error}
                               </p>
                             ) : (
-                              <p className="text-xs text-green-400">
-                                ✓ OCR Complete - {imageAnalysisResults[file.name].threat_indicators?.length || 0} threats found
-                              </p>
+                              <div className="space-y-2">
+                                <p className="text-xs text-green-400">
+                                  ✓ OCR Complete - {imageAnalysisResults[file.name].threat_indicators?.length || 0} threats found
+                                </p>
+                                
+                                {/* Show extracted text */}
+                                {imageAnalysisResults[file.name].ocr_text && (
+                                  <div className="p-2 bg-[#2A2D35] rounded border border-gray-600">
+                                    <p className="text-xs text-gray-400 mb-1">📝 Extracted Text:</p>
+                                    <p className="text-xs text-gray-300 max-h-20 overflow-y-auto whitespace-pre-wrap">
+                                      {imageAnalysisResults[file.name].ocr_text.substring(0, 300)}
+                                      {imageAnalysisResults[file.name].ocr_text.length > 300 ? '...' : ''}
+                                    </p>
+                                  </div>
+                                )}
+                                
+                                {/* Show summary */}
+                                {imageAnalysisResults[file.name].summary && (
+                                  <div className="p-2 bg-purple-500/10 rounded border border-purple-500/30">
+                                    <p className="text-xs text-purple-400 mb-1">🤖 AI Summary:</p>
+                                    <p className="text-xs text-gray-300">{imageAnalysisResults[file.name].summary}</p>
+                                  </div>
+                                )}
+                                
+                                {/* Show threat indicators */}
+                                {imageAnalysisResults[file.name].threat_indicators && imageAnalysisResults[file.name].threat_indicators.length > 0 && (
+                                  <div className="p-2 bg-red-500/10 rounded border border-red-500/30">
+                                    <p className="text-xs text-red-400 mb-1">⚠️ Threat Indicators:</p>
+                                    <ul className="text-xs text-gray-300 space-y-1">
+                                      {imageAnalysisResults[file.name].threat_indicators.slice(0, 5).map((indicator, idx) => (
+                                        <li key={idx} className="flex items-start">
+                                          <span className="text-red-400 mr-1">•</span>
+                                          {indicator}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                
+                                {/* Show recommendations */}
+                                {imageAnalysisResults[file.name].recommendations && imageAnalysisResults[file.name].recommendations!.length > 0 && (
+                                  <div className="p-2 bg-green-500/10 rounded border border-green-500/30">
+                                    <p className="text-xs text-green-400 mb-1">💡 Recommendations:</p>
+                                    <ul className="text-xs text-gray-300 space-y-1">
+                                      {imageAnalysisResults[file.name].recommendations!.slice(0, 3).map((rec, idx) => (
+                                        <li key={idx} className="flex items-start">
+                                          <span className="text-green-400 mr-1">•</span>
+                                          {rec}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                                
+                                {/* Confidence score */}
+                                {imageAnalysisResults[file.name].confidence !== undefined && (imageAnalysisResults[file.name].confidence ?? 0) > 0 && (
+                                  <p className="text-xs text-gray-400">
+                                    Confidence: {Math.round(imageAnalysisResults[file.name].confidence! * 100)}%
+                                  </p>
+                                )}
+                              </div>
                             )}
                           </div>
                         )}

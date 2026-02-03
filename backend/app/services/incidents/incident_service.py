@@ -64,7 +64,7 @@ class IncidentService:
         attachments_map = {}
         try:
             # Fetch all attachments in one query
-            files_collection = self.db.collection('incident_files')
+            files_collection = self.db.collection('file_attachments')
             all_files = list(files_collection.where('incident_id', 'in', incident_ids[:10]).stream())
 
             # If more than 10 incidents, batch the queries (Firestore 'in' limit is 10)
@@ -844,10 +844,10 @@ class IncidentService:
         FAST: Get assigned incidents for a user without N+1 queries
         """
         try:
-            # Direct query with filter
+            # Direct query with filter (no order_by to avoid index requirement)
             query = self.incidents_collection.where(
                 'assigned_to', '==', user_id
-            ).order_by('created_at', direction='DESCENDING').limit(limit)
+            ).limit(limit * 2)  # Get more to account for filtering
 
             docs = list(query.stream())
             incidents = []
@@ -871,7 +871,9 @@ class IncidentService:
                     'assigned_at': data.get('assigned_at')
                 })
 
-            return incidents
+            # Sort by created_at in Python
+            incidents.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+            return incidents[:limit]
 
         except Exception as e:
             print(f"Error getting assigned incidents: {e}")
@@ -882,10 +884,10 @@ class IncidentService:
         FAST: Get resolved incidents for a user without N+1 queries
         """
         try:
-            # Query resolved incidents assigned to or resolved by user
+            # Query resolved incidents (no order_by to avoid index requirement)
             query = self.incidents_collection.where(
                 'status', 'in', ['resolved', 'closed']
-            ).order_by('resolved_at', direction='DESCENDING').limit(limit * 2)
+            ).limit(limit * 3)  # Get more to account for filtering
 
             docs = list(query.stream())
             incidents = []
@@ -897,9 +899,6 @@ class IncidentService:
                 if data.get('assigned_to') != user_id and data.get('resolved_by') != user_id:
                     continue
 
-                if len(incidents) >= limit:
-                    break
-
                 incidents.append({
                     'id': data.get('id'),
                     'title': data.get('title'),
@@ -908,10 +907,14 @@ class IncidentService:
                     'incident_type': str(data.get('incident_type', '')).lower(),
                     'reporter_name': data.get('reporter_name'),
                     'resolved_at': data.get('resolved_at'),
-                    'resolved_by': data.get('resolved_by')
+                    'resolved_by': data.get('resolved_by'),
+                    'assigned_at': data.get('assigned_at'),
+                    'created_at': data.get('created_at')
                 })
 
-            return incidents
+            # Sort by resolved_at in Python
+            incidents.sort(key=lambda x: x.get('resolved_at', ''), reverse=True)
+            return incidents[:limit]
 
         except Exception as e:
             print(f"Error getting resolved incidents: {e}")
