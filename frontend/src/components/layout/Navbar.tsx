@@ -18,30 +18,30 @@ export default function Navbar({ currentPage = 'home' }: NavbarProps) {
         <div className="max-w-7xl mx-auto px-3 min-[400px]:px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-12 min-[400px]:h-14 md:h-16">
             {/* Logo */}
-            <Link href="/" className="flex items-center group flex-shrink-0">
-              <div className="relative">
+            <Link href="/" className="flex items-center group flex-shrink-0 min-w-0">
+              <div className="relative flex-shrink-0">
                 <Shield className="h-6 w-6 min-[400px]:h-7 min-[400px]:w-7 sm:h-8 sm:w-8 md:h-9 md:w-9 text-[#00D4FF] mr-1.5 min-[400px]:mr-2 sm:mr-2.5 group-hover:scale-110 transition-transform duration-300" />
                 <div className="absolute inset-0 bg-[#00D4FF]/20 rounded-full blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
               </div>
-              <span className="text-lg min-[400px]:text-xl sm:text-2xl md:text-[1.7rem] font-bold bg-gradient-to-r from-white to-[#00D4FF] bg-clip-text text-transparent">
+              <span className="text-base min-[360px]:text-lg min-[400px]:text-xl sm:text-2xl md:text-[1.7rem] font-bold bg-gradient-to-r from-white to-[#00D4FF] bg-clip-text text-transparent truncate">
                 Secura
               </span>
             </Link>
 
             {/* Desktop Navigation */}
-            <nav className="hidden sm:flex items-center space-x-2 sm:space-x-3 md:space-x-4 lg:space-x-6">
+            <nav className="hidden sm:flex items-center space-x-1 sm:space-x-2 md:space-x-3 lg:space-x-6 flex-shrink-0">
               {currentPage !== 'home' && (
-                <Link href="/" className="text-gray-300 hover:text-[#00D4FF] transition-all duration-300 font-medium px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D4FF]/10 text-sm md:text-base">
+                <Link href="/" className="text-gray-300 hover:text-[#00D4FF] transition-all duration-300 font-medium px-2 sm:px-2.5 md:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D4FF]/10 text-xs sm:text-sm md:text-base whitespace-nowrap">
                   Home
                 </Link>
               )}
               {currentPage !== 'login' && (
-                <Link href="/auth/login" className="text-gray-300 hover:text-[#00D4FF] transition-all duration-300 font-medium px-2.5 sm:px-3 md:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D4FF]/10 text-sm md:text-base">
+                <Link href="/auth/login" className="text-gray-300 hover:text-[#00D4FF] transition-all duration-300 font-medium px-2 sm:px-2.5 md:px-3 lg:px-4 py-1.5 sm:py-2 rounded-lg hover:bg-[#00D4FF]/10 text-xs sm:text-sm md:text-base whitespace-nowrap">
                   Login
                 </Link>
               )}
               {currentPage !== 'register' && (
-                <Link href="/auth/register" className="bg-gradient-to-r from-[#00D4FF] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#3B82F6] px-3 sm:px-4 md:px-5 lg:px-6 py-1.5 sm:py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-[#00D4FF]/25 hover:scale-105 text-sm md:text-base whitespace-nowrap">
+                <Link href="/auth/register" className="bg-gradient-to-r from-[#00D4FF] to-[#0EA5E9] hover:from-[#0EA5E9] hover:to-[#3B82F6] px-2.5 sm:px-3 md:px-4 lg:px-6 py-1.5 sm:py-2 rounded-lg font-semibold transition-all duration-300 shadow-lg hover:shadow-[#00D4FF]/25 hover:scale-105 text-xs sm:text-sm md:text-base whitespace-nowrap">
                   Get Started
                 </Link>
               )}

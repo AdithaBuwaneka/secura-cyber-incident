@@ -2,9 +2,24 @@
 
 import { Shield, Globe, Lock } from 'lucide-react';
 
-export default function Footer() {
+interface FooterProps {
+  variant?: 'landing' | 'dashboard';
+}
+
+export default function Footer({ variant = 'landing' }: FooterProps) {
+  const isDashboard = variant === 'dashboard';
+  
+  // Theme colors based on variant
+  const containerClass = isDashboard
+    ? 'relative bg-[#1A1D23] border-t border-gray-700'
+    : 'relative bg-gradient-to-r from-[#1E293B]/90 to-[#334155]/90 border-t border-[#334155]/50 backdrop-blur-xl';
+  
+  const borderClass = isDashboard
+    ? 'border-gray-700'
+    : 'border-[#334155]/50';
+
   return (
-    <footer className="relative bg-gradient-to-r from-[#1E293B]/90 to-[#334155]/90 border-t border-[#334155]/50 backdrop-blur-xl">
+    <footer className={containerClass}>
       <div className="max-w-7xl mx-auto px-3 min-[400px]:px-4 sm:px-6 lg:px-8 py-6 min-[400px]:py-8 sm:py-12">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 min-[400px]:gap-8 mb-6 min-[400px]:mb-8">
           {/* Brand Section */}
@@ -52,7 +67,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom Bar */}
-        <div className="border-t border-[#334155]/50 pt-4 min-[400px]:pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-2 min-[400px]:gap-4">
+        <div className={`border-t ${borderClass} pt-4 min-[400px]:pt-6 sm:pt-8 flex flex-col sm:flex-row justify-between items-center gap-2 min-[400px]:gap-4`}>
           <span className="text-gray-400 text-xs min-[400px]:text-sm">© 2026 Secura. All rights reserved.</span>
           <span className="bg-gradient-to-r from-[#00D4FF] to-[#0EA5E9] bg-clip-text text-transparent font-semibold text-xs min-[400px]:text-sm">
             Enterprise Security Solutions
