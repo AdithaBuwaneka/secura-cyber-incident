@@ -55,16 +55,29 @@ async def get_system_stats(
         # Get real system stats using psutil
         cpu_percent = psutil.cpu_percent(interval=1)
         memory = psutil.virtual_memory()
-        disk = psutil.disk_usage('C:\\')
+        
+        # Get disk usage - use root for Linux, C:\ for Windows
+        try:
+            disk_path = '/' if os.name != 'nt' else 'C:\\'
+            disk = psutil.disk_usage(disk_path)
+        except Exception:
+            # Fallback to current directory if root access fails
+            disk = psutil.disk_usage(os.getcwd())
         
         # Get system uptime
-        boot_time = psutil.boot_time()
-        uptime_seconds = datetime.now().timestamp() - boot_time
-        uptime_delta = timedelta(seconds=uptime_seconds)
-        uptime_str = f"{uptime_delta.days} days, {uptime_delta.seconds // 3600} hours"
+        try:
+            boot_time = psutil.boot_time()
+            uptime_seconds = datetime.now().timestamp() - boot_time
+            uptime_delta = timedelta(seconds=uptime_seconds)
+            uptime_str = f"{uptime_delta.days} days, {uptime_delta.seconds // 3600} hours"
+        except Exception:
+            uptime_str = "N/A"
         
         # Get active connections (approximation)
-        connections = len(psutil.net_connections())
+        try:
+            connections = len(psutil.net_connections())
+        except Exception:
+            connections = 0
         
         # Database size (Firebase doesn't provide direct size, so we'll estimate)
         db = FirebaseConfig.get_firestore()
@@ -74,20 +87,30 @@ async def get_system_stats(
             backup_logs_ref = db.collection('backup_logs').order_by('initiated_at', direction='DESCENDING').limit(1)
             backup_logs = list(backup_logs_ref.stream())
             if backup_logs:
-                last_backup = backup_logs[0].to_dict().get('initiated_at', datetime.utcnow()).isoformat()
+                last_backup_data = backup_logs[0].to_dict()
+                backup_time = last_backup_data.get('initiated_at', datetime.utcnow())
+                if hasattr(backup_time, 'isoformat'):
+                    last_backup = backup_time.isoformat()
+                else:
+                    last_backup = str(backup_time)
             else:
                 last_backup = "No backups recorded"
-        except:
+        except Exception as e:
             last_backup = "Backup system initializing"
+            print(f"Backup logs error: {str(e)}")
 
         # Estimate database size based on collections
         try:
             collections = ['users', 'security_applications', 'incidents', 'system_logs', 'system_config']
             total_docs = 0
             for collection_name in collections:
-                collection_ref = db.collection(collection_name)
-                docs = list(collection_ref.stream())
-                total_docs += len(docs)
+                try:
+                    collection_ref = db.collection(collection_name)
+                    # Use limit and count to avoid loading all docs
+                    docs = collection_ref.limit(1000).stream()
+                    total_docs += len(list(docs))
+                except Exception:
+                    continue
             
             # Rough estimate: ~1KB per document
             estimated_size_mb = total_docs * 1.0 / 1024  # Convert to MB
@@ -97,8 +120,9 @@ async def get_system_stats(
                 database_size = f"{estimated_size_mb:.1f} MB"
             else:
                 database_size = f"{estimated_size_mb/1024:.1f} GB"
-        except:
+        except Exception as e:
             database_size = "Calculating..."
+            print(f"Database size error: {str(e)}")
 
         return {
             "uptime": uptime_str,
@@ -135,37 +159,63 @@ async def get_system_config(
     try:
         # Get configuration from Firebase (stored in system_config collection)
         db = FirebaseConfig.get_firestore()
-        config_doc = db.collection('system_config').document('main').get()
         
-        if config_doc.exists:
-            config_data = config_doc.to_dict()
-        else:
-            # Default configuration
-            config_data = {
-                "notifications_enabled": True,
-                "email_alerts": True,
-                "auto_backup": True,
-                "backup_frequency": "daily",
-                "session_timeout": 30,
-                "max_file_size": 10,
-                "allowed_file_types": ["pdf", "doc", "docx", "jpg", "png"],
-                "password_policy": {
-                    "min_length": 8,
-                    "require_uppercase": True,
-                    "require_lowercase": True,
-                    "require_numbers": True,
-                    "require_symbols": False
-                }
+        # Default configuration
+        default_config = {
+            "notifications_enabled": True,
+            "email_alerts": True,
+            "auto_backup": True,
+            "backup_frequency": "daily",
+            "session_timeout": 30,
+            "max_file_size": 10,
+            "allowed_file_types": ["pdf", "doc", "docx", "jpg", "png"],
+            "password_policy": {
+                "min_length": 8,
+                "require_uppercase": True,
+                "require_lowercase": True,
+                "require_numbers": True,
+                "require_symbols": False
             }
-            # Create default config in Firebase
-            db.collection('system_config').document('main').set(config_data)
+        }
+        
+        try:
+            config_doc = db.collection('system_config').document('main').get()
+            
+            if config_doc.exists:
+                config_data = config_doc.to_dict()
+                # Merge with defaults to ensure all fields exist
+                config_data = {**default_config, **config_data}
+            else:
+                # Create default config in Firebase
+                config_data = default_config
+                try:
+                    db.collection('system_config').document('main').set(config_data)
+                except Exception as set_error:
+                    print(f"Warning: Could not create default config: {str(set_error)}")
+        except Exception as fetch_error:
+            print(f"Warning: Using default config due to error: {str(fetch_error)}")
+            config_data = default_config
         
         return config_data
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to retrieve system configuration: {str(e)}"
-        )
+        print(f"System config error: {str(e)}")
+        # Return default config instead of failing
+        return {
+            "notifications_enabled": True,
+            "email_alerts": True,
+            "auto_backup": True,
+            "backup_frequency": "daily",
+            "session_timeout": 30,
+            "max_file_size": 10,
+            "allowed_file_types": ["pdf", "doc", "docx", "jpg", "png"],
+            "password_policy": {
+                "min_length": 8,
+                "require_uppercase": True,
+                "require_lowercase": True,
+                "require_numbers": True,
+                "require_symbols": False
+            }
+        }
 
 @router.put("/config")
 async def update_system_config(
