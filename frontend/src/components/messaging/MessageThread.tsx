@@ -747,9 +747,9 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                placeholder="Type your message..."
+                placeholder={!currentConversationId ? "Loading conversation..." : "Type your message..."}
                 className="flex-1 p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
-                disabled={!isConnected}
+                disabled={!currentConversationId || isLoading}
               />
               <label className="p-2 text-gray-400 hover:text-white cursor-pointer transition-colors">
                 <Paperclip className="h-4 w-4" />
