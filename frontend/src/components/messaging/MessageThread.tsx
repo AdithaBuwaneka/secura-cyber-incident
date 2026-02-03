@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { RootState } from '@/store';
 import toast from 'react-hot-toast';
-import { useMessaging } from './MessagingProvider';
 
 interface Message {
   id: string;
@@ -38,15 +37,16 @@ interface MessageThreadProps {
 
 export default function MessageThread({ incidentId, conversationId, onClose }: MessageThreadProps) {
   const { userProfile, idToken } = useSelector((state: RootState) => state.auth);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const _messaging = useMessaging();
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [attachments, setAttachments] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(undefined);
+  const [currentConversationId, setCurrentConversationId] = useState<string | undefined>(conversationId);
   const [isConnected, setIsConnected] = useState(false);
+  const [conversationTitle, setConversationTitle] = useState<string>('Security Support');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [otherParticipantName, setOtherParticipantName] = useState<string>('');
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WebSocket | null>(null);
@@ -54,51 +54,29 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
   const WS_URL = API_URL.replace('http', 'ws');
 
-  const initializeWebSocket = useCallback(async () => {
-    // Don't initialize if we don't have required data
-    if (!idToken || !userProfile?.uid) {
-      console.log('WebSocket: Missing required data for connection');
-      return;
-    }
+  // Cache conversation data to avoid redundant API calls
+  const conversationCacheRef = useRef<{ id: string; title: string; participants: any[] } | null>(null);
 
-    // Get conversation ID first to determine proper room
-    let targetConversationId = conversationId;
-    if (!targetConversationId && incidentId) {
-      try {
-        const convResponse = await fetch(`${API_URL}/api/messaging/conversations/incident/${incidentId}`, {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          }
-        });
-        
-        if (convResponse.ok) {
-          const conversation = await convResponse.json();
-          targetConversationId = conversation.id;
-          setCurrentConversationId(targetConversationId);
-        }
-      } catch (error) {
-        console.error('Error getting conversation:', error);
-        return;
-      }
-    }
+  const initializeWebSocket = useCallback(async (cachedConvId?: string) => {
+    if (!idToken || !userProfile?.uid) return;
 
-    if (!targetConversationId) {
-      console.log('No conversation ID available for WebSocket');
-      return;
+    // Use cached conversation ID if available
+    let targetConversationId = cachedConvId || conversationId || currentConversationId;
+
+    if (!targetConversationId) return;
+
+    // Close existing connection if any
+    if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      return; // Already connected
     }
 
     try {
       const wsUrl = `${WS_URL}/api/messaging/ws/${targetConversationId}?token=${idToken}`;
-      console.log('WebSocket: Connecting to conversation room:', targetConversationId);
-      
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
         setIsConnected(true);
-        console.log('WebSocket connected to conversation:', targetConversationId);
-        
-        // Join the conversation room to receive real-time messages
-        if (wsRef.current) {
+        if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'join_room',
             room_id: `conversation_${targetConversationId}`,
@@ -110,22 +88,17 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
       wsRef.current.onmessage = (event) => {
         try {
           const data = JSON.parse(event.data);
-          console.log('WebSocket: Received message:', data);
 
           if (data.type === 'incident_message' || data.type === 'new_message' || data.type === 'message') {
-            console.log('Processing message data:', data);
-            
-            // Extract message data properly - the backend sends it in data.message
             const messageData = data.message || data;
-            console.log('Extracted message data:', messageData);
-            
+
             const newMessage: Message = {
               id: messageData.id || Date.now().toString(),
               sender_id: messageData.sender_id || data.user_id || 'unknown',
               sender_name: messageData.sender_name || data.sender || 'Unknown',
-              sender_role: messageData.sender_role || 'employee', 
+              sender_role: messageData.sender_role || 'employee',
               content: messageData.content || messageData.message || '',
-              created_at: messageData.created_at ? 
+              created_at: messageData.created_at ?
                 (typeof messageData.created_at === 'string' ? messageData.created_at : new Date(messageData.created_at).toISOString()) :
                 (data.timestamp || new Date().toISOString()),
               attachments: messageData.attachments || [],
@@ -133,95 +106,136 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
               message_type: messageData.message_type || 'text'
             };
 
-            console.log('Processed message for display:', newMessage);
-
-            // Only add if from a different user (avoid duplicating own messages)
             if (newMessage.sender_id !== userProfile?.uid) {
               setMessages(prev => {
-                if (prev.some(msg => msg.id === newMessage.id)) {
-                  console.log('Message already exists, skipping:', newMessage.id);
-                  return prev;
-                }
-                console.log('Adding new message to chat:', newMessage);
+                if (prev.some(msg => msg.id === newMessage.id)) return prev;
                 return [...prev, newMessage];
               });
-            } else {
-              console.log('Skipping own message to avoid duplication');
             }
           } else if (data.type === 'typing') {
             setIsTyping(data.is_typing && data.user_id !== userProfile?.uid);
-          } else if (data.type === 'connection_established') {
-            console.log('WebSocket: Connection confirmed by server');
           }
-        } catch (error) {
-          console.error('WebSocket: Failed to parse message:', error);
+        } catch {
+          // Silent fail for parse errors
         }
       };
 
-      wsRef.current.onclose = (event) => {
+      wsRef.current.onclose = () => {
         setIsConnected(false);
-        console.log('WebSocket disconnected:', event.code, event.reason);
-        // Attempt to reconnect after 3 seconds
+        // Reconnect after 5 seconds (increased from 3)
         setTimeout(() => {
-          initializeWebSocket();
-        }, 3000);
+          if (currentConversationId) initializeWebSocket(currentConversationId);
+        }, 5000);
       };
 
-      wsRef.current.onerror = (error) => {
-        console.log('WebSocket error occurred:', error);
+      wsRef.current.onerror = () => {
         setIsConnected(false);
       };
-    } catch (error) {
-      console.error('Failed to initialize WebSocket:', error);
+    } catch {
+      // Silent fail
     }
-  }, [incidentId, conversationId, idToken, userProfile?.uid, WS_URL, API_URL]);
+  }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL]);
 
   const loadMessages = useCallback(async () => {
-    // Determine the conversation ID - either provided directly or get from incident
-    let targetConversationId = conversationId;
-    
-    if (!targetConversationId && incidentId) {
-      // Get or create conversation for incident
+    if (!idToken) {
+      setIsLoading(false);
+      return;
+    }
+
+    let targetConversationId = conversationId || currentConversationId;
+
+    // For team chats: conversationId is passed directly, fetch conversation details
+    if (conversationId && !conversationCacheRef.current) {
+      try {
+        const convResponse = await fetch(`${API_URL}/api/messaging/conversations/${conversationId}`, {
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+
+        if (convResponse.ok) {
+          const conversation = await convResponse.json();
+
+          // Cache conversation data
+          conversationCacheRef.current = {
+            id: conversation.id,
+            title: conversation.title || 'Team Chat',
+            participants: conversation.participants || []
+          };
+
+          setCurrentConversationId(conversationId);
+          setConversationTitle(conversationCacheRef.current.title);
+
+          // Initialize WebSocket
+          initializeWebSocket(conversationId);
+        }
+      } catch {
+        // Continue anyway - we can still try to load messages
+      }
+    }
+    // For incident chats: fetch conversation by incident ID
+    else if (!targetConversationId && incidentId) {
       try {
         const convResponse = await fetch(`${API_URL}/api/messaging/conversations/incident/${incidentId}`, {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          }
+          headers: { 'Authorization': `Bearer ${idToken}` }
         });
-        
+
         if (convResponse.ok) {
           const conversation = await convResponse.json();
           targetConversationId = conversation.id;
+
+          // Cache conversation data
+          conversationCacheRef.current = {
+            id: conversation.id,
+            title: conversation.incident_title || conversation.title || 'Incident',
+            participants: conversation.participants || []
+          };
+
+          setCurrentConversationId(targetConversationId);
+          setConversationTitle(conversationCacheRef.current.title);
+
+          // Find other participant
+          const otherParticipant = conversation.participants?.find(
+            (p: { user_id: string; user_name?: string; user_role?: string }) => p.user_id !== userProfile?.uid
+          );
+
+          if (otherParticipant) {
+            setOtherParticipantName(otherParticipant.user_name ||
+              (otherParticipant.user_role === 'security_team' ? 'Security Team Member' : 'Employee'));
+          }
+
+          // Initialize WebSocket with the conversation ID
+          initializeWebSocket(targetConversationId);
         } else {
-          console.error('Failed to get incident conversation:', convResponse.status);
           setIsLoading(false);
           return;
         }
-      } catch (error) {
-        console.error('Error getting incident conversation:', error);
+      } catch {
         setIsLoading(false);
         return;
       }
     }
-    
+    // If we have conversationId but WebSocket not initialized yet
+    else if (conversationId && !wsRef.current) {
+      setCurrentConversationId(conversationId);
+      initializeWebSocket(conversationId);
+    }
+
+    // Use the final target conversation ID
+    targetConversationId = conversationId || currentConversationId || targetConversationId;
+
     if (!targetConversationId) {
       setIsLoading(false);
       return;
     }
-    
+
     try {
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
-        headers: {
-          'Authorization': `Bearer ${idToken}`
-        }
+        headers: { 'Authorization': `Bearer ${idToken}` }
       });
 
       if (response.ok) {
         const data = await response.json();
         const messages = data.messages || [];
-        console.log('Raw messages from API:', messages);
-        
-        // Ensure messages have proper structure for display
+
         const processedMessages = messages.map((msg: Partial<Message> & { id: string; sender_id: string; created_at: string }) => ({
           id: msg.id,
           sender_id: msg.sender_id,
@@ -233,94 +247,82 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           is_read: msg.is_read || false,
           message_type: msg.message_type || 'text'
         }));
-        
-        console.log('Processed messages for display:', processedMessages);
+
         setMessages(processedMessages);
-        console.log(`Loaded ${processedMessages.length} messages for conversation ${targetConversationId}`);
       } else if (response.status === 404) {
-        console.log(`Incident ${incidentId} not found or access denied`);
-        toast.error(`Incident ${incidentId} not found. Please check the incident ID.`);
+        toast.error('Conversation not found.');
       } else if (response.status === 401) {
-        console.log('Authentication failed when loading messages');
         toast.error('Authentication failed. Please log in again.');
-      } else {
-        console.log(`Failed to load messages: ${response.status} ${response.statusText}`);
-        toast.error('Failed to load messages. Please try again.');
       }
-    } catch (error) {
-      console.error('Failed to load messages:', error);
+    } catch {
       toast.error('Network error while loading messages.');
     } finally {
       setIsLoading(false);
     }
-  }, [incidentId, conversationId, idToken, API_URL]);
+  }, [incidentId, conversationId, currentConversationId, idToken, userProfile?.uid, API_URL, initializeWebSocket]);
 
-  // Fallback message polling when WebSocket is not connected
+  // Fallback message polling when WebSocket is not connected (reduced frequency)
   const startMessagePolling = useCallback(() => {
     if (messagePollingRef.current) {
       clearInterval(messagePollingRef.current);
     }
-    
-    messagePollingRef.current = setInterval(async () => {
-      if (!isConnected && currentConversationId) {
-        try {
-          const response = await fetch(`${API_URL}/api/messaging/conversations/${currentConversationId}/messages`, {
-            headers: {
-              'Authorization': `Bearer ${idToken}`
-            }
-          });
 
-          if (response.ok) {
-            const data = await response.json();
-            const latestMessages = data.messages || [];
-            
-            setMessages(prev => {
-              const processedMessages = latestMessages.map((msg: Partial<Message> & { id: string; sender_id: string; created_at: string }) => ({
-                id: msg.id,
-                sender_id: msg.sender_id,
-                sender_name: msg.sender_name || 'Unknown User',
-                sender_role: msg.sender_role || 'employee',
-                content: msg.content || '',
-                created_at: msg.created_at,
-                attachments: msg.attachments || [],
-                is_read: msg.is_read || false,
-                message_type: msg.message_type || 'text'
-              }));
-              
-              const newMessages = processedMessages.filter((msg: Message) => 
-                !prev.some(existingMsg => existingMsg.id === msg.id)
-              );
-              
-              if (newMessages.length > 0) {
-                console.log('Adding new messages from polling:', newMessages);
-                return [...prev, ...newMessages];
-              }
-              return prev;
-            });
-          }
-        } catch (error) {
-          console.error('Message polling error:', error);
+    // Only poll if not connected and we have a conversation
+    if (isConnected || !currentConversationId || !idToken) return;
+
+    messagePollingRef.current = setInterval(async () => {
+      if (isConnected || !currentConversationId) return;
+
+      try {
+        const response = await fetch(`${API_URL}/api/messaging/conversations/${currentConversationId}/messages`, {
+          headers: { 'Authorization': `Bearer ${idToken}` }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const latestMessages = data.messages || [];
+
+          setMessages(prev => {
+            const processedMessages = latestMessages.map((msg: Partial<Message> & { id: string; sender_id: string; created_at: string }) => ({
+              id: msg.id,
+              sender_id: msg.sender_id,
+              sender_name: msg.sender_name || 'Unknown User',
+              sender_role: msg.sender_role || 'employee',
+              content: msg.content || '',
+              created_at: msg.created_at,
+              attachments: msg.attachments || [],
+              is_read: msg.is_read || false,
+              message_type: msg.message_type || 'text'
+            }));
+
+            const newMessages = processedMessages.filter((msg: Message) =>
+              !prev.some(existingMsg => existingMsg.id === msg.id)
+            );
+
+            return newMessages.length > 0 ? [...prev, ...newMessages] : prev;
+          });
         }
+      } catch {
+        // Silent fail
       }
-    }, 3000); // Poll every 3 seconds when disconnected
+    }, 5000); // Poll every 5 seconds when disconnected (was 3)
   }, [isConnected, currentConversationId, idToken, API_URL]);
 
   useEffect(() => {
-    // Initialize WebSocket connection
-    initializeWebSocket();
-    
-    // Load existing messages
+    // Load messages first - this will also initialize WebSocket with cached conversation ID
     loadMessages();
 
     return () => {
       if (wsRef.current) {
         wsRef.current.close();
+        wsRef.current = null;
       }
       if (messagePollingRef.current) {
         clearInterval(messagePollingRef.current);
       }
+      conversationCacheRef.current = null;
     };
-  }, [incidentId, initializeWebSocket, loadMessages]);
+  }, [incidentId, conversationId, loadMessages]);
 
   // Start/stop polling based on connection status
   useEffect(() => {
@@ -345,59 +347,32 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
 
   const sendMessage = async () => {
     if (!newMessage.trim() && attachments.length === 0) return;
-    
-    // Determine the conversation ID
-    let targetConversationId = conversationId;
-    if (!targetConversationId && incidentId) {
-      try {
-        const convResponse = await fetch(`${API_URL}/api/messaging/conversations/incident/${incidentId}`, {
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          }
-        });
-        
-        if (convResponse.ok) {
-          const conversation = await convResponse.json();
-          targetConversationId = conversation.id;
-        } else {
-          toast.error('Failed to find conversation');
-          return;
-        }
-      } catch {
-        toast.error('Error finding conversation');
-        return;
-      }
-    }
-    
+
+    // Use cached or current conversation ID - no extra API call needed
+    const targetConversationId = conversationId || currentConversationId || conversationCacheRef.current?.id;
+
     if (!targetConversationId) {
       toast.error('No conversation available');
       return;
     }
 
     try {
-      console.log('Sending message to conversation:', targetConversationId);
-      
-      // Send message via API
-      const messageData = {
-        content: newMessage.trim(),
-        message_type: 'text'
-      };
-
       const response = await fetch(`${API_URL}/api/messaging/conversations/${targetConversationId}/messages`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${idToken}`
         },
-        body: JSON.stringify(messageData)
+        body: JSON.stringify({
+          content: newMessage.trim(),
+          message_type: 'text'
+        })
       });
-      
-      console.log('Message send response status:', response.status);
 
       if (response.ok) {
         const result = await response.json();
-        
-        // Add message immediately to UI for sender
+
+        // Add message immediately to UI
         const tempMessage: Message = {
           id: result.message_id || Date.now().toString(),
           sender_id: userProfile?.uid || 'unknown',
@@ -411,7 +386,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
         };
         setMessages(prev => [...prev, tempMessage]);
 
-        // Also send via WebSocket for real-time delivery to other participants
+        // Send via WebSocket for real-time delivery
         if (wsRef.current?.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'new_message',
@@ -419,44 +394,41 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
             timestamp: new Date().toISOString()
           }));
         }
-        
-        // Handle file uploads separately
+
+        // Handle file uploads
         if (attachments.length > 0) {
           await uploadAttachments();
         }
 
         setNewMessage('');
         setAttachments([]);
-        toast.success('Message sent');
       } else {
         const errorData = await response.json().catch(() => ({}));
-        console.error('Send message failed:', response.status, errorData);
         toast.error(errorData.detail || 'Failed to send message');
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to send message');
-      console.error('Send message error:', error);
     }
   };
 
   const uploadAttachments = async () => {
+    if (!incidentId || attachments.length === 0) return;
+
     try {
-      for (const file of attachments) {
+      // Upload files in parallel for speed
+      await Promise.all(attachments.map(async (file) => {
         const formData = new FormData();
         formData.append('file', file);
-        formData.append('incident_id', incidentId || '');
+        formData.append('incident_id', incidentId);
 
         await fetch(`${API_URL}/api/incidents/${incidentId}/attachments`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${idToken}`
-          },
+          headers: { 'Authorization': `Bearer ${idToken}` },
           body: formData
         });
-      }
-    } catch (error) {
-      console.error('Failed to upload attachments:', error);
-      toast.error('Message sent but some files failed to upload');
+      }));
+    } catch {
+      toast.error('Some files failed to upload');
     }
   };
 
@@ -523,7 +495,7 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           </div>
           <div>
             <h3 className="font-semibold text-white">
-              {incidentId ? `Incident #${incidentId}` : 'Security Support'}
+              {conversationTitle}
             </h3>
             <div className="flex items-center space-x-2">
               <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'}`}></div>

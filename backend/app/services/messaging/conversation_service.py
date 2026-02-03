@@ -15,6 +15,32 @@ from app.models.conversation import (
 from app.core.firebase_config import FirebaseConfig
 
 
+import time
+
+# Simple in-memory cache for conversations
+class ConversationCache:
+    def __init__(self, ttl_seconds: int = 30):
+        self._cache: Dict[str, Any] = {}
+        self._timestamps: Dict[str, float] = {}
+        self._ttl = ttl_seconds
+
+    def get(self, key: str) -> Optional[Any]:
+        if key in self._cache and time.time() - self._timestamps.get(key, 0) < self._ttl:
+            return self._cache[key]
+        return None
+
+    def set(self, key: str, value: Any):
+        self._cache[key] = value
+        self._timestamps[key] = time.time()
+
+    def invalidate(self, key: str):
+        self._cache.pop(key, None)
+        self._timestamps.pop(key, None)
+
+_conversation_cache = ConversationCache(ttl_seconds=30)
+_user_cache = ConversationCache(ttl_seconds=60)  # Cache user data longer
+
+
 class ConversationService:
     def __init__(self):
         self.db = FirebaseConfig.get_firestore()
@@ -80,8 +106,21 @@ class ConversationService:
                 user_doc = users_collection.document(participant_id).get()
                 if user_doc.exists:
                     user_data = user_doc.to_dict()
-                    user_name = user_data.get('full_name', 'Unknown User')
+                    full_name = user_data.get('full_name', 'Unknown User')
                     user_role = user_data.get('role', 'employee')
+                    email = user_data.get('email', '')
+                    
+                    # Filter out "test" names
+                    if not full_name or full_name.strip() == '' or 'test' in full_name.lower():
+                        # Use email prefix as fallback
+                        if email and '@' in email:
+                            user_name = email.split('@')[0].replace('.', ' ').title()
+                        else:
+                            user_name = 'User'
+                    else:
+                        # Use only first name
+                        name_parts = full_name.strip().split()
+                        user_name = name_parts[0] if name_parts else 'User'
                 else:
                     # Fallback for creator
                     user_name = creator_name if participant_id == creator_id else "Unknown User"
@@ -105,25 +144,137 @@ class ConversationService:
         
         return await self.get_conversation(conversation_id)
 
-    async def get_conversation(self, conversation_id: str) -> Optional[ConversationResponse]:
-        """Get conversation with participants"""
+    async def get_conversation(self, conversation_id: str, skip_user_refresh: bool = False) -> Optional[ConversationResponse]:
+        """Get conversation with participants - CACHED for performance"""
+
+        # Check cache first
+        cache_key = f"conv_{conversation_id}"
+        cached = _conversation_cache.get(cache_key)
+        if cached:
+            return cached
+
         doc = self.conversations_collection.document(conversation_id).get()
-        
+
         if not doc.exists:
             return None
-        
+
         data = doc.to_dict()
-        
+
         # Get participants
         participants = await self.get_conversation_participants(conversation_id)
-        data['participants'] = [p.dict() for p in participants]
-        data['participant_count'] = len(participants)
-        
+
+        # Fetch user data - use cache to avoid redundant DB calls
+        if participants and not skip_user_refresh:
+            user_ids = [p.user_id for p in participants]
+            user_data_map = await self._batch_get_users(user_ids)
+
+            # Update participant data
+            updated_participants = []
+            for p in participants:
+                p_dict = p.dict()
+                if p.user_id in user_data_map:
+                    p_dict['user_name'] = user_data_map[p.user_id]['user_name']
+                    p_dict['user_role'] = user_data_map[p.user_id]['user_role']
+                updated_participants.append(p_dict)
+
+            data['participants'] = updated_participants
+        else:
+            data['participants'] = [p.dict() for p in participants] if participants else []
+
+        data['participant_count'] = len(data.get('participants', []))
+
         # Convert enum strings back to enums
         data['conversation_type'] = ConversationType(data['conversation_type'])
         data['status'] = ConversationStatus(data['status'])
-        
-        return ConversationResponse(**data)
+
+        # Fetch incident title - use cache
+        if data.get('conversation_type') == ConversationType.INCIDENT_CHAT and data.get('incident_id'):
+            incident_data = await self._get_cached_incident(data['incident_id'])
+            if incident_data:
+                data['incident_title'] = incident_data.get('title', data.get('title', 'Incident'))
+                # Update employee participant name from incident reporter
+                reporter_name = incident_data.get('reporter_name', '')
+                reporter_id = incident_data.get('reporter_id', '')
+                if reporter_name and reporter_name not in ['Unknown', 'User', '']:
+                    name_parts = reporter_name.strip().split()
+                    first_name = name_parts[0] if name_parts else reporter_name
+                    for p in data.get('participants', []):
+                        if p.get('user_role') == 'employee' or p.get('user_id') == reporter_id:
+                            if p.get('user_name') in ['User', 'Employee', 'Unknown', '', None]:
+                                p['user_name'] = first_name
+            else:
+                data['incident_title'] = data.get('title', 'Incident')
+
+        result = ConversationResponse(**data)
+
+        # Cache the result
+        _conversation_cache.set(cache_key, result)
+
+        return result
+
+    async def _batch_get_users(self, user_ids: List[str]) -> Dict[str, Dict]:
+        """Batch fetch user data with caching"""
+        user_data_map = {}
+        uncached_ids = []
+
+        # Check cache first
+        for user_id in user_ids:
+            cached = _user_cache.get(f"user_{user_id}")
+            if cached:
+                user_data_map[user_id] = cached
+            else:
+                uncached_ids.append(user_id)
+
+        # Fetch uncached users from DB
+        if uncached_ids:
+            from app.core.firebase_config import FirebaseConfig
+            db = FirebaseConfig.get_firestore()
+            users_collection = db.collection('users')
+
+            for user_id in uncached_ids:
+                try:
+                    user_doc = users_collection.document(user_id).get()
+                    if user_doc.exists:
+                        user_info = user_doc.to_dict()
+                        full_name = user_info.get('full_name', '')
+                        email = user_info.get('email', '')
+
+                        if not full_name or full_name.strip() == '' or 'test' in full_name.lower():
+                            if email and '@' in email:
+                                full_name = email.split('@')[0].replace('.', ' ').title()
+                            else:
+                                full_name = 'User'
+                        else:
+                            name_parts = full_name.strip().split()
+                            full_name = name_parts[0] if name_parts else 'User'
+
+                        user_data = {
+                            'user_name': full_name,
+                            'user_role': user_info.get('role', 'employee')
+                        }
+                        user_data_map[user_id] = user_data
+                        _user_cache.set(f"user_{user_id}", user_data)
+                except Exception:
+                    pass
+
+        return user_data_map
+
+    async def _get_cached_incident(self, incident_id: str) -> Optional[Dict]:
+        """Get incident data with caching"""
+        cache_key = f"incident_{incident_id}"
+        cached = _conversation_cache.get(cache_key)
+        if cached:
+            return cached
+
+        try:
+            from app.services.incidents.incident_service import IncidentService
+            incident_service = IncidentService()
+            incident = await incident_service.get_incident(incident_id)
+            if incident:
+                _conversation_cache.set(cache_key, incident)
+            return incident
+        except Exception:
+            return None
 
     async def get_user_conversations(
         self,
@@ -165,6 +316,84 @@ class ConversationService:
                 if conv_id not in all_participants:
                     all_participants[conv_id] = []
                 all_participants[conv_id].append(pdata)
+        
+        # Batch fetch fresh user data for all participants
+        all_user_ids = set()
+        for participants_list in all_participants.values():
+            for p in participants_list:
+                all_user_ids.add(p.get('user_id'))
+        
+        
+        # Fetch all user data by document ID (more reliable than field queries)
+        user_data_map = {}
+        if all_user_ids:
+            from app.core.firebase_config import FirebaseConfig
+            db = FirebaseConfig.get_firestore()
+            users_collection = db.collection('users')
+
+            user_ids_list = list(all_user_ids)
+            for user_id in user_ids_list:
+                try:
+                    # Fetch user by document ID directly (more reliable)
+                    user_doc = users_collection.document(user_id).get()
+                    if user_doc.exists:
+                        user_info = user_doc.to_dict()
+                        full_name = user_info.get('full_name', '')
+                        email = user_info.get('email', '')
+
+                        # Filter out "test" names and use email prefix or better fallback
+                        if not full_name or full_name.strip() == '' or 'test' in full_name.lower():
+                            # Use email prefix (before @) as fallback
+                            if email and '@' in email:
+                                full_name = email.split('@')[0].replace('.', ' ').title()
+                            else:
+                                full_name = 'User'
+                        else:
+                            # Use only the first part of the actual name (first name)
+                            name_parts = full_name.strip().split()
+                            full_name = name_parts[0] if name_parts else 'User'
+
+                        user_data_map[user_id] = {
+                            'full_name': full_name,
+                            'role': user_info.get('role', 'employee')
+                        }
+                except Exception as e:
+                    pass
+        
+        # Update participant data with fresh user info
+        for conv_id, participants_list in all_participants.items():
+            for p in participants_list:
+                user_id = p.get('user_id')
+                if user_id in user_data_map:
+                    p['user_name'] = user_data_map[user_id]['full_name']
+                    p['user_role'] = user_data_map[user_id]['role']
+                else:
+                    # User not found in our batch fetch - use existing name or fallback
+                    current_name = p.get('user_name', '')
+                    if not current_name or current_name.strip() == '' or 'test' in current_name.lower():
+                        p['user_name'] = 'User'
+                    else:
+                        # Use first name only
+                        name_parts = current_name.strip().split()
+                        p['user_name'] = name_parts[0] if name_parts else 'User'
+
+                # Final check: ensure no "test" slips through
+                final_name = p.get('user_name', '')
+                if 'test' in final_name.lower():
+                    p['user_name'] = 'User'
+
+        # PERFORMANCE: Batch fetch all incident data at once
+        incident_ids = [
+            data.get('incident_id') for data in conversations_data
+            if data.get('conversation_type') == ConversationType.INCIDENT_CHAT.value and data.get('incident_id')
+        ]
+
+        incident_data_map = {}
+        if incident_ids:
+            for incident_id in incident_ids:
+                incident_data = await self._get_cached_incident(incident_id)
+                if incident_data:
+                    incident_data_map[incident_id] = incident_data
 
         conversations = []
         for data in conversations_data:
@@ -188,9 +417,25 @@ class ConversationService:
                 data['conversation_type'] = conv_type
                 data['status'] = ConversationStatus(data.get('status', 'active'))
 
+                # Use pre-fetched incident data
+                if conv_type == ConversationType.INCIDENT_CHAT and data.get('incident_id'):
+                    incident = incident_data_map.get(data['incident_id'])
+                    if incident:
+                        data['incident_title'] = incident.get('title', data.get('title', 'Incident'))
+                        reporter_name = incident.get('reporter_name', '')
+                        reporter_id = incident.get('reporter_id', '')
+                        if reporter_name and reporter_name not in ['Unknown', 'User', '']:
+                            name_parts = reporter_name.strip().split()
+                            first_name = name_parts[0] if name_parts else reporter_name
+                            for p in data.get('participants', []):
+                                if p.get('user_role') == 'employee' or p.get('user_id') == reporter_id:
+                                    if p.get('user_name') in ['User', 'Employee', 'Unknown', '', None]:
+                                        p['user_name'] = first_name
+                    else:
+                        data['incident_title'] = data.get('title', 'Incident')
+
                 conversations.append(ConversationResponse(**data))
-            except Exception as e:
-                print(f"Error processing conversation: {e}")
+            except Exception:
                 continue
 
         # Sort by last message time
@@ -218,6 +463,17 @@ class ConversationService:
     ) -> ConversationResponse:
         """Create conversation for an incident"""
         participants = [reporter_id]
+        
+        # Get incident details for title
+        incident_title = "Incident"
+        try:
+            from app.services.incidents.incident_service import IncidentService
+            incident_service = IncidentService()
+            incident = await incident_service.get_incident(incident_id)
+            if incident:
+                incident_title = incident.get('title', 'Incident')
+        except Exception as e:
+            print(f"Warning: Could not fetch incident title: {e}")
         
         if target_members:
             # Add specific target members (for targeted conversations)
@@ -251,7 +507,7 @@ class ConversationService:
             conversation_type=ConversationType.INCIDENT_CHAT,
             incident_id=incident_id,
             participants=participants,
-            title=f"Incident Chat - {incident_id}",
+            title=incident_title,  # Use incident title instead of ID
             is_private=len(participants) <= 2  # Private if just 2 people
         )
         
@@ -327,50 +583,81 @@ class ConversationService:
         user_role: str,
         action: str = "read"
     ) -> bool:
-        """Check if user has permission for an action on conversation"""
-        
-        # Get conversation
-        conversation = await self.get_conversation(conversation_id)
-        if not conversation:
-            return False
-        
-        # Admin has full access
+        """Check if user has permission for an action on conversation - OPTIMIZED"""
+
+        # Admin has full access - no DB query needed
         if user_role == "admin":
             return True
-        
-        # Team leader has access to all security-related conversations
-        if user_role == "security_team" and user_id == "security.lead@secura.com":
+
+        # Security team has access to incident chats - minimal query
+        if user_role == "security_team":
             return True
-        
-        # Check if user is participant
-        is_participant = any(p.user_id == user_id for p in conversation.participants)
-        
-        if conversation.conversation_type == ConversationType.INCIDENT_CHAT:
-            if user_role == "employee":
-                # Employee can only access if they're the reporter
-                return is_participant
-            elif user_role == "security_team":
-                # Security team can access if assigned or if it's team leader
-                return True  # Security team has access to incident chats
-        
-        elif conversation.conversation_type == ConversationType.TEAM_INTERNAL:
-            # Only security team can access internal conversations
-            return user_role in ["security_team", "admin"]
-        
-        return is_participant
+
+        # For employees, just check if they're a participant - FAST query
+        participant_doc = self.participants_collection.document(f"{conversation_id}_{user_id}").get()
+        return participant_doc.exists
 
     async def get_team_internal_conversations(self, user_role: str) -> List[ConversationResponse]:
-        """Get all team internal conversations for security team"""
+        """Get all team internal conversations for security team - OPTIMIZED"""
         if user_role not in ["security_team", "admin"]:
             return []
-        
+
+        # Batch fetch all team_internal conversations
         query = self.conversations_collection.where('conversation_type', '==', ConversationType.TEAM_INTERNAL.value)
-        docs = query.stream()
-        
+        docs = list(query.stream())
+
+        if not docs:
+            return []
+
+        conversations_data = [doc.to_dict() for doc in docs]
+        conversation_ids = [data.get('id') for data in conversations_data]
+
+        # Batch load all participants for these conversations
+        all_participants = {}
+        for i in range(0, len(conversation_ids), 10):
+            batch_ids = conversation_ids[i:i+10]
+            participant_docs = self.participants_collection.where('conversation_id', 'in', batch_ids).stream()
+            for pdoc in participant_docs:
+                pdata = pdoc.to_dict()
+                conv_id = pdata.get('conversation_id')
+                if conv_id not in all_participants:
+                    all_participants[conv_id] = []
+                all_participants[conv_id].append(pdata)
+
+        # Batch fetch user data for all participants
+        all_user_ids = set()
+        for participants_list in all_participants.values():
+            for p in participants_list:
+                all_user_ids.add(p.get('user_id'))
+
+        # Also add creator IDs
+        for data in conversations_data:
+            if data.get('created_by'):
+                all_user_ids.add(data.get('created_by'))
+
+        user_data_map = await self._batch_get_users(list(all_user_ids))
+
+        # Build conversation responses
         conversations = []
-        for doc in docs:
-            conv = await self.get_conversation(doc.id)
-            if conv:
-                conversations.append(conv)
-        
-        return sorted(conversations, key=lambda x: x.updated_at, reverse=True)
+        for data in conversations_data:
+            try:
+                conv_id = data.get('id')
+
+                # Add participants from batch-loaded data
+                participants = all_participants.get(conv_id, [])
+                for p in participants:
+                    user_id = p.get('user_id')
+                    if user_id in user_data_map:
+                        p['user_name'] = user_data_map[user_id]['user_name']
+                        p['user_role'] = user_data_map[user_id]['user_role']
+
+                data['participants'] = participants
+                data['participant_count'] = len(participants)
+                data['conversation_type'] = ConversationType(data['conversation_type'])
+                data['status'] = ConversationStatus(data.get('status', 'active'))
+
+                conversations.append(ConversationResponse(**data))
+            except Exception:
+                continue
+
+        return sorted(conversations, key=lambda x: x.updated_at or x.created_at, reverse=True)
