@@ -77,11 +77,20 @@ export default function IncidentChatButton({
 
   // Handle chat button click
   const handleChatClick = () => {
+    console.log('[IncidentChatButton] Opening chat', {
+      incidentId,
+      assignedToId,
+      userRole: userProfile?.role,
+      userId: userProfile?.uid
+    });
+    
     if (assignedToId) {
       // If incident is assigned to someone, chat directly with them
+      console.log('[IncidentChatButton] Opening chat with assigned member:', assignedToId);
       setShowChat(true);
     } else if (userProfile?.role === 'employee') {
       // If employee and no one assigned, show member selection
+      console.log('[IncidentChatButton] Employee - showing member selection');
       fetchSecurityTeamMembers();
       setShowMemberSelection(true);
     } else {

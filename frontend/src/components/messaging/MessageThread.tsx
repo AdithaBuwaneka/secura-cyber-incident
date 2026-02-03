@@ -244,13 +244,25 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           console.error('[MessageThread] Conversation not found for incident:', incidentId, 'Status:', convResponse.status);
           const errorText = await convResponse.text();
           console.error('[MessageThread] Error response:', errorText);
-          toast.error('Conversation not found. Please try reloading the incident.');
+          
+          // For 404, the conversation might not exist yet - retry after a delay
+          if (convResponse.status === 404) {
+            console.log('[MessageThread] Conversation not found, will retry in 2 seconds...');
+            toast.error('Creating conversation, please wait...');
+            setTimeout(() => {
+              console.log('[MessageThread] Retrying conversation fetch...');
+              loadMessages();
+            }, 2000);
+          } else {
+            toast.error('Failed to load conversation. Please refresh the page.');
+          }
+          
           setIsLoading(false);
           return;
         }
       } catch (error) {
         console.error('[MessageThread] Failed to fetch conversation:', error);
-        toast.error('Failed to load conversation');
+        toast.error('Failed to load conversation. Check your connection.');
         setIsLoading(false);
         return;
       }
@@ -747,9 +759,14 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && !e.shiftKey && sendMessage()}
-                placeholder={!currentConversationId ? "Loading conversation..." : "Type your message..."}
-                className="flex-1 p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+                placeholder={
+                  isLoading ? "Loading..." : 
+                  !currentConversationId ? "Unable to load conversation" : 
+                  "Type your message..."
+                }
+                className="flex-1 p-3 bg-transparent text-white placeholder-gray-400 focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={!currentConversationId || isLoading}
+                title={!currentConversationId ? "Waiting for conversation to load" : ""}
               />
               <label className="p-2 text-gray-400 hover:text-white cursor-pointer transition-colors">
                 <Paperclip className="h-4 w-4" />
