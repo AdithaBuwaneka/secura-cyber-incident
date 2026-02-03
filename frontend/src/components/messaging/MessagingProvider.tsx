@@ -34,7 +34,8 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
   const wsRef = useRef<WebSocket | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const WS_URL = API_URL.replace('http', 'ws');
+  // Properly convert HTTP/HTTPS to WS/WSS for WebSocket connections
+  const WS_URL = API_URL.replace(/^https?:\/\//, (match) => match === 'https://' ? 'wss://' : 'ws://');
 
   const handleWebSocketMessage = useCallback((data: Record<string, unknown>) => {
     switch (data.type) {
@@ -88,11 +89,12 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
 
     try {
       const wsUrl = `${WS_URL}/api/messaging/ws/general?token=${idToken}&user_id=${userProfile?.uid}`;
+      console.log('[MessagingProvider] Connecting to WebSocket:', WS_URL);
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
         setIsConnected(true);
-        console.log('Global messaging WebSocket connected');
+        console.log('[MessagingProvider] WebSocket connected successfully');
         
         // Clear any existing reconnect timeout
         if (reconnectTimeoutRef.current) {
@@ -106,16 +108,17 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
           const data = JSON.parse(event.data);
           handleWebSocketMessage(data);
         } catch (error) {
-          console.error('Failed to parse WebSocket message:', error);
+          console.error('[MessagingProvider] Failed to parse message:', error);
         }
       };
 
-      wsRef.current.onclose = () => {
+      wsRef.current.onclose = (event) => {
         setIsConnected(false);
-        console.log('Global messaging WebSocket disconnected');
+        console.log(`[MessagingProvider] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
         
         // Attempt to reconnect after 3 seconds if authenticated
         if (isAuthenticated && !reconnectTimeoutRef.current) {
+          console.log('[MessagingProvider] Will attempt reconnect in 3s...');
           reconnectTimeoutRef.current = setTimeout(() => {
             reconnectTimeoutRef.current = null;
             initializeWebSocket();
@@ -124,27 +127,15 @@ export default function MessagingProvider({ children }: MessagingProviderProps) 
       };
 
       wsRef.current.onerror = (error) => {
-        // TEMP: Remove console.error to test if it's causing the toast
-        console.log('Global messaging WebSocket error (not using console.error):', error);
-        console.log('WebSocket error object:', error);
-        console.log('WebSocket error type:', typeof error);
-        console.log('WebSocket error stack trace:', new Error().stack);
+        console.error('[MessagingProvider] WebSocket error:', {
+          readyState: wsRef.current?.readyState,
+          url: WS_URL,
+          error: error
+        });
         setIsConnected(false);
-        
-        // Prevent this error from being passed to any toast
-        // by not allowing it to bubble or be caught elsewhere
-        if (error instanceof Event) {
-          error.preventDefault?.();
-          error.stopPropagation?.();
-        }
-        
-        // Check if anything is calling toast with this error
-        setTimeout(() => {
-          console.log('Checking if this error caused a toast...');
-        }, 100);
       };
     } catch (error) {
-      console.error('Failed to initialize global messaging WebSocket:', error);
+      console.error('[MessagingProvider] Failed to initialize WebSocket:', error);
     }
   }, [idToken, userProfile?.uid, WS_URL, isAuthenticated, handleWebSocketMessage]);
 

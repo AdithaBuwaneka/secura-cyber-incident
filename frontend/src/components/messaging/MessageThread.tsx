@@ -52,30 +52,40 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
   const wsRef = useRef<WebSocket | null>(null);
   const messagePollingRef = useRef<NodeJS.Timeout | null>(null);
   const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
-  const WS_URL = API_URL.replace('http', 'ws');
+  // Properly convert HTTP/HTTPS to WS/WSS for WebSocket connections
+  const WS_URL = API_URL.replace(/^https?:\/\//, (match) => match === 'https://' ? 'wss://' : 'ws://');
 
   // Cache conversation data to avoid redundant API calls
   const conversationCacheRef = useRef<{ id: string; title: string; participants: any[] } | null>(null);
 
   const initializeWebSocket = useCallback(async (cachedConvId?: string) => {
-    if (!idToken || !userProfile?.uid) return;
+    if (!idToken || !userProfile?.uid) {
+      console.log('[MessageThread] Cannot initialize WebSocket: missing auth');
+      return;
+    }
 
     // Use cached conversation ID if available
     let targetConversationId = cachedConvId || conversationId || currentConversationId;
 
-    if (!targetConversationId) return;
+    if (!targetConversationId) {
+      console.log('[MessageThread] Cannot initialize WebSocket: missing conversation ID');
+      return;
+    }
 
     // Close existing connection if any
     if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
+      console.log('[MessageThread] WebSocket already connected');
       return; // Already connected
     }
 
     try {
       const wsUrl = `${WS_URL}/api/messaging/ws/${targetConversationId}?token=${idToken}`;
+      console.log('[MessageThread] Connecting to WebSocket:', WS_URL, 'Conversation:', targetConversationId);
       wsRef.current = new WebSocket(wsUrl);
 
       wsRef.current.onopen = () => {
         setIsConnected(true);
+        console.log('[MessageThread] WebSocket connected successfully');
         if (wsRef.current && wsRef.current.readyState === WebSocket.OPEN) {
           wsRef.current.send(JSON.stringify({
             type: 'join_room',
@@ -115,24 +125,34 @@ export default function MessageThread({ incidentId, conversationId, onClose }: M
           } else if (data.type === 'typing') {
             setIsTyping(data.is_typing && data.user_id !== userProfile?.uid);
           }
-        } catch {
-          // Silent fail for parse errors
+        } catch (error) {
+          console.error('[MessageThread] Failed to parse message:', error);
         }
       };
 
-      wsRef.current.onclose = () => {
+      wsRef.current.onclose = (event) => {
         setIsConnected(false);
-        // Reconnect after 5 seconds (increased from 3)
-        setTimeout(() => {
-          if (currentConversationId) initializeWebSocket(currentConversationId);
-        }, 5000);
+        console.log(`[MessageThread] WebSocket closed. Code: ${event.code}, Reason: ${event.reason}`);
+        // Reconnect after 5 seconds
+        if (currentConversationId) {
+          console.log('[MessageThread] Will attempt reconnect in 5s...');
+          setTimeout(() => {
+            initializeWebSocket(currentConversationId);
+          }, 5000);
+        }
       };
 
-      wsRef.current.onerror = () => {
+      wsRef.current.onerror = (error) => {
+        console.error('[MessageThread] WebSocket error:', {
+          readyState: wsRef.current?.readyState,
+          url: WS_URL,
+          conversationId: targetConversationId,
+          error: error
+        });
         setIsConnected(false);
       };
-    } catch {
-      // Silent fail
+    } catch (error) {
+      console.error('[MessageThread] Failed to initialize WebSocket:', error);
     }
   }, [conversationId, currentConversationId, idToken, userProfile?.uid, WS_URL]);
 
