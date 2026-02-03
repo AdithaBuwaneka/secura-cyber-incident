@@ -286,6 +286,64 @@ async def update_user_profile_new(
         )
 
 
+@router.get("/users/security-team")
+async def get_security_team_members(
+    current_user: User = Depends(get_current_user),
+    auth_service: AuthService = Depends()
+):
+    """Get all security team members - for team chat functionality"""
+    try:
+        # Only security team and admin can view team members
+        if current_user.role.value not in ["security_team", "admin"]:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Only security team can access team members"
+            )
+
+        from app.core.firebase_config import FirebaseConfig
+        db = FirebaseConfig.get_firestore()
+        users_collection = db.collection('users')
+
+        # Get all security team members
+        security_query = users_collection.where('role', '==', 'security_team')
+        security_docs = list(security_query.stream())
+
+        # Also get admins
+        admin_query = users_collection.where('role', '==', 'admin')
+        admin_docs = list(admin_query.stream())
+
+        all_docs = security_docs + admin_docs
+
+        # Format response for frontend SecurityMember interface
+        members = []
+        seen_uids = set()
+
+        for doc in all_docs:
+            data = doc.to_dict()
+            uid = data.get('uid') or doc.id
+
+            if uid in seen_uids:
+                continue
+            seen_uids.add(uid)
+
+            members.append({
+                "uid": uid,
+                "full_name": data.get('full_name', 'Unknown'),
+                "email": data.get('email', ''),
+                "role": data.get('role', 'security_team'),
+                "is_online": False,  # Will be updated by activity service
+                "last_seen": data.get('last_login')
+            })
+
+        return members
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Failed to fetch security team: {str(e)}"
+        )
+
 
 @router.post("/admin/manage-security-team")
 async def manage_security_team(

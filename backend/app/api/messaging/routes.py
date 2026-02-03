@@ -46,7 +46,7 @@ async def get_conversations(
             limit,
             offset
         )
-        
+
         return {
             "conversations": conversations,
             "total": len(conversations),
@@ -136,45 +136,72 @@ async def get_incident_conversation(
     current_user: User = Depends(get_current_user),
     conversation_service: ConversationService = Depends()
 ):
-    """Get or create conversation for an incident"""
+    """Get or create conversation for an incident - OPTIMIZED"""
     try:
-        # Check if conversation exists
-        conversation = await conversation_service.get_incident_conversation(incident_id)
-        
-        if not conversation:
-            # Get incident details to determine assigned member
+        # Quick permission check without full conversation load
+        if current_user.role.value == "employee":
+            # For employees, verify they own the incident
             from app.services.incidents.incident_service import IncidentService
             incident_service = IncidentService()
             incident = await incident_service.get_incident(incident_id)
-            
-            assigned_to = None
-            if incident:
-                assigned_to = incident.get('assigned_to')
-            
+
+            if not incident:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Incident not found"
+                )
+
+            reporter_id = incident.get('reporter_id')
+            if current_user.uid != reporter_id:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="You can only access conversations for your own incidents"
+                )
+        else:
+            # Security team/admin - quick incident existence check
+            from app.services.incidents.incident_service import IncidentService
+            incident_service = IncidentService()
+            incident = await incident_service.get_incident(incident_id)
+
+            if not incident:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Incident not found"
+                )
+
+            reporter_id = incident.get('reporter_id')
+
+        assigned_to = incident.get('assigned_to')
+
+        # Check if conversation exists - uses caching
+        conversation = await conversation_service.get_incident_conversation(incident_id)
+
+        if not conversation:
             # Create new incident conversation
             target_members = [target_member] if target_member else None
             conversation = await conversation_service.create_incident_conversation(
                 incident_id,
-                current_user.uid,
-                current_user.full_name,
+                reporter_id,
+                incident.get('reporter_name', 'Reporter'),
                 assigned_to=assigned_to,
                 target_members=target_members
             )
-        
-        # Check permissions
-        has_permission = await conversation_service.check_user_permission(
-            conversation.id,
-            current_user.uid,
-            current_user.role.value,
-            "read"
-        )
-        
-        if not has_permission:
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Access denied to this incident conversation"
-            )
-        
+        else:
+            # Quick participant check - no need to reload full conversation
+            is_participant = any(p.user_id == current_user.uid for p in conversation.participants)
+
+            if not is_participant:
+                if current_user.role.value == "security_team" or current_user.uid == reporter_id:
+                    await conversation_service.add_participant(
+                        conversation.id,
+                        current_user.uid,
+                        current_user.full_name,
+                        current_user.role.value
+                    )
+                    # Only refresh if we added a participant
+                    conversation = await conversation_service.get_conversation(conversation.id)
+
+        # Permission already verified above - skip redundant check
         return conversation
     except HTTPException:
         raise
@@ -298,19 +325,56 @@ async def get_team_internal_conversations(
     current_user: User = Depends(get_current_user),
     conversation_service: ConversationService = Depends()
 ):
-    """Get all team internal conversations for security team"""
+    """Get all team internal conversations for security team - OPTIMIZED"""
     try:
         if current_user.role.value not in ["security_team", "admin"]:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
                 detail="Only security team can access team conversations"
             )
-        
+
         conversations = await conversation_service.get_team_internal_conversations(
             current_user.role.value
         )
-        
-        return {"conversations": conversations}
+
+        # Format response for frontend TeamChatRoom interface
+        formatted_conversations = []
+        for conv in conversations:
+            # Find creator name from participants
+            creator_name = "Unknown"
+            for p in conv.participants:
+                if p.user_id == conv.created_by:
+                    creator_name = p.user_name
+                    break
+
+            # Format last message as object
+            last_message = None
+            if conv.last_message_content:
+                last_message = {
+                    "content": conv.last_message_content,
+                    "sender_name": conv.last_message_sender or "Unknown",
+                    "created_at": conv.last_message_time.isoformat() if conv.last_message_time else None
+                }
+
+            formatted_conversations.append({
+                "id": conv.id,
+                "title": conv.title or "Team Chat",
+                "created_by": conv.created_by,
+                "created_by_name": creator_name,
+                "participants": [
+                    {
+                        "user_id": p.user_id if hasattr(p, 'user_id') else p.get('user_id'),
+                        "user_name": p.user_name if hasattr(p, 'user_name') else p.get('user_name', 'Unknown'),
+                        "user_role": p.user_role if hasattr(p, 'user_role') else p.get('user_role', 'security_team')
+                    }
+                    for p in conv.participants
+                ],
+                "last_message": last_message,
+                "unread_count": 0,  # TODO: Implement unread count
+                "created_at": conv.created_at.isoformat() if conv.created_at else None
+            })
+
+        return {"conversations": formatted_conversations}
     except HTTPException:
         raise
     except Exception as e:

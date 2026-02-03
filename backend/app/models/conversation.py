@@ -43,6 +43,7 @@ class ConversationResponse(BaseModel):
     conversation_type: ConversationType
     title: Optional[str] = None
     incident_id: Optional[str] = None
+    incident_title: Optional[str] = None  # Add incident title for display
     
     # Participants
     participants: List[ConversationParticipant] = []

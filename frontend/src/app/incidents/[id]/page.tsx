@@ -290,13 +290,14 @@ export default function IncidentDetailPage() {
             </div>
           )}
 
-          {/* Attachments */}
-          {incident.attachments && incident.attachments.length > 0 && (
-            <div className="bg-[#2A2D35] p-4 rounded-lg border border-gray-700 mb-6">
-              <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center">
-                <Paperclip className="h-4 w-4 mr-2" />
-                Attachments ({incident.attachments.length})
-              </h4>
+          {/* Attachments - Always show this section */}
+          <div className="bg-[#2A2D35] p-4 rounded-lg border border-gray-700 mb-6">
+            <h4 className="text-sm font-medium text-gray-400 mb-3 flex items-center">
+              <Paperclip className="h-4 w-4 mr-2" />
+              Attachments ({incident.attachments?.length || 0})
+            </h4>
+            
+            {incident.attachments && incident.attachments.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {incident.attachments.map((attachment: IncidentAttachment & { file_url?: string; imagekit_url?: string }, index) => {
                   const isImage = attachment.file_type?.startsWith('image/') ||
@@ -314,6 +315,10 @@ export default function IncidentDetailPage() {
                     // Construct ImageKit URL
                     fileUrl = `${IMAGEKIT_URL}/incidents/${incident.id}/${attachment.filename}`;
                   }
+
+                  // Debug log
+                  console.log('Attachment:', attachment);
+                  console.log('File URL:', fileUrl);
 
                   return (
                     <div key={index} className="bg-[#1A1D23] p-3 rounded-lg border border-gray-700">
@@ -339,10 +344,22 @@ export default function IncidentDetailPage() {
                                 className="w-full h-48 object-cover rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
                                 onClick={() => window.open(fileUrl, '_blank')}
                                 onError={(e) => {
+                                  console.error('Image failed to load:', fileUrl);
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
                             </div>
+                          )}
+                          {!isImage && fileUrl && (
+                            <a
+                              href={fileUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center mt-2 text-xs text-[#00D4FF] hover:underline"
+                            >
+                              <Download className="h-3 w-3 mr-1" />
+                              View / Download File
+                            </a>
                           )}
                         </div>
                         <div className="flex flex-col space-y-1">
@@ -361,8 +378,12 @@ export default function IncidentDetailPage() {
                   );
                 })}
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-gray-500 text-center py-4">
+                No attachments uploaded for this incident
+              </p>
+            )}
+          </div>
 
           {/* Timeline */}
           <div className="bg-[#2A2D35] p-4 rounded-lg border border-gray-700 mb-6">

@@ -44,7 +44,7 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
   const [profileStats, setProfileStats] = useState({
     totalAssigned: 0,
     totalResolved: 0,
-    avgResolutionTime: 0,
+    completionRate: 0,
     currentActive: 0
   });
   const [loading, setLoading] = useState(false);
@@ -131,24 +131,15 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
       i.status !== 'resolved' && i.status !== 'closed'
     ).length;
 
-    // Calculate average resolution time
-    let avgResolutionTime = 0;
-    if (resolvedIncidents.length > 0) {
-      const totalTime = resolvedIncidents.reduce((acc, incident) => {
-        if (incident.resolved_at && incident.assigned_at) {
-          const assignedTime = new Date(incident.assigned_at).getTime();
-          const resolvedTime = new Date(incident.resolved_at).getTime();
-          return acc + (resolvedTime - assignedTime);
-        }
-        return acc;
-      }, 0);
-      avgResolutionTime = Math.round(totalTime / resolvedIncidents.length / (1000 * 60 * 60)); // Convert to hours
-    }
+    // Calculate completion rate percentage
+    const completionRate = totalAssigned > 0 
+      ? Math.round((totalResolved / totalAssigned) * 100) 
+      : 0;
 
     setProfileStats({
       totalAssigned,
       totalResolved,
-      avgResolutionTime,
+      completionRate,
       currentActive
     });
   };
@@ -178,6 +169,16 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
     }
   };
 
+  // Fetch incidents data on mount for statistics
+  useEffect(() => {
+    if (idToken && userProfile?.uid) {
+      fetchAssignedIncidents();
+      fetchResolvedIncidents();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [idToken, userProfile?.uid]);
+
+  // Also fetch when switching tabs (for refresh)
   useEffect(() => {
     if (activeTab === 'assigned') {
       fetchAssignedIncidents();
@@ -185,7 +186,7 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
       fetchResolvedIncidents();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab, idToken, userProfile?.uid]);
+  }, [activeTab]);
 
   useEffect(() => {
     calculateStats();
@@ -341,11 +342,11 @@ export default function SecurityTeamProfile({ onClose }: SecurityTeamProfileProp
                       <p className="text-xs text-gray-400">Total Resolved</p>
                     </div>
                     <div className="text-center">
-                      <div className="p-3 bg-orange-500/20 rounded-lg mb-2">
-                        <Clock className="h-6 w-6 text-orange-400 mx-auto" />
+                      <div className="p-3 bg-purple-500/20 rounded-lg mb-2">
+                        <TrendingUp className="h-6 w-6 text-purple-400 mx-auto" />
                       </div>
-                      <p className="text-2xl font-bold text-white">{profileStats.avgResolutionTime}h</p>
-                      <p className="text-xs text-gray-400">Avg Resolution</p>
+                      <p className="text-2xl font-bold text-white">{profileStats.completionRate}%</p>
+                      <p className="text-xs text-gray-400">Completion Rate</p>
                     </div>
                     <div className="text-center">
                       <div className="p-3 bg-yellow-500/20 rounded-lg mb-2">
