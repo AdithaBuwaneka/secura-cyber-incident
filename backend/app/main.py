@@ -16,6 +16,7 @@ from app.api.security_applications import routes as security_app_routes
 from app.api.messaging import routes as messaging_routes
 from app.api.system import routes as system_routes
 from app.api.user_activity import routes as user_activity_routes
+from app.api.chatbot import routes as chatbot_routes
 from app.core.firebase_config import FirebaseConfig
 from app.services.background.background_tasks import background_service
 
@@ -51,6 +52,7 @@ app.include_router(security_app_routes.router, prefix="/api/security-application
 app.include_router(messaging_routes.router, prefix="/api/messaging", tags=["Messaging"])
 app.include_router(system_routes.router, prefix="/api/system", tags=["System Configuration"])
 app.include_router(user_activity_routes.router, prefix="/api/user-activity", tags=["User Activity"])
+app.include_router(chatbot_routes.router, prefix="/api", tags=["Chatbot"])
 
 # Startup event to initialize background tasks
 @app.on_event("startup")

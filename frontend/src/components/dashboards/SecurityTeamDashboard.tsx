@@ -32,6 +32,7 @@ import TeamStatusPanel from '@/components/security/TeamStatusPanel';
 import AIInsightsPanel from '@/components/security/AIInsightsPanel';
 import IncidentChatButton from '@/components/messaging/IncidentChatButton';
 import { Footer } from '@/components/layout';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 import toast from 'react-hot-toast';
 
 interface Attachment {
@@ -1321,6 +1322,9 @@ ${imageAnalysis.recommendations.map((r: string, i: number) => `${i + 1}. ${r}`).
 
       {/* Footer */}
       <Footer variant="dashboard" />
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget pageContext="security-dashboard" position="bottom-right" />
     </div>
   );
 }
