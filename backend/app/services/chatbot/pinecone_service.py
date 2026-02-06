@@ -25,7 +25,7 @@ class PineconeService:
         self.api_key = os.getenv("PINECONE_API_KEY")
         self.environment = os.getenv("PINECONE_ENVIRONMENT", "us-east-1")
         self.index_name = os.getenv("PINECONE_INDEX_NAME", "secura-chatbot")
-        self.dimension = 768  # Standard embedding dimension for text-embedding models
+        self.dimension = 3072  # gemini-embedding-001 dimension (updated from 768)
         
         if not self.api_key:
             raise ValueError("PINECONE_API_KEY environment variable not set")

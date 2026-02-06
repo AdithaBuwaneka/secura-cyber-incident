@@ -28,8 +28,8 @@ class EmbeddingService:
         # Configure Google AI
         genai.configure(api_key=self.api_key)
         
-        # Use text-embedding-004 model (768 dimensions)
-        self.model_name = "models/text-embedding-004"
+        # Use gemini-embedding-001 (3072 dimensions) - text-embedding-004 retired Jan 2026
+        self.model_name = "models/gemini-embedding-001"
         
         logger.info(f"EmbeddingService initialized with model: {self.model_name}")
     
