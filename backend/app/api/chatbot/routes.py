@@ -15,45 +15,36 @@ router = APIRouter(prefix="/chatbot", tags=["Chatbot"])
 logger = get_logger(__name__)
 
 
-# Initialize services (will be lazy loaded)
-rag_service = None
-scope_classifier = None
-
-
 def get_rag_service() -> RAGService:
-    """Dependency to get RAG service instance"""
-    global rag_service
-    if rag_service is None:
-        try:
-            logger.info("Initializing RAG service...")
-            rag_service = RAGService()
-            logger.info("RAG service initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize RAG service: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise HTTPException(
-                status_code=503,
-                detail=f"Chatbot service initialization failed: {str(e)}"
-            )
-    return rag_service
+    """Dependency to get RAG service instance - recreated each time to avoid caching issues"""
+    try:
+        logger.info("Creating RAG service instance...")
+        service = RAGService()
+        logger.info(f"RAG service created - similarity_threshold={service.similarity_threshold}")
+        return service
+    except Exception as e:
+        logger.error(f"Failed to initialize RAG service: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=503,
+            detail=f"Chatbot service initialization failed: {str(e)}"
+        )
 
 
 def get_scope_classifier() -> ScopeClassifier:
-    """Dependency to get scope classifier instance"""
-    global scope_classifier
-    if scope_classifier is None:
-        try:
-            logger.info("Initializing scope classifier...")
-            scope_classifier = ScopeClassifier()
-            logger.info("Scope classifier initialized successfully")
-        except Exception as e:
-            logger.error(f"Failed to initialize scope classifier: {str(e)}")
-            logger.error(traceback.format_exc())
-            raise HTTPException(
-                status_code=503,
-                detail=f"Classifier service initialization failed: {str(e)}"
-            )
-    return scope_classifier
+    """Dependency to get scope classifier instance - recreated each time"""
+    try:
+        logger.info("Creating scope classifier instance...")
+        classifier = ScopeClassifier()
+        logger.info("Scope classifier created successfully")
+        return classifier
+    except Exception as e:
+        logger.error(f"Failed to initialize scope classifier: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise HTTPException(
+            status_code=503,
+            detail=f"Classifier service initialization failed: {str(e)}"
+        )
 
 
 @router.post("/chat", response_model=ChatResponse)

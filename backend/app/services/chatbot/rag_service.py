@@ -27,7 +27,7 @@ class RAGService:
         
         # Configuration
         self.top_k = 5  # Number of similar documents to retrieve
-        self.similarity_threshold = 0.5  # Minimum similarity score (lowered for better recall)
+        self.similarity_threshold = 0.35  # Minimum similarity score (lowered for better recall)
         
         logger.info("RAGService initialized")
     
@@ -58,16 +58,12 @@ class RAGService:
             # Step 2: Search Pinecone for similar documents
             logger.debug(f"Step 2: Searching Pinecone (top_k={self.top_k}, threshold={self.similarity_threshold})")
             
-            # Optional: Filter by page context if provided
-            filter_metadata = None
-            if page_context:
-                filter_metadata = {"page": page_context}
-            
+            # Don't filter by page context - search across all documentation
             similar_docs = await self.pinecone_service.query_similar(
                 query_vector=query_embedding,
                 top_k=self.top_k,
                 namespace="default",
-                filter_metadata=filter_metadata,
+                filter_metadata=None,  # Search all pages
                 min_score=self.similarity_threshold
             )
             
