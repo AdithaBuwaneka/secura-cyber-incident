@@ -27,6 +27,7 @@ import SystemConfig from '@/components/system/SystemConfig';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Footer } from '@/components/layout';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 
 interface OverviewData {
   users: {
@@ -726,6 +727,9 @@ export default function AdminDashboard() {
 
       {/* Footer */}
       <Footer variant="dashboard" />
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget pageContext="admin-dashboard" position="bottom-right" />
     </div>
   );
 }

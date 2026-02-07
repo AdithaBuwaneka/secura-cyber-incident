@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Shield, AlertTriangle, Users, BarChart3, Zap, ArrowRight, CheckCircle } from 'lucide-react';
 import { Navbar, Footer } from '@/components/layout';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 
 export default function Home() {
   return (
@@ -241,6 +242,9 @@ export default function Home() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget pageContext="home" position="bottom-right" />
     </div>
   );
 }
