@@ -9,6 +9,7 @@ import { RootState, AppDispatch } from '@/store';
 import Link from 'next/link';
 import toast from 'react-hot-toast';
 import { Navbar, Footer } from '@/components/layout';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -229,6 +230,9 @@ export default function LoginPage() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget pageContext="login" position="bottom-right" />
     </div>
   );
 }

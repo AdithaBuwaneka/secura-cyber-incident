@@ -27,6 +27,7 @@ import IncidentReportForm from '@/components/forms/IncidentReportForm';
 import SecurityMessaging from '@/components/messaging/SecurityMessaging';
 import IncidentChatButton from '@/components/messaging/IncidentChatButton';
 import { useMessaging } from '@/components/messaging/MessagingProvider';
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
 import toast from 'react-hot-toast';
 import Link from 'next/link';
 import { Footer } from '@/components/layout';
@@ -651,6 +652,9 @@ export default function EmployeeDashboard() {
 
       {/* Footer */}
       <Footer variant="dashboard" />
+
+      {/* Chatbot Widget */}
+      <ChatbotWidget pageContext="dashboard" position="bottom-right" />
     </div>
   );
 }

@@ -3,8 +3,41 @@ System Logging Utility
 Logs system activities to Firebase for admin dashboard
 """
 
+import logging
 from datetime import datetime
 from app.core.firebase_config import FirebaseConfig
+
+
+def get_logger(name: str) -> logging.Logger:
+    """
+    Get a configured logger instance
+    
+    Args:
+        name: Name for the logger (typically __name__)
+    
+    Returns:
+        Configured logger instance
+    """
+    logger = logging.getLogger(name)
+    
+    # Only configure if not already configured
+    if not logger.handlers:
+        logger.setLevel(logging.INFO)
+        
+        # Console handler
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        
+        # Formatter
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+            datefmt='%Y-%m-%d %H:%M:%S'
+        )
+        handler.setFormatter(formatter)
+        
+        logger.addHandler(handler)
+    
+    return logger
 
 def log_system_activity(user_email: str, action: str, message: str, level: str = "info", ip_address: str = "127.0.0.1"):
     """
