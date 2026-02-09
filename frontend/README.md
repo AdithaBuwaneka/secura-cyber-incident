@@ -50,15 +50,17 @@ npm run dev
 - **🚨 Incident Reporting**: Complete incident management with file uploads
 - **💬 Real-time Messaging**: WebSocket-based secure communication
 - **📈 Analytics**: Chart.js visualizations with role-based data access
-- **👥 Security Applications**: Employee-to-security team application system  
+- **👥 Security Applications**: Employee-to-security team application system
 - **🛡️ Protected Routes**: Role-based access control throughout the app
 - **📱 Responsive Design**: Mobile-first design with Tailwind CSS
+- **🤖 AI Chatbot Widget**: *(New)* Intelligent RAG-powered assistance across all pages
 
 ## 🤖 **AI Features**
 - **Smart Categorization**: Real-time incident classification with 85%+ accuracy
 - **Severity Assessment**: Multi-factor analysis with confidence scoring
 - **Mitigation Strategies**: Context-aware response recommendations
 - **Threat Intelligence**: Predictive analytics and pattern recognition
+- **RAG Chatbot Widget**: *(New)* Context-aware conversational assistance powered by Gemini 2.5 Flash
 
 ## 📊 **Analytics Dashboard**
 - **Real-time Metrics**: Live charts and statistics using Chart.js
@@ -97,6 +99,7 @@ src/
 ├── components/            # Reusable React components
 │   ├── analytics/         # Data visualization
 │   ├── applications/      # Security applications
+│   ├── chatbot/           # AI chatbot widget (NEW)
 │   ├── dashboards/        # Role-based dashboards
 │   ├── forms/             # Form components
 │   └── messaging/         # Real-time messaging
@@ -133,6 +136,92 @@ src/
 - User management and role assignment
 - Security application review and approval
 - Executive analytics and compliance
+
+## 🤖 Chatbot Widget
+
+### Overview
+The Secura platform features an intelligent chatbot widget available on all pages, powered by RAG (Retrieval-Augmented Generation) technology with Gemini 2.5 Flash LLM.
+
+### Features
+- **💬 Context-Aware Assistance**: Understands current page context for relevant answers
+- **🔍 Semantic Search**: Retrieves accurate information from documentation
+- **📚 Source Attribution**: Shows documentation sources for answers
+- **🎯 Page Suggestions**: Recommends relevant pages to visit
+- **⚡ Real-time Responses**: Fast, streaming-like response generation
+- **🎨 Modern UI**: Beautiful, responsive chat interface with smooth animations
+- **📱 Mobile Friendly**: Works seamlessly on all device sizes
+- **💾 Session Persistence**: Maintains conversation context within session
+
+### Implementation
+
+#### Component: `ChatbotWidget.tsx`
+Located in: `src/components/chatbot/ChatbotWidget.tsx`
+
+#### Integration
+The chatbot is integrated across all major pages:
+- **Home Page** (`/`)
+- **Login Page** (`/auth/login`)
+- **Register Page** (`/auth/register`)
+- **Employee Dashboard** (`/dashboard`)
+- **Security Team Dashboard** (`/dashboard`)
+- **Admin Dashboard** (`/dashboard`)
+
+#### Usage Example
+```tsx
+import ChatbotWidget from '@/components/chatbot/ChatbotWidget';
+
+export default function YourPage() {
+  return (
+    <div>
+      {/* Your page content */}
+
+      {/* Add chatbot widget */}
+      <ChatbotWidget
+        pageContext="your-page-name"  // Current page identifier
+        position="bottom-right"        // or "bottom-left"
+      />
+    </div>
+  );
+}
+```
+
+#### Props
+- `pageContext` (optional): Current page identifier for context-aware responses
+- `apiBaseUrl` (optional): Backend API URL (defaults to `NEXT_PUBLIC_API_URL`)
+- `position` (optional): Widget position - `"bottom-right"` or `"bottom-left"`
+
+### API Integration
+The widget connects to the backend chatbot API:
+- **Endpoint**: `POST /api/chatbot/chat`
+- **Request**:
+  ```json
+  {
+    "message": "User's question",
+    "session_id": "unique-session-id",
+    "page_context": "home"
+  }
+  ```
+- **Response**:
+  ```json
+  {
+    "answer": "Bot's response",
+    "is_in_scope": true,
+    "confidence_score": 0.92,
+    "sources": ["page1", "page2"],
+    "suggested_pages": ["incidents", "dashboard"]
+  }
+  ```
+
+### User Experience
+1. **Floating Button**: Cyan circular button with chat icon
+2. **Chat Window**: 600px height, modern card design
+3. **Messages**:
+   - User messages: Cyan background, right-aligned
+   - Bot messages: White background, left-aligned with bot avatar
+4. **Sources**: Displayed as tags below bot messages
+5. **Suggested Pages**: Clickable links to navigate
+6. **Loading State**: Animated spinner while processing
+7. **Error Handling**: Graceful error messages if API fails
 
 ## 📝 Available Scripts
 
@@ -215,6 +304,7 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
 - **✅ File Management**: ImageKit integration for secure uploads
 - **✅ State Management**: Redux Toolkit with persistent state
 - **✅ Security Applications**: Complete workflow system
+- **✅ AI Chatbot Widget**: RAG-powered assistance on all pages (NEW)
 - **✅ Code Quality**: Zero ESLint errors, TypeScript strict mode
 
 ### **🔗 Backend Integration**
@@ -233,4 +323,4 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
 
 ## 🚀 Production Ready!
 
-The frontend is fully developed, tested, and integrated with the backend. All features are operational and ready for deployment.
+The frontend is fully developed, tested, and integrated with the backend. All features including the new **AI chatbot widget** are operational and ready for deployment.

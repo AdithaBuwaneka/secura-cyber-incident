@@ -22,10 +22,10 @@ class GeminiService:
     
     def __init__(self):
         """Initialize Gemini API"""
-        self.api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
-        
+        self.api_key = os.getenv("GEMINI_API_KEY")
+
         if not self.api_key:
-            raise ValueError("GOOGLE_API_KEY or GEMINI_API_KEY environment variable not set")
+            raise ValueError("GEMINI_API_KEY environment variable not set")
         
         # Configure Google AI
         genai.configure(api_key=self.api_key)

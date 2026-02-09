@@ -68,6 +68,14 @@ Created via: `python scripts/create_security_team.py`
 - **Threat Intelligence**: Pattern analysis and predictive insights
 - **Anomaly Detection**: Advanced behavioral analysis
 
+### 💬 **Intelligent RAG Chatbot** *(New)*
+- **Context-Aware Assistance**: Gemini 2.5 Flash powered conversational AI
+- **Vector Search**: Pinecone-based semantic search for accurate responses
+- **Scope Detection**: Automatically identifies website-related questions
+- **Page Context**: Understands user's current location for relevant answers
+- **Source Attribution**: Provides documentation sources and suggested pages
+- **Session Management**: Maintains conversation context across interactions
+
 ### 🔐 **Enterprise Authentication**
 - **Firebase Integration**: Secure ID token validation
 - **Role-Based Access**: Employee, Security Team, Admin permissions
@@ -102,6 +110,8 @@ Created via: `python scripts/create_security_team.py`
 - **File Storage**: ImageKit with virus scanning
 - **Email**: SendGrid integration
 - **AI/ML**: Scikit-learn, Transformers, NLP libraries
+- **LLM**: Google Gemini 2.5 Flash for chatbot and AI features
+- **Vector Database**: Pinecone for RAG chatbot semantic search
 
 ## 📁 Project Structure
 
@@ -114,11 +124,20 @@ backend/
 │   │   ├── security_applications/ # Security team applications
 │   │   ├── incidents/         # Incident management
 │   │   ├── ai/                # AI engine endpoints
-│   │   └── analytics/         # Analytics and reporting
+│   │   ├── analytics/         # Analytics and reporting
+│   │   └── chatbot/           # RAG chatbot endpoints
 │   ├── core/
 │   │   └── firebase_config.py # Firebase configuration
-│   ├── models/                # Pydantic data models
-│   ├── services/              # Business logic
+│   ├── models/
+│   │   ├── chatbot.py         # Chatbot data models
+│   │   └── ...                # Other Pydantic models
+│   ├── services/
+│   │   ├── chatbot/           # Chatbot services
+│   │   │   ├── rag_service.py       # RAG orchestration
+│   │   │   ├── gemini_service.py    # Gemini LLM integration
+│   │   │   ├── embedding_service.py # Vector embeddings
+│   │   │   └── pinecone_service.py  # Vector database
+│   │   └── ...                # Other business logic
 │   └── utils/                 # Utilities
 ├── scripts/                   # Setup scripts
 ├── requirements.txt           # Dependencies
@@ -167,6 +186,10 @@ backend/
 - `POST /reports/generate` - Generate compliance reports
 - `POST /notifications/email` - Send email notifications
 
+### Chatbot (`/api/chatbot`) *(New)*
+- `POST /chat` - Send message and get AI response
+- `GET /health` - Check chatbot service health
+
 ## 👤 Role System
 
 ### Employee (Default)
@@ -186,6 +209,103 @@ backend/
 - Manage users and roles
 - Generate compliance reports
 - Access executive dashboards
+
+## 💬 Chatbot Feature (RAG System)
+
+### Overview
+The Secura chatbot uses **Retrieval-Augmented Generation (RAG)** to provide accurate, context-aware assistance about the platform. It combines semantic search with Gemini 2.5 Flash LLM for intelligent responses.
+
+### Architecture Components
+
+#### 1. **Gemini Service** (`gemini_service.py`)
+- **Model**: Gemini 2.5 Flash for fast, reliable responses
+- **Question Classification**: Determines if questions are about Secura platform
+- **RAG Response Generation**: Creates answers grounded in documentation context
+- **Safety Settings**: Filters harmful content automatically
+
+#### 2. **Embedding Service** (`embedding_service.py`)
+- **Model**: gemini-embedding-001 (768 dimensions)
+- **Task Types**:
+  - `retrieval_document` - For document embeddings
+  - `retrieval_query` - For user query embeddings
+- **Batch Processing**: Handles multiple embeddings efficiently
+
+#### 3. **Pinecone Service** (`pinecone_service.py`)
+- **Vector Database**: Stores and searches documentation embeddings
+- **Semantic Search**: Finds relevant docs using cosine similarity
+- **Index**: `secura-chatbot` with 768-dimensional vectors
+- **Top-K Retrieval**: Returns most relevant documentation chunks
+
+#### 4. **RAG Service** (`rag_service.py`)
+- **Orchestration**: Coordinates all chatbot services
+- **Workflow**:
+  1. Classify question scope (in-scope vs out-of-scope)
+  2. Generate query embedding
+  3. Search Pinecone for relevant docs
+  4. Build context from retrieved chunks
+  5. Generate answer using Gemini with context
+  6. Return response with sources and suggested pages
+
+### API Endpoints
+
+#### `POST /api/chatbot/chat`
+**Request:**
+```json
+{
+  "message": "How do I report an incident?",
+  "session_id": "unique-session-id",
+  "page_context": "home"
+}
+```
+
+**Response:**
+```json
+{
+  "answer": "To report an incident, navigate to the Incidents page...",
+  "is_in_scope": true,
+  "confidence_score": 0.92,
+  "sources": ["incidents-page", "dashboard"],
+  "suggested_pages": ["incidents", "dashboard"],
+  "session_id": "unique-session-id",
+  "timestamp": "2026-02-09T10:30:00Z"
+}
+```
+
+#### `GET /api/chatbot/health`
+**Response:**
+```json
+{
+  "status": "healthy",
+  "services": {
+    "gemini": "healthy",
+    "pinecone": "healthy",
+    "embedding": "healthy"
+  }
+}
+```
+
+### Features
+
+✅ **Scope Detection**: Automatically identifies website-related questions
+✅ **Context-Aware**: Understands current page for relevant answers
+✅ **Source Attribution**: Provides documentation sources
+✅ **Suggested Pages**: Recommends relevant pages to visit
+✅ **Session Management**: Maintains conversation context
+✅ **Confidence Scoring**: Indicates answer reliability
+✅ **Safety Filters**: Blocks harmful or inappropriate content
+
+### Configuration
+
+Required environment variables:
+```env
+# Gemini API for LLM and embeddings
+GEMINI_API_KEY=your_gemini_api_key
+
+# Pinecone for vector database
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX_NAME=secura-chatbot
+```
 
 ## 🔧 Environment Configuration
 
@@ -208,7 +328,15 @@ IMAGEKIT_URL_ENDPOINT=https://ik.imagekit.io/your_id
 
 # SendGrid Configuration (Optional)
 SENDGRID_API_KEY=your_sendgrid_key
-FROM_EMAIL=noreply@your-domain.com
+SENDGRID_FROM_EMAIL=noreply@your-domain.com
+
+# Google Gemini API (Required for Chatbot & AI Features)
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Pinecone Vector Database (Required for Chatbot RAG)
+PINECONE_API_KEY=your_pinecone_api_key
+PINECONE_ENVIRONMENT=us-east-1
+PINECONE_INDEX_NAME=secura-chatbot
 
 # Environment
 ENVIRONMENT=development
@@ -228,6 +356,8 @@ ENVIRONMENT=development
 - Transformers 4.30+
 - Pandas 2.0+
 - NumPy 1.24+
+- Google Generative AI (Gemini) 0.8.3+
+- Pinecone Client 5.0.1+
 
 ### Services
 - SendGrid 6.11.0
@@ -299,13 +429,14 @@ curl http://127.0.0.1:8000/api/auth/admin/users
 - **✅ Email System**: SendGrid notifications configured
 - **✅ Role Management**: Employee, Security Team, Admin access
 
-### **🔌 API Endpoints (40+)**
+### **🔌 API Endpoints (42+)**
 - **✅ Authentication**: Complete user management system
 - **✅ Security Applications**: Full workflow implementation
 - **✅ Incident Management**: CRUD operations with messaging
 - **✅ AI Engine**: Comprehensive analysis capabilities
 - **✅ Analytics**: Dashboard data and compliance reporting
 - **✅ WebSocket**: Real-time communication system
+- **✅ RAG Chatbot**: Intelligent conversational assistance (NEW)
 
 ### **🤖 AI Engine Performance**
 - **✅ Categorization**: 85%+ accuracy with confidence scoring
@@ -337,6 +468,7 @@ The Secura backend is **100% complete** with all core features implemented and t
 - ✅ Comprehensive analytics and compliance reporting
 - ✅ Secure file management and evidence handling
 - ✅ Role-based access control across all endpoints
+- ✅ **NEW:** Intelligent RAG chatbot with Gemini 2.5 Flash & Pinecone
 
 **Ready for deployment and frontend integration!**
 # test 1770069269
