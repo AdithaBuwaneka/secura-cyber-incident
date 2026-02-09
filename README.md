@@ -14,17 +14,16 @@ app_port: 7860
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.104.1-009688)](https://fastapi.tiangolo.com/)
 [![Firebase](https://img.shields.io/badge/Firebase-11-orange)](https://firebase.google.com/)
 [![Python](https://img.shields.io/badge/Python-3.11+-blue)](https://python.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)](https://typescriptlang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://typescriptlang.org/)
 [![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen)](https://github.com)
 
 ## 🌐 Live Deployment
 
-- **🌍 Frontend (Vercel):** [https://secura-cyber-incident.vercel.app](https://secura-cyber-incident.vercel.app)
-- **🚀 Backend API (HuggingFace):** [https://adithaf7-secura-backend.hf.space](https://adithaf7-secura-backend.hf.space)
-- **💚 Health Check:** [https://adithaf7-secura-backend.hf.space/health](https://adithaf7-secura-backend.hf.space/health)
-- **📖 API Docs:** [https://adithaf7-secura-backend.hf.space/docs](https://adithaf7-secura-backend.hf.space/docs)
-- **🤗 HuggingFace Space:** [https://huggingface.co/spaces/adithaf7/secura-backend](https://huggingface.co/spaces/adithaf7/secura-backend)
-- **🔄 GitHub Actions:** [View CI/CD Pipeline](https://github.com/AdithaBuwaneka/secura-cyber-incident/actions)
+- **Frontend:** [https://secura-cyber-incident.vercel.app](https://secura-cyber-incident.vercel.app) (Vercel)
+- **Backend API:** [https://adithaf7-secura-backend.hf.space](https://adithaf7-secura-backend.hf.space) (HuggingFace Spaces)
+  - API Docs: [/docs](https://adithaf7-secura-backend.hf.space/docs)
+  - Health Check: [/health](https://adithaf7-secura-backend.hf.space/health)
+- **CI/CD:** [GitHub Actions Pipeline](https://github.com/AdithaBuwaneka/secura-cyber-incident/actions)
 
 **Secura** is a comprehensive, AI-powered cybersecurity incident management platform designed to streamline incident reporting, enhance threat analysis, and facilitate real-time collaboration between employees, security teams, and administrators.
 
@@ -76,9 +75,10 @@ app_port: 7860
 - Pydantic 2.0+, ReportLab
 
 **AI/ML:**
-- Gemini 2.5 Flash (LLM), gemini-embedding-001 (768-dim embeddings)
+- Gemini 1.5 Flash (AI categorization & image analysis), Gemini 2.5 Flash (RAG chatbot)
+- Gemini-embedding-001 (768-dim embeddings), Pinecone 3.0 (vector DB)
 - Scikit-learn (Logistic Regression, SVM, Random Forest ensemble models)
-- Pinecone 5.0+ (vector DB), TF-IDF Vectorization, Tesseract (OCR)
+- TF-IDF Vectorization, Tesseract OCR
 
 **DevOps:**
 - Vercel (frontend), HuggingFace Spaces (backend), GitHub Actions (CI/CD), Docker
