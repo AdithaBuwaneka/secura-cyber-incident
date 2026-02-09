@@ -113,41 +113,13 @@ pip install -r requirements.txt
 
 **Configure Environment Variables:**
 
-Create `backend/.env` file:
+Create and configure `backend/.env` file:
 ```bash
 cp .env.example .env
+# Edit .env with your Firebase, Gemini, Pinecone, ImageKit, and SendGrid credentials
 ```
 
-Edit `backend/.env` with your credentials:
-```env
-# Firebase Configuration
-FIREBASE_PROJECT_ID=your-project-id
-FIREBASE_PRIVATE_KEY=your-private-key
-FIREBASE_CLIENT_EMAIL=your-client-email
-
-# Google AI (Gemini) Configuration
-GOOGLE_API_KEY=your-gemini-api-key
-
-# Pinecone Configuration
-PINECONE_API_KEY=your-pinecone-api-key
-PINECONE_ENVIRONMENT=your-pinecone-environment
-PINECONE_INDEX_NAME=secura-incidents
-
-# ImageKit Configuration
-IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
-IMAGEKIT_PRIVATE_KEY=your-imagekit-private-key
-IMAGEKIT_URL_ENDPOINT=your-imagekit-url
-
-# SendGrid Configuration (Optional)
-SENDGRID_API_KEY=your-sendgrid-api-key
-SENDGRID_FROM_EMAIL=noreply@secura.com
-
-# Server Configuration
-PORT=8000
-ENVIRONMENT=development
-```
-
-**Template:** See [backend/.env.example](backend/.env.example)
+**See template:** [backend/.env.example](backend/.env.example)
 
 **Initialize Users & Start Server:**
 ```bash
@@ -171,30 +143,13 @@ npm install
 
 **Configure Environment Variables:**
 
-Create `frontend/.env.local` file:
+Create and configure `frontend/.env.local` file:
 ```bash
 cp .env.example .env.local
+# Edit .env.local with your Firebase config, Backend API URL, and ImageKit credentials
 ```
 
-Edit `frontend/.env.local` with your credentials:
-```env
-# Firebase Configuration
-NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
-NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
-
-# Backend API Configuration
-NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
-
-# ImageKit Configuration
-NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
-NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=your-imagekit-url
-```
-
-**Template:** See [frontend/.env.example](frontend/.env.example)
+**See template:** [frontend/.env.example](frontend/.env.example)
 
 **Start Development Server:**
 ```bash
