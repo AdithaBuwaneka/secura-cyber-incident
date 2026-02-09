@@ -1,10 +1,10 @@
 # 🌟 Secura Frontend - AI-Powered Security Interface
 
-[![Next.js](https://img.shields.io/badge/Next.js-15.3.5-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue)](https://reactjs.org/)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3.3-blue)](https://typescriptlang.org/)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4.17-cyan)](https://tailwindcss.com/)
-[![Redux Toolkit](https://img.shields.io/badge/Redux%20Toolkit-2.8.2-purple)](https://redux-toolkit.js.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://typescriptlang.org/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3.4-cyan)](https://tailwindcss.com/)
+[![Redux Toolkit](https://img.shields.io/badge/Redux%20Toolkit-2.8-purple)](https://redux-toolkit.js.org/)
 
 A modern, responsive Next.js frontend for the Secura cybersecurity incident management platform, featuring AI-powered analysis, real-time communication, and comprehensive role-based dashboards.
 
@@ -76,14 +76,14 @@ npm run dev
 
 ## 🏗️ Architecture
 
-- **Framework**: Next.js 15 with App Router
-- **Language**: TypeScript
-- **Styling**: Tailwind CSS
-- **State Management**: Redux Toolkit
-- **Authentication**: Firebase Auth
+- **Framework**: Next.js 16 with App Router
+- **Language**: TypeScript 5
+- **Styling**: Tailwind CSS 3.4
+- **State Management**: Redux Toolkit 2.8
+- **Authentication**: Firebase Auth 11
 - **Database**: Firebase Firestore
 - **File Storage**: ImageKit
-- **Charts**: Chart.js with React Chart.js 2
+- **Charts**: Chart.js 4.5 with React Chart.js 2
 - **Icons**: Lucide React
 - **Build Tool**: Turbopack
 
@@ -254,12 +254,13 @@ NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
 ## 🛠️ Dependencies
 
 ### Core
-- Next.js 15.3.5
-- React 19
-- TypeScript 5
+- Next.js 16.1.6
+- React 19.0.0
+- TypeScript ^5
 - Firebase 11.10.0
 - Redux Toolkit 2.8.2
 - Tailwind CSS 3.4.17
+- Chart.js 4.5.0
 
 ### Development
 - ESLint 9
