@@ -174,15 +174,18 @@ npm run dev
 For production deployment, update your environment variables:
 
 **Backend (`backend/.env`):**
-- Set `ENVIRONMENT=production`
-- Configure production Firebase credentials
-- Update CORS settings for production frontend URL
-- Enable SendGrid for email notifications
+- Configure production Firebase credentials (project ID, private key, client email)
+- Add SendGrid API key for email notifications
+- Update Gemini API key for production quota
+- Configure Pinecone production instance
+- Update ImageKit production keys
 
 **Frontend (`frontend/.env.local`):**
-- Update `NEXT_PUBLIC_API_URL` to production backend URL
+- Update `NEXT_PUBLIC_API_URL` to production backend URL (e.g., HuggingFace Space URL)
 - Configure production Firebase project credentials
 - Update ImageKit production keys
+
+**Note:** CORS is currently set to allow all origins. For production, modify `app/main.py` line 38 to restrict origins.
 
 ## 📁 Project Structure
 
@@ -253,28 +256,35 @@ npm run build
 vercel --prod
 ```
 
-### Backend Deployment (Docker)
+### Backend Deployment (Docker/HuggingFace)
 ```bash
 cd backend
 docker build -t secura-backend .
-docker run -p 8000:8000 secura-backend
+# For HuggingFace Spaces (default)
+docker run -p 7860:7860 secura-backend
+# For local deployment on port 8000
+docker run -p 8000:7860 secura-backend
 ```
 
-**Note:** Update environment variables for production as described in the Environment Configuration section.
+**Note:**
+- Dockerfile is configured for HuggingFace Spaces (port 7860)
+- Update environment variables for production as described in the Environment Configuration section
+- For HuggingFace deployment, push to your Space repository
 
 ## 📊 Performance & Status
 
 **AI/ML Performance:**
 - 85-92% threat categorization accuracy with ensemble ML models
-- 90%+ severity prediction accuracy using scikit-learn classifiers
-- <500ms ML prediction time, <1s Gemini AI analysis
-- 90%+ OCR accuracy with Tesseract + Gemini image analysis
+- Multi-factor severity assessment with confidence scoring
+- <500ms ML prediction time, 1-3s Gemini AI analysis
+- OCR text extraction with Gemini AI image threat analysis
 
 **System Performance:**
-- <200ms API response, 1-3s chatbot response
-- <50ms WebSocket latency, <100ms DB queries
-- 100+ concurrent users, auto-scaling Firestore
-- 99.9% uptime target with health monitoring
+- <200ms average API response time
+- 1-3s RAG chatbot response with context retrieval
+- Real-time WebSocket messaging and notifications
+- Auto-scaling Firestore with Firebase infrastructure
+- Production deployment on Vercel (frontend) and HuggingFace Spaces (backend)
 
 **Production Status:**
 ✅ All systems operational • Authentication (4 roles) • Incident Management (AI-enhanced) • AI Analysis • File Management (ImageKit) • Real-time (WebSocket) • Analytics & Reporting • RAG Chatbot (Gemini + Pinecone) • Full Integration
