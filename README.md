@@ -72,8 +72,8 @@ app_port: 7860
 ### **📥 Step 1: Clone & Navigate**
 ```bash
 # Clone the repository
-git clone https://github.com/AdithaBuwaneka/Secura.git
-cd Secura
+git clone https://github.com/AdithaBuwaneka/secura-cyber-incident.git
+cd secura-cyber-incident
 
 # Verify structure
 ls -la
@@ -367,7 +367,7 @@ docker run -p 8000:8000 secura-backend
 - **API Documentation**: http://127.0.0.1:8000/docs
 - **Frontend README**: [frontend/README.md](frontend/README.md)
 - **Backend README**: [backend/README.md](backend/README.md)
-- **Issues**: [GitHub Issues](https://github.com/AdithaBuwaneka/Secura/issues)
+- **Issues**: [GitHub Issues](https://github.com/AdithaBuwaneka/secura-cyber-incident/issues)
 
 ## 🏆 Team
 
