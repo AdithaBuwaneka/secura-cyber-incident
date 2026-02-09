@@ -86,12 +86,30 @@ Before setting up Secura, ensure you have:
 - **Pinecone** account for vector database
 - **SendGrid** account (optional, for email notifications)
 
-## 🔧 Environment Configuration
+## 🚀 Installation & Setup
 
-### Backend Environment Setup
+### Step 1: Clone Repository
+```bash
+git clone https://github.com/AdithaBuwaneka/secura-cyber-incident.git
+cd secura-cyber-incident
+```
 
-Create `backend/.env` file with the following configuration:
+### Step 2: Backend Setup & Configuration
 
+**Install Dependencies:**
+```bash
+cd backend
+pip install -r requirements.txt
+```
+
+**Configure Environment Variables:**
+
+Create `backend/.env` file:
+```bash
+cp .env.example .env
+```
+
+Edit `backend/.env` with your credentials:
 ```env
 # Firebase Configuration
 FIREBASE_PROJECT_ID=your-project-id
@@ -120,12 +138,36 @@ PORT=8000
 ENVIRONMENT=development
 ```
 
-**Template:** See [backend/.env.example](backend/.env.example) for the complete template.
+**Template:** See [backend/.env.example](backend/.env.example)
 
-### Frontend Environment Setup
+**Initialize Users & Start Server:**
+```bash
+# Create admin and security team users
+python scripts/create_admin.py
+python scripts/create_security_team.py
 
-Create `frontend/.env.local` file with the following configuration:
+# Start backend server
+python run.py
+```
 
+**Verify Backend:** `curl http://127.0.0.1:8000/health`
+
+### Step 3: Frontend Setup & Configuration
+
+**Install Dependencies:**
+```bash
+cd frontend
+npm install
+```
+
+**Configure Environment Variables:**
+
+Create `frontend/.env.local` file:
+```bash
+cp .env.example .env.local
+```
+
+Edit `frontend/.env.local` with your credentials:
 ```env
 # Firebase Configuration
 NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
@@ -143,59 +185,14 @@ NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
 NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=your-imagekit-url
 ```
 
-**Template:** See [frontend/.env.example](frontend/.env.example) for the complete template.
+**Template:** See [frontend/.env.example](frontend/.env.example)
 
-### Production Environment Setup
-
-For production deployment, update the following:
-
-**Backend:**
-- Set `ENVIRONMENT=production`
-- Configure production Firebase credentials
-- Update CORS settings for production frontend URL
-- Enable SendGrid for email notifications
-
-**Frontend:**
-- Update `NEXT_PUBLIC_API_URL` to production backend URL
-- Configure production Firebase project
-- Update ImageKit production keys
-
-## 🚀 Installation & Setup
-
-### Step 1: Clone Repository
+**Start Development Server:**
 ```bash
-git clone https://github.com/AdithaBuwaneka/secura-cyber-incident.git
-cd secura-cyber-incident
-```
-
-### Step 2: Backend Setup
-```bash
-cd backend
-pip install -r requirements.txt
-cp .env.example .env
-# Edit .env with your configuration (see Environment Configuration section)
-
-# Create admin and security team users
-python scripts/create_admin.py
-python scripts/create_security_team.py
-
-# Start backend server
-python run.py
-```
-
-**Health Check:** `curl http://127.0.0.1:8000/health`
-
-### Step 3: Frontend Setup
-```bash
-cd frontend
-npm install
-cp .env.example .env.local
-# Edit .env.local with your configuration (see Environment Configuration section)
-
 npm run dev
 ```
 
-**Frontend:** http://localhost:3000
+**Verify Frontend:** http://localhost:3000
 
 ### Step 4: Login & Test
 
@@ -208,6 +205,21 @@ npm run dev
 - Frontend: http://localhost:3000
 - Backend API: http://127.0.0.1:8000
 - API Documentation: http://127.0.0.1:8000/docs
+
+## 🔧 Production Environment Configuration
+
+For production deployment, update your environment variables:
+
+**Backend (`backend/.env`):**
+- Set `ENVIRONMENT=production`
+- Configure production Firebase credentials
+- Update CORS settings for production frontend URL
+- Enable SendGrid for email notifications
+
+**Frontend (`frontend/.env.local`):**
+- Update `NEXT_PUBLIC_API_URL` to production backend URL
+- Configure production Firebase project credentials
+- Update ImageKit production keys
 
 ## 📁 Project Structure
 
