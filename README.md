@@ -56,15 +56,113 @@ app_port: 7860
 - **File Sharing**: Secure evidence and document exchange
 - **AI Chatbot Widget**: Context-aware assistant available on all pages
 
-## 🚀 Quick Start
+## 🛠️ Technology Stack
 
-### Prerequisites
+**Frontend:**
+- Next.js 16, React 19, TypeScript 5, Tailwind 3.4
+- Redux Toolkit 2.8, Firebase 11, Chart.js 4.5, ImageKit, WebSockets
+
+**Backend:**
+- FastAPI 0.104, Python 3.11+, Uvicorn
+- Firebase Firestore, Firebase Admin 6.2, ImageKit, SendGrid
+- Pydantic 2.0+, ReportLab
+
+**AI/ML:**
+- Gemini 2.5 Flash (LLM), gemini-embedding-001 (768-dim embeddings)
+- Pinecone 5.0+ (vector DB), Scikit-learn, Transformers, Tesseract (OCR)
+
+**DevOps:**
+- Vercel (frontend), HuggingFace Spaces (backend), GitHub Actions (CI/CD), Docker
+
+## 📋 Prerequisites
+
+Before setting up Secura, ensure you have:
+
 - **Node.js** 18+ and npm
 - **Python** 3.11+
-- **Firebase** project with Firestore
+- **Firebase** project with Firestore enabled
 - **ImageKit** account for file storage
+- **Google AI Studio** API key for Gemini
+- **Pinecone** account for vector database
+- **SendGrid** account (optional, for email notifications)
 
-### Step 1: Clone & Navigate
+## 🔧 Environment Configuration
+
+### Backend Environment Setup
+
+Create `backend/.env` file with the following configuration:
+
+```env
+# Firebase Configuration
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_PRIVATE_KEY=your-private-key
+FIREBASE_CLIENT_EMAIL=your-client-email
+
+# Google AI (Gemini) Configuration
+GOOGLE_API_KEY=your-gemini-api-key
+
+# Pinecone Configuration
+PINECONE_API_KEY=your-pinecone-api-key
+PINECONE_ENVIRONMENT=your-pinecone-environment
+PINECONE_INDEX_NAME=secura-incidents
+
+# ImageKit Configuration
+IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
+IMAGEKIT_PRIVATE_KEY=your-imagekit-private-key
+IMAGEKIT_URL_ENDPOINT=your-imagekit-url
+
+# SendGrid Configuration (Optional)
+SENDGRID_API_KEY=your-sendgrid-api-key
+SENDGRID_FROM_EMAIL=noreply@secura.com
+
+# Server Configuration
+PORT=8000
+ENVIRONMENT=development
+```
+
+**Template:** See [backend/.env.example](backend/.env.example) for the complete template.
+
+### Frontend Environment Setup
+
+Create `frontend/.env.local` file with the following configuration:
+
+```env
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your-firebase-api-key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-sender-id
+NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+
+# Backend API Configuration
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8000
+
+# ImageKit Configuration
+NEXT_PUBLIC_IMAGEKIT_PUBLIC_KEY=your-imagekit-public-key
+NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT=your-imagekit-url
+```
+
+**Template:** See [frontend/.env.example](frontend/.env.example) for the complete template.
+
+### Production Environment Setup
+
+For production deployment, update the following:
+
+**Backend:**
+- Set `ENVIRONMENT=production`
+- Configure production Firebase credentials
+- Update CORS settings for production frontend URL
+- Enable SendGrid for email notifications
+
+**Frontend:**
+- Update `NEXT_PUBLIC_API_URL` to production backend URL
+- Configure production Firebase project
+- Update ImageKit production keys
+
+## 🚀 Installation & Setup
+
+### Step 1: Clone Repository
 ```bash
 git clone https://github.com/AdithaBuwaneka/secura-cyber-incident.git
 cd secura-cyber-incident
@@ -75,7 +173,7 @@ cd secura-cyber-incident
 cd backend
 pip install -r requirements.txt
 cp .env.example .env
-# Edit .env with your Firebase credentials
+# Edit .env with your configuration (see Environment Configuration section)
 
 # Create admin and security team users
 python scripts/create_admin.py
@@ -92,7 +190,7 @@ python run.py
 cd frontend
 npm install
 cp .env.example .env.local
-# Edit .env.local with your Firebase config
+# Edit .env.local with your configuration (see Environment Configuration section)
 
 npm run dev
 ```
@@ -106,10 +204,10 @@ npm run dev
 - **Security Lead:** `security.lead@secura.com` / `SecuraSecLead123!`
 - **Employee:** `employee1@secura.com` / `SecuraEmployee123!` or register at `/auth/register`
 
-**URLs:**
+**Application URLs:**
 - Frontend: http://localhost:3000
 - Backend API: http://127.0.0.1:8000
-- API Docs: http://127.0.0.1:8000/docs
+- API Documentation: http://127.0.0.1:8000/docs
 
 ## 📁 Project Structure
 
@@ -150,42 +248,13 @@ secura-cyber-incident/
 - **Applications** (6): Security team application workflow, document uploads
 - **Activity** (5): Online status, heartbeat, activity logging
 
-## 🛠️ Technology Stack
-
-**Frontend:**
-- Next.js 16, React 19, TypeScript 5, Tailwind 3.4
-- Redux Toolkit 2.8, Firebase 11, Chart.js 4.5, ImageKit, WebSockets
-
-**Backend:**
-- FastAPI 0.104, Python 3.11+, Uvicorn
-- Firebase Firestore, Firebase Admin 6.2, ImageKit, SendGrid
-- Pydantic 2.0+, ReportLab
-
-**AI/ML:**
-- Gemini 2.5 Flash (LLM), gemini-embedding-001 (768-dim embeddings)
-- Pinecone 5.0+ (vector DB), Scikit-learn, Transformers, Tesseract (OCR)
-
-**DevOps:**
-- Vercel (frontend), HuggingFace Spaces (backend), GitHub Actions (CI/CD), Docker
-
-## 🔧 Configuration
-
-**Frontend** (`frontend/.env.local`):
-- Firebase config (API key, auth domain, project ID)
-- Backend API URL
-
-**Backend** (`backend/.env`):
-- Firebase (project ID, private key, client email)
-- ImageKit, SendGrid, Gemini API
-- Pinecone (API key, environment, index name)
-
-See [frontend/.env.example](frontend/.env.example) and [backend/.env.example](backend/.env.example) for templates.
+**Full API Documentation:** http://127.0.0.1:8000/docs
 
 ## 🧪 Testing & Verification
 
 ### Interactive API Testing
-**Swagger UI:** http://127.0.0.1:8000/docs - Test all 42+ endpoints with built-in interface
-**ReDoc:** http://127.0.0.1:8000/redoc - Alternative documentation view
+- **Swagger UI:** http://127.0.0.1:8000/docs - Test all 42+ endpoints with built-in interface
+- **ReDoc:** http://127.0.0.1:8000/redoc - Alternative documentation view
 
 ### Health Checks
 ```bash
@@ -202,25 +271,21 @@ curl http://127.0.0.1:8000/health
 
 ## 🚀 Deployment
 
-### Frontend (Vercel)
+### Frontend Deployment (Vercel)
 ```bash
 cd frontend
 npm run build
 vercel --prod
 ```
 
-### Backend (Docker)
+### Backend Deployment (Docker)
 ```bash
 cd backend
 docker build -t secura-backend .
 docker run -p 8000:8000 secura-backend
 ```
 
-### Environment Setup
-- Configure production Firebase project
-- Set up SendGrid for email notifications
-- Configure ImageKit for file storage
-- Update CORS settings for production URLs
+**Note:** Update environment variables for production as described in the Environment Configuration section.
 
 ## 📊 Performance & Status
 
@@ -238,21 +303,6 @@ docker run -p 8000:8000 secura-backend
 ✅ All systems operational • Authentication (4 roles) • Incident Management (AI-enhanced) • AI Analysis • File Management (ImageKit) • Real-time (WebSocket) • Analytics & Reporting • RAG Chatbot (Gemini + Pinecone) • Full Integration
 
 **Status:** 100% complete, tested, and deployed. Ready for production use.
-
-## 🤝 Contributing
-
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
-
-## 📞 Support & Documentation
-
-- **API Documentation**: http://127.0.0.1:8000/docs
-- **Frontend README**: [frontend/README.md](frontend/README.md)
-- **Backend README**: [backend/README.md](backend/README.md)
-- **Issues**: [GitHub Issues](https://github.com/AdithaBuwaneka/secura-cyber-incident/issues)
 
 ## 🏆 Team
 
