@@ -36,7 +36,7 @@ app_port: 7860
 - **Mitigation Strategies**: Context-aware response recommendations
 - **Threat Intelligence**: Industry pattern analysis and forecasting
 - **Predictive Analytics**: Future incident forecasting (Admin only)
-- **🆕 RAG Chatbot**: Context-aware conversational assistance powered by Gemini 2.5 Flash & Pinecone
+- **RAG Chatbot**: Context-aware conversational assistance powered by Gemini 2.5 Flash & Pinecone
 
 ### 👥 Role-Based Access Control
 - **Employee**: Incident reporting with AI assistance, apply for security team
