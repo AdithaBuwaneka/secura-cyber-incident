@@ -33,8 +33,8 @@ app_port: 7860
 ### 🤖 AI-Powered Security Analysis
 
 **Dual AI Categorization System:**
-- **ML-Based Categorization**: Automatic incident classification using scikit-learn ensemble models (Logistic Regression, SVM, Random Forest) with TF-IDF vectorization - 85%+ accuracy
-- **Gemini AI Categorization**: Advanced natural language analysis using Gemini 1.5 Flash for detailed reasoning and context understanding (activated via "Generate AI Predictions")
+- **ML-Based Categorization**: Automatic incident classification using scikit-learn ensemble models (Logistic Regression, SVM, Random Forest) with TF-IDF vectorization - 85%+ accuracy. Used by default for real-time incident predictions.
+- **Gemini AI Categorization**: Advanced natural language analysis using Gemini 1.5 Flash for detailed reasoning and context understanding. Provides human-readable explanations and threat analysis. Activated via "Generate AI Predictions" button or for image analysis.
 
 **Additional AI Features:**
 - **Threat Score Prediction**: ML-based threat scoring (0-100) using ensemble regression models
@@ -262,7 +262,7 @@ secura-cyber-incident/
 
 - **Auth** (11): Registration, login, profile, roles, admin management
 - **Incidents** (15): CRUD, assignment, status, attachments, messaging, dashboard stats
-- **AI Engine** (10): ML-based categorization, severity assessment, mitigation strategies, threat intelligence, predictive analytics, anomaly detection, image analysis with OCR (Gemini + Tesseract)
+- **AI Engine** (10): Dual categorization (ML ensemble + Gemini AI), severity assessment, threat scoring, mitigation strategies, threat intelligence, predictive analytics, anomaly detection, image analysis with OCR
 - **Chatbot** (2): RAG chat, health monitoring
 - **Analytics** (12): Dashboards, compliance reports (PDF), trends, exports (CSV/PDF/Excel), SIEM
 - **Messaging** (10+): Conversations, real-time chat, team communication, WebSocket
