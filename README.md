@@ -33,7 +33,7 @@ app_port: 7860
 
 **Dual AI Categorization System:**
 - **ML-Based Categorization**: Automatic incident classification using scikit-learn ensemble models (Logistic Regression, SVM, Random Forest) with TF-IDF vectorization - 85%+ accuracy. Used by default for real-time incident predictions.
-- **Gemini AI Categorization**: Advanced natural language analysis using Gemini 1.5 Flash for detailed reasoning and context understanding. Provides human-readable explanations and threat analysis. Activated via "Generate AI Predictions" button or for image analysis.
+- **Gemini AI Categorization**: Advanced natural language analysis using Gemini 2.5 Flash for detailed reasoning and context understanding. Provides human-readable explanations and threat analysis. Activated via "Generate AI Predictions" button or for image analysis.
 
 **Additional AI Features:**
 - **Threat Score Prediction**: ML-based threat scoring (0-100) using ensemble regression models
@@ -75,9 +75,8 @@ app_port: 7860
 - Pydantic 2.0+, ReportLab
 
 **AI/ML:**
-- Gemini 1.5 Flash (AI categorization & image analysis), Gemini 2.5 Flash (RAG chatbot)
-- Gemini-embedding-001 (768-dim embeddings), Pinecone 3.0 (vector DB)
-- Scikit-learn (Logistic Regression, SVM, Random Forest ensemble models)
+- Gemini 2.5 Flash (LLM), Gemini-embedding-001 (768-dim embeddings)
+- Pinecone 3.0 (vector DB), Scikit-learn (ensemble models)
 - TF-IDF Vectorization, Tesseract OCR
 
 **DevOps:**
